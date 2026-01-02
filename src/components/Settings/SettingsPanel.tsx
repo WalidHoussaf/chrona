@@ -3,17 +3,8 @@
 import { useState } from "react";
 import { useTimerStore } from "@/store/timerStore";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Command, 
-  Copy, 
-  Check, 
-  Keyboard, 
-  MousePointer2, 
-  Bell, 
-  LayoutGrid, 
-  Zap,
-  Database
-} from "lucide-react";
+import { Command, Copy, Check, Keyboard, MousePointer2, Bell, LayoutGrid, Zap,Database} from "lucide-react";
+import { notificationManager } from "@/lib/notifications";
 
 // --- Animation Variants ---
 const containerVariants = {
@@ -72,6 +63,10 @@ export function SettingsPanel() {
     } catch {
       setCopied(false);
     }
+  };
+
+  const onTestNotification = () => {
+    notificationManager.notifyTimerComplete('Test Timer');
   };
 
   return (
@@ -228,6 +223,12 @@ export function SettingsPanel() {
                <p className="text-sm font-offbit text-zinc-400 leading-relaxed">
                  Visual window flashing and audio chimes for background completion. Phase change alerts for Pomodoro.
                </p>
+               <button
+                 onClick={onTestNotification}
+                 className="mt-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-zinc-200 text-sm font-offbit transition-colors"
+               >
+                 Test Notification
+               </button>
              </Card>
           </div>
 

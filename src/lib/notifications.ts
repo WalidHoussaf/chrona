@@ -18,6 +18,7 @@ export interface SoundOptions {
 class NotificationManager {
   private audioContext: AudioContext | null = null;
   private permissionGranted: boolean = false;
+  private inAppNotifications: Array<{id: string; title: string; body: string; timestamp: number}> = [];
 
   constructor() {
     // Initialize audio context on first user interaction
@@ -29,6 +30,11 @@ class NotificationManager {
   private initAudioContext() {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      
+      // Handle autoplay restrictions - resume if suspended
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume().catch(console.warn);
+      }
     }
   }
 
@@ -53,27 +59,76 @@ class NotificationManager {
   }
 
   async showNotification(options: NotificationOptions): Promise<void> {
+    // Try browser notification first
     if (!this.permissionGranted) {
       const granted = await this.requestPermission();
-      if (!granted) return;
-    }
-
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      const notification = new Notification(options.title, {
-        body: options.body,
-        icon: options.icon || '/favicon.ico',
-        tag: options.tag || 'chrona-timer',
-        requireInteraction: options.requireInteraction || false,
-      });
-
-      // Auto-close after 5 seconds unless requireInteraction is true
-      if (!options.requireInteraction) {
-        setTimeout(() => notification.close(), 5000);
+      if (!granted) {
+        this.showInAppNotification(options);
+        return;
       }
-
-      // Flash window if supported
-      this.flashWindow();
     }
+    
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        const notification = new Notification(options.title, {
+          body: options.body,
+          icon: options.icon || '/favicon.ico',
+          tag: options.tag || 'chrona-timer',
+          requireInteraction: options.requireInteraction || false,
+          silent: true, // Let our own sound handle audio
+        });
+
+        // Auto-close after 5 seconds unless requireInteraction is true
+        if (!options.requireInteraction) {
+          setTimeout(() => notification.close(), 5000);
+        }
+        
+        // Flash window if supported
+        this.flashWindow();
+        
+        // Only show in-app notification if page is visible (user is actively using the app)
+        if (!document.hidden) {
+          this.showInAppNotification(options);
+        }
+        
+      } catch (error) {
+        console.error('Failed to show browser notification:', error);
+        this.showInAppNotification(options);
+      }
+    } else {
+      this.showInAppNotification(options);
+    }
+  }
+
+  private showInAppNotification(options: NotificationOptions): void {
+    const id = Date.now().toString();
+    const notification = { id, title: options.title, body: options.body, timestamp: Date.now() };
+    
+    this.inAppNotifications.unshift(notification);
+    
+    // Keep only last 10 notifications
+    if (this.inAppNotifications.length > 10) {
+      this.inAppNotifications = this.inAppNotifications.slice(0, 10);
+    }
+
+    // Auto-remove after 5 seconds unless requireInteraction is true
+    if (!options.requireInteraction) {
+      setTimeout(() => {
+        this.removeInAppNotification(id);
+      }, 5000);
+    }
+
+    // Dispatch custom event for UI components to listen to
+    window.dispatchEvent(new CustomEvent('in-app-notification', { detail: notification }));
+  }
+
+  private removeInAppNotification(id: string): void {
+    this.inAppNotifications = this.inAppNotifications.filter(n => n.id !== id);
+    window.dispatchEvent(new CustomEvent('in-app-notification-removed', { detail: { id } }));
+  }
+
+  getInAppNotifications(): Array<{id: string; title: string; body: string; timestamp: number}> {
+    return this.inAppNotifications;
   }
 
   playSound(options: SoundOptions = {}): void {
@@ -82,6 +137,12 @@ class NotificationManager {
     }
 
     if (!this.audioContext) return;
+
+    // Resume if suspended (handles autoplay restrictions)
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(console.warn);
+      return; // Skip this sound, context will resume for next sound
+    }
 
     const {
       frequency = 800,
@@ -150,7 +211,7 @@ class NotificationManager {
       title: 'Timer Complete!',
       body: `${timerName} has finished.`,
       tag: 'timer-complete',
-      requireInteraction: true,
+      requireInteraction: false, // Allow auto-close for better UX
     });
     this.playCompletionSound();
   }
@@ -185,5 +246,6 @@ export function useNotifications() {
     notifyTimerComplete: (timerName: string) => notificationManager.notifyTimerComplete(timerName),
     notifyPomodoroPhaseChange: (phase: string, timerName: string) => 
       notificationManager.notifyPomodoroPhaseChange(phase, timerName),
+    getInAppNotifications: () => notificationManager.getInAppNotifications(),
   };
 }

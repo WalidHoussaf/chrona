@@ -77,7 +77,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
         title={preset.name}
       >
         <span className="truncate">{preset.name}</span>
-        <span className="ml-2 shrink-0 text-sm text-zinc-500" style={{ fontFamily: 'var(--font-offbit)' }}>
+        <span className="ml-2 shrink-0 text-sm text-zinc-500 font-offbit">
           {preset.kind === "stopwatch" ? "SW" : "T"}
         </span>
       </button>

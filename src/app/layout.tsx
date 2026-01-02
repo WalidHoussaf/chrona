@@ -5,46 +5,28 @@ import "./globals.css";
 
 const harmond = localFont({
   variable: "--font-harmond",
-  display: "swap",
   src: [
     {
-      path: "../../public/fonts/Harmond-SemiBoldCondensed.otf",
+      path: "./fonts/Harmond-SemiBoldCondensed.otf",
       weight: "600",
       style: "normal",
-    },
-    {
-      path: "../../public/fonts/Harmond-SemBdItaCond.otf",
-      weight: "600",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/Harmond-ExtraBoldExpanded.otf",
-      weight: "800",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/Harmond-ExtBdItaExp.otf",
-      weight: "800",
-      style: "italic",
     },
   ],
+  display: "swap",
+  preload: false,
 });
 
 const offbit = localFont({
   variable: "--font-offbit",
-  display: "swap",
   src: [
     {
-      path: "../../public/fonts/OffBitTrial-Regular.ttf",
+      path: "./fonts/OffBitTrial-Regular.ttf",
       weight: "400",
       style: "normal",
     },
-    {
-      path: "../../public/fonts/OffBitTrial-Bold.ttf",
-      weight: "700",
-      style: "normal",
-    },
   ],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -68,4 +50,3 @@ export default function RootLayout({
     </html>
   );
 }
-

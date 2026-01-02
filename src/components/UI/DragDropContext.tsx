@@ -51,7 +51,7 @@ export function DragDropProvider({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // 8px movement before drag starts
+        distance: 8, 
       },
     })
   );

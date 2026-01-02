@@ -106,8 +106,7 @@ export function Presets() {
         </summary>
         <div className="mt-2 flex flex-col gap-2">
           <textarea
-            className="min-h-24 w-full resize-y rounded-md border border-white/10 bg-black/20 p-2 text-md text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-white/20"
-            style={{ fontFamily: 'var(--font-offbit)' }}
+            className="min-h-24 w-full resize-y rounded-md border border-white/10 bg-black/20 p-2 text-md text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-white/20 font-offbit"
             placeholder="Paste presets JSON here…"
             value={importText}
             onChange={(e) => setImportText(e.target.value)}
@@ -137,8 +136,7 @@ export function Presets() {
           {exportText ? (
             <textarea
               readOnly
-              className="min-h-24 w-full resize-y rounded-md border border-white/10 bg-black/20 p-2 text-sm text-zinc-100 outline-none"
-              style={{ fontFamily: 'var(--font-offbit)' }}
+              className="min-h-24 w-full resize-y rounded-md border border-white/10 bg-black/20 p-2 text-sm text-zinc-100 outline-none font-offbit"
               value={exportText}
             />
           ) : null}

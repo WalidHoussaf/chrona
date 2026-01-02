@@ -503,7 +503,7 @@ export function PomodoroPanel() {
                 >
                   {status.charAt(0).toUpperCase() + status.slice(1)}
                 </div>
-                <div className="text-zinc-500 text-md">Enable Pomodoro for enhanced focus features</div>
+                <div className="text-zinc-500 font-offbit text-md">Enable Pomodoro for enhanced focus features</div>
               </div>
 
               <div className="text-center font-offbit text-6xl tabular-nums tracking-tight text-zinc-50 mb-6">

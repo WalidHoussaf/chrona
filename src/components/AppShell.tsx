@@ -4,12 +4,14 @@ import { useEffect, useMemo } from "react";
 
 import { useTimerStore } from "@/store/timerStore";
 import { useGlobalShortcuts, requestFullscreen } from "@/lib/shortcuts";
+import { notificationManager } from "@/lib/notifications";
 
 import { Sidebar } from "@/components/Sidebar/Sidebar";
 import { TimerDashboard } from "@/components/Timer/TimerDashboard";
 import { StopwatchPanel } from "@/components/Stopwatch/StopwatchPanel";
 import { FocusPanel } from "@/components/Focus/FocusPanel";
 import { SettingsPanel } from "@/components/Settings/SettingsPanel";
+import { InAppNotificationContainer } from "@/components/UI/InAppNotificationContainer";
 
 export function AppShell() {
   const boot = useTimerStore((s) => s.boot);
@@ -24,6 +26,8 @@ export function AppShell() {
 
   useEffect(() => {
     boot();
+    // Initialize notification permissions
+    notificationManager.requestPermission();
   }, [boot]);
 
   const handlers = useMemo(
@@ -55,6 +59,7 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
+      <InAppNotificationContainer />
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-hidden">

@@ -69,7 +69,7 @@ export function StopwatchPanel() {
           className="rounded-2xl border border-white/10 bg-white/5 p-8"
           onMouseDown={() => setActive(stopwatch.id)}
         >
-          <div className="text-center text-6xl tabular-nums tracking-tight text-zinc-50" style={{ fontFamily: 'var(--font-offbit)' }}>
+          <div className="text-center text-6xl tabular-nums tracking-tight text-zinc-50 font-offbit">
             {formatDurationMs(display)}
           </div>
           <div className="mt-3 text-center text-2xl text-zinc-500">
@@ -90,7 +90,7 @@ export function StopwatchPanel() {
                     className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3"
                   >
                     <div className="text-5xl text-zinc-500">#{stopwatch.laps!.length - idx}</div>
-                    <div className="text-4xl tabular-nums text-zinc-100" style={{ fontFamily: 'var(--font-offbit)' }}>
+                    <div className="text-4xl tabular-nums text-zinc-100 font-offbit">
                       {formatDurationMs(lap.elapsedMs)}
                     </div>
                   </div>
