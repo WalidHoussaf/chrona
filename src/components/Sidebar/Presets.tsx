@@ -1,17 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import clsx from "clsx";
+import { DragEndEvent } from "@dnd-kit/core";
 
 import { useTimerStore } from "@/store/timerStore";
+import { DragDropProvider } from "@/components/UI/DragDropContext";
+import { DraggablePreset } from "@/components/Sidebar/DraggablePreset";
 
 export function Presets() {
   const presets = useTimerStore((s) => s.presets);
-  const applyPreset = useTimerStore((s) => s.applyPreset);
   const savePresetFromActive = useTimerStore((s) => s.savePresetFromActive);
-  const renamePreset = useTimerStore((s) => s.renamePreset);
-  const removePreset = useTimerStore((s) => s.removePreset);
-  const movePreset = useTimerStore((s) => s.movePreset);
+  const movePresetByIndex = useTimerStore((s) => s.movePresetByIndex);
   const exportPresetsJson = useTimerStore((s) => s.exportPresetsJson);
   const importPresetsJson = useTimerStore((s) => s.importPresetsJson);
 
@@ -25,6 +24,19 @@ export function Presets() {
       return a.name.localeCompare(b.name);
     });
   }, [presets]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sorted.findIndex((preset) => preset.id === active.id);
+    const newIndex = sorted.findIndex((preset) => preset.id === over.id);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      movePresetByIndex(active.id as string, newIndex);
+    }
+  };
 
   const onExport = async () => {
     const json = exportPresetsJson();
@@ -43,7 +55,7 @@ export function Presets() {
         <div className="text-3xl tracking-wide text-zinc-400">Presets</div>
         <button
           type="button"
-          className="rounded-md font-offbit bg-white/5 px-2 py-1 text-md text-zinc-300 hover:bg-white/10"
+          className="rounded-md font-offbit bg-white/5 px-2 py-1 text-md text-zinc-300 hover:bg-white/10 cursor-pointer"
           onClick={onExport}
         >
           Export
@@ -59,7 +71,7 @@ export function Presets() {
         />
         <button
           type="button"
-          className="shrink-0 rounded-md font-offbit bg-white/10 px-2 py-1 text-md text-zinc-100 hover:bg-white/20"
+          className="shrink-0 rounded-md font-offbit bg-white/10 px-2 py-1 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
           onClick={() => {
             const n = name.trim();
             if (!n) return;
@@ -77,77 +89,14 @@ export function Presets() {
             No presets yet.
           </div>
         ) : (
-          sorted.map((p) => (
-            <div key={p.id} className="flex items-center gap-1">
-              <button
-                type="button"
-                className={clsx(
-                  "flex min-w-0 flex-1 items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors",
-                  "bg-white/5 text-zinc-200 hover:bg-white/10",
-                )}
-                onClick={() => applyPreset(p.id, "new")}
-                title={p.name}
-              >
-                <span className="truncate">{p.name}</span>
-                <span className="ml-2 shrink-0 text-sm text-zinc-500" style={{ fontFamily: 'var(--font-offbit)' }}>
-                  {p.kind === "stopwatch" ? "SW" : "T"}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                className="rounded-md bg-white/5 px-2 py-2 text-sm text-zinc-300 hover:bg-white/10"
-                title="Apply to active timer"
-                onClick={() => applyPreset(p.id, "active")}
-              >
-                A
-              </button>
-
-              <button
-                type="button"
-                className="rounded-md bg-white/5 px-2 py-2 text-sm text-zinc-300 hover:bg-white/10"
-                title="Move up"
-                onClick={() => movePreset(p.id, -1)}
-              >
-                ↑
-              </button>
-
-              <button
-                type="button"
-                className="rounded-md bg-white/5 px-2 py-2 text-sm text-zinc-300 hover:bg-white/10"
-                title="Move down"
-                onClick={() => movePreset(p.id, 1)}
-              >
-                ↓
-              </button>
-
-              <button
-                type="button"
-                className="rounded-md bg-white/5 px-2 py-2 text-sm text-zinc-300 hover:bg-white/10"
-                title="Rename"
-                onClick={() => {
-                  const next = window.prompt("Rename preset", p.name);
-                  if (!next) return;
-                  renamePreset(p.id, next);
-                }}
-              >
-                R
-              </button>
-
-              <button
-                type="button"
-                className="rounded-md bg-white/5 px-2 py-2 text-sm text-zinc-300 hover:bg-white/10"
-                title="Delete"
-                onClick={() => {
-                  const ok = window.confirm(`Delete preset \"${p.name}\"?`);
-                  if (!ok) return;
-                  removePreset(p.id);
-                }}
-              >
-                ×
-              </button>
-            </div>
-          ))
+          <DragDropProvider
+            items={sorted.map((p) => ({ id: p.id }))}
+            onDragEnd={handleDragEnd}
+          >
+            {sorted.map((p) => (
+              <DraggablePreset key={p.id} preset={p} />
+            ))}
+          </DragDropProvider>
         )}
       </div>
 
@@ -166,7 +115,7 @@ export function Presets() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="rounded-md font-offbit bg-white/10 px-2 py-1 text-md text-zinc-100 hover:bg-white/20"
+              className="rounded-md font-offbit bg-white/10 px-2 py-1 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
               onClick={() => {
                 importPresetsJson(importText);
                 setImportText("");
@@ -177,7 +126,7 @@ export function Presets() {
             {exportText ? (
               <button
                 type="button"
-                className="rounded-md font-offbit bg-white/5 px-2 py-1 text-md text-zinc-300 hover:bg-white/10"
+                className="rounded-md font-offbit bg-white/5 px-2 py-1 text-md text-zinc-300 hover:bg-white/10 cursor-pointer"
                 onClick={() => setExportText(null)}
               >
                 Hide export

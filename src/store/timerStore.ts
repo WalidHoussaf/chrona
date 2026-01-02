@@ -6,6 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import { chronaStorage } from "@/lib/storage";
 import { getTimerEngine } from "@/lib/timerEngine";
+import { notificationManager } from "@/lib/notifications";
 import type {
   TimerConfig,
   TimerId,
@@ -60,6 +61,8 @@ type TimerState = {
   renamePreset: (presetId: string, name: string) => void;
   removePreset: (presetId: string) => void;
   movePreset: (presetId: string, delta: -1 | 1) => void;
+  movePresetByIndex: (presetId: string, newIndex: number) => void;
+  moveTimer: (timerId: string, newIndex: number) => void;
   exportPresetsJson: () => string;
   importPresetsJson: (json: string) => void;
   removeTimer: (id: TimerId) => void;
@@ -127,8 +130,20 @@ export const useTimerStore = create<TimerState>()(
             }));
           }
 
+          if (event.type === "completed") {
+            const id = event.id;
+            const timer = get().timers.find((t) => t.id === id);
+            if (timer) {
+              notificationManager.notifyTimerComplete(timer.label);
+            }
+          }
+
           if (event.type === "pomodoroPhaseChange") {
             const id = event.id;
+            const timer = get().timers.find((t) => t.id === id);
+            if (timer) {
+              notificationManager.notifyPomodoroPhaseChange(event.phase, timer.label);
+            }
             set((s) => ({
               timers: s.timers.map((t) => {
                 if (t.id !== id) return t;
@@ -533,6 +548,44 @@ export const useTimerStore = create<TimerState>()(
             ),
           }));
           syncTimer(id);
+        },
+
+        moveTimer(timerId, newIndex) {
+          set((s) => {
+            const timers = [...s.timers];
+            const currentIndex = timers.findIndex((t) => t.id === timerId);
+            if (currentIndex === -1) return s;
+
+            const [movedTimer] = timers.splice(currentIndex, 1);
+            timers.splice(newIndex, 0, movedTimer);
+
+            // Update order values
+            const updatedTimers = timers.map((timer, index) => ({
+              ...timer,
+              order: index,
+            }));
+
+            return { timers: updatedTimers };
+          });
+        },
+
+        movePresetByIndex(presetId, newIndex) {
+          set((s) => {
+            const presets = [...s.presets];
+            const currentIndex = presets.findIndex((p) => p.id === presetId);
+            if (currentIndex === -1) return s;
+
+            const [movedPreset] = presets.splice(currentIndex, 1);
+            presets.splice(newIndex, 0, movedPreset);
+
+            // Update order values
+            const updatedPresets = presets.map((preset, index) => ({
+              ...preset,
+              order: index,
+            }));
+
+            return { presets: updatedPresets };
+          });
         },
       };
     },

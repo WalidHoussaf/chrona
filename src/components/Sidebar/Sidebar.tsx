@@ -20,7 +20,7 @@ export function Sidebar() {
         <nav className="flex flex-col gap-2">
           <button
             className={clsx(
-              "rounded-md px-3 py-2 text-left text-3xl transition-colors",
+              "rounded-md px-3 py-2 text-left text-3xl transition-colors cursor-pointer",
               view === "timers" ? "bg-white/10 text-zinc-50" : "text-zinc-400 hover:bg-white/5",
             )}
             onClick={() => setView("timers")}
@@ -31,7 +31,7 @@ export function Sidebar() {
 
           <button
             className={clsx(
-              "rounded-md px-3 py-2 text-left text-3xl transition-colors",
+              "rounded-md px-3 py-2 text-left text-3xl transition-colors cursor-pointer",
               view === "stopwatch" ? "bg-white/10 text-zinc-50" : "text-zinc-400 hover:bg-white/5",
             )}
             onClick={() => setView("stopwatch")}
@@ -42,7 +42,7 @@ export function Sidebar() {
 
           <button
             className={clsx(
-              "rounded-md px-3 py-2 text-left text-3xl transition-colors",
+              "rounded-md px-3 py-2 text-left text-3xl transition-colors cursor-pointer",
               view === "focus" ? "bg-white/10 text-zinc-50" : "text-zinc-400 hover:bg-white/5",
             )}
             onClick={() => setView("focus")}
@@ -53,7 +53,7 @@ export function Sidebar() {
 
           <button
             className={clsx(
-              "rounded-md px-3 py-2 text-left text-3xl transition-colors",
+              "rounded-md px-3 py-2 text-left text-3xl transition-colors cursor-pointer",
               view === "settings" ? "bg-white/10 text-zinc-50" : "text-zinc-400 hover:bg-white/5",
             )}
             onClick={() => setView("settings")}

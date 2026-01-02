@@ -1,11 +1,60 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import clsx from "clsx";
 
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, parseHmsToMs } from "@/lib/time";
 import type { PomodoroConfig } from "@/lib/timerProtocol";
+
+const TimeFieldArrows = ({ onIncrement, onDecrement, disabled }: { onIncrement: () => void; onDecrement: () => void; disabled: boolean }) => (
+  <div className="flex flex-col">
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        onIncrement();
+      }}
+      disabled={disabled}
+      className="flex flex-1 w-6 items-center justify-center rounded-tr-md border-l border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors cursor-pointer"
+    >
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 100 125"
+        className="ml-px -rotate-90 transform"
+        fill="currentColor"
+      >
+        <path
+          d="M56 68L56 56 44 56 44 68 56 68M32 68L32 80 44 80 44 68 32 68M44 44L56 44 56 32 44 32 44 44M68 44L56 44 56 56 68 56 68 44M44 32L44 20 32 20 32 32 44 32Z"
+          className="text-zinc-300"
+        />
+      </svg>
+    </button>
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        onDecrement();
+      }}
+      disabled={disabled}
+      className="flex flex-1 w-6 items-center justify-center rounded-br-md border-l border-t border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors cursor-pointer"
+    >
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 100 125"
+        className="-ml-px rotate-90 transform"
+        fill="currentColor"
+      >
+        <path
+          d="M56 68L56 56 44 56 44 68 56 68M32 68L32 80 44 80 44 68 32 68M44 44L56 44 56 32 44 32 44 44M68 44L56 44 56 56 68 56 68 44M44 32L44 20 32 20 32 32 44 32Z"
+          className="text-zinc-300"
+        />
+      </svg>
+    </button>
+  </div>
+);
 
 function parseTimeString(timeStr: string): number {
   const parts = timeStr.split(':');
@@ -33,6 +82,7 @@ export function PomodoroPanel() {
 
   const [focusLock, setFocusLock] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
   
   const display = runtime?.displayMs ?? 0;
   const status = runtime?.status ?? "idle";
@@ -183,7 +233,7 @@ export function PomodoroPanel() {
         </div>
       )}
 
-      <header className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+      <header className="flex items-center justify-between border-b border-white/10 px-6 py-4 relative">
         <div className="min-w-0">
           <div className="font-harmond text-3xl text-zinc-200">Focus</div>
           <div className="truncate text-lg font-offbit text-zinc-100">{timer.label}</div>
@@ -193,7 +243,7 @@ export function PomodoroPanel() {
             <button
               type="button"
               className={clsx(
-                "rounded-md font-offbit px-4 py-2 text-md transition-colors",
+                "rounded-md font-offbit px-4 py-2 text-md transition-colors cursor-pointer",
                 focusLock 
                   ? "bg-rose-400/20 text-rose-200 border border-rose-400/30" 
                   : "bg-white/5 text-zinc-200 hover:bg-white/10"
@@ -218,20 +268,156 @@ export function PomodoroPanel() {
               )}
             </button>
           )}
+          <div className="relative">
+            <button
+              ref={settingsButtonRef}
+              type="button"
+              className="rounded-md font-offbit bg-white/5 px-3 py-2 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
+              onClick={() => setShowSettings(!showSettings)}
+            >
+              <svg className="w-6 h-6 inline -ml-1 mr-1" viewBox="0 0 100 125" fill="currentColor">
+                <path d="M46,38 L54,38 L54,42 L46,42 L46,38 Z M46,58 L54,58 L54,62 L46,62 L46,58 Z M38,46 L42,46 L42,54 L38,54 L38,46 Z M42,42 L46,42 L46,46 L42,46 L42,42 Z M54,42 L58,42 L58,46 L54,46 L54,42 Z M42,54 L46,54 L46,58 L42,58 L42,54 Z M54,54 L58,54 L58,58 L54,58 L54,54 Z M58,46 L62,46 L62,54 L58,54 L58,46 Z M42,22 L46,22 L46,30 L42,30 L42,22 Z M54,22 L58,22 L58,30 L54,30 L54,22 Z M46,18 L54,18 L54,22 L46,22 L46,18 Z M34,26 L38,26 L38,30 L34,30 L34,26 Z M58,30 L62,30 L62,34 L58,34 L58,30 Z M70,26 L74,26 L74,30 L70,30 L70,26 Z M74,30 L78,30 L78,34 L74,34 L74,30 Z M70,34 L74,34 L74,38 L70,38 L70,34 Z M30,22 L34,22 L34,26 L30,26 L30,22 Z M26,26 L30,26 L30,30 L26,30 L26,26 Z M26,34 L30,34 L30,38 L26,38 L26,34 Z M22,30 L26,30 L26,34 L22,34 L22,30 Z M62,26 L66,26 L66,30 L62,30 L62,26 Z M66,22 L70,22 L70,26 L66,26 L66,22 Z M38,30 L42,30 L42,34 L38,34 L38,30 Z M18,46 L22,46 L22,54 L18,54 L18,46 Z M22,42 L30,42 L30,46 L22,46 L22,42 Z M22,54 L30,54 L30,58 L22,58 L22,54 Z M82,46 L82,54 L78,54 L78,46 L82,46 Z M78,42 L78,46 L70,46 L70,42 L78,42 Z M78,54 L78,58 L70,58 L70,54 L78,54 Z M30,38 L34,38 L34,42 L30,42 L30,38 Z M66,38 L70,38 L70,42 L66,42 L66,38 Z M42,78 L42,70 L46,70 L46,78 L42,78 Z M54,78 L54,70 L58,70 L58,78 L54,78 Z M46,82 L46,78 L54,78 L54,82 L46,82 Z M34,74 L34,70 L38,70 L38,74 L34,74 Z M58,70 L58,66 L62,66 L62,70 L58,70 Z M70,74 L70,70 L74,70 L74,74 L70,74 Z M74,70 L74,66 L78,66 L78,70 L74,70 Z M70,66 L70,62 L74,62 L74,66 L70,66 Z M30,78 L30,74 L34,74 L34,78 L30,78 Z M26,74 L26,70 L30,70 L30,74 L26,74 Z M26,66 L26,62 L30,62 L30,66 L26,66 Z M22,70 L22,66 L26,66 L26,70 L22,70 Z M62,74 L62,70 L66,70 L66,74 L62,74 Z M66,78 L66,74 L70,74 L70,78 L66,78 Z M38,70 L38,66 L42,66 L42,70 L38,70 Z M30,62 L30,58 L34,58 L34,62 L30,62 Z M66,62 L66,58 L70,58 L70,62 L66,62 Z"/>
+              </svg>
+              Pomodoro Settings
+            </button>
+
+            {/* Pomodoro Settings Dropdown */}
+            {showSettings && (
+              <div className="absolute top-full right-0 mt-2 z-50 w-lg rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-2xl font-harmond text-zinc-200">Pomodoro Settings</h3>
+                  <button
+                    type="button"
+                    className="rounded-md bg-white/5 px-2 py-1 text-zinc-300 hover:bg-white/10 cursor-pointer"
+                    onClick={() => setShowSettings(false)}
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {!pomodoroConfig ? (
+                  <div className="space-y-4">
+                    <p className="text-lg text-zinc-300">Enable Pomodoro mode for this timer:</p>
+                    <button
+                      type="button"
+                      className="w-full rounded-md font-offbit bg-emerald-400/20 text-emerald-200 px-6 py-3 text-md hover:bg-emerald-400/30 border border-emerald-400/30 cursor-pointer"
+                      onClick={handleEnablePomodoro}
+                    >
+                      Enable Pomodoro
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-base font-offbit text-zinc-400 mb-1">Work Duration</label>
+                        <input
+                          type="text"
+                          className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md font-offbit text-zinc-100 outline-none focus:border-white/20"
+                          placeholder="25:00"
+                          defaultValue={formatDurationMs(config.workDurationMs || 25 * 60 * 1000)}
+                          onChange={(e) => handleConfigUpdate({ workDurationMs: parseTimeString(e.target.value) })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-base font-offbit text-zinc-400 mb-1">Short Break</label>
+                        <input
+                          type="text"
+                          className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md font-offbit text-zinc-100 outline-none focus:border-white/20"
+                          placeholder="5:00"
+                          defaultValue={formatDurationMs(config.shortBreakDurationMs || 5 * 60 * 1000)}
+                          onChange={(e) => handleConfigUpdate({ shortBreakDurationMs: parseTimeString(e.target.value) })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-base font-offbit text-zinc-400 mb-1">Long Break</label>
+                        <input
+                          type="text"
+                          className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md font-offbit text-zinc-100 outline-none focus:border-white/20"
+                          placeholder="15:00"
+                          defaultValue={formatDurationMs(config.longBreakDurationMs || 15 * 60 * 1000)}
+                          onChange={(e) => handleConfigUpdate({ longBreakDurationMs: parseTimeString(e.target.value) })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-base font-offbit text-zinc-400 mb-1">Long Break After</label>
+                        <div className="flex items-stretch">
+                          <input
+                            type="number"
+                            className="w-full rounded-l-md border border-r-0 border-white/10 bg-black/30 px-3 py-2 text-md font-offbit text-zinc-100 outline-none focus:border-white/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            placeholder="4"
+                            min="2"
+                            max="10"
+                            value={config.longBreakInterval || 4}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value) || 4;
+                              handleConfigUpdate({ longBreakInterval: Math.min(10, Math.max(2, value)) });
+                            }}
+                          />
+                          <TimeFieldArrows
+                            onIncrement={() => {
+                              const current = config.longBreakInterval || 4;
+                              const next = Math.min(10, current + 1);
+                              handleConfigUpdate({ longBreakInterval: next });
+                            }}
+                            onDecrement={() => {
+                              const current = config.longBreakInterval || 4;
+                              const next = Math.max(2, current - 1);
+                              handleConfigUpdate({ longBreakInterval: next });
+                            }}
+                            disabled={false}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-25">
+                      <label className="flex items-center gap-2 text-zinc-300">
+                        <input
+                          type="checkbox"
+                          className="rounded border-white/10 bg-black/20 text-emerald-400 focus:ring-emerald-400/50"
+                          checked={config.autoStartBreaks || false}
+                          onChange={(e) => handleConfigUpdate({ autoStartBreaks: e.target.checked })}
+                        />
+                        <span className="font-offbit text-base">Auto-start breaks</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-zinc-300">
+                        <input
+                          type="checkbox"
+                          className="rounded border-white/10 bg-black/20 text-emerald-400 focus:ring-emerald-400/50"
+                          checked={config.autoStartWork || false}
+                          onChange={(e) => handleConfigUpdate({ autoStartWork: e.target.checked })}
+                        />
+                        <span className="font-offbit text-md">Auto-start work</span>
+                      </label>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        type="button"
+                        className="flex-1 rounded-md font-offbit bg-rose-400/20 text-rose-200 px-4 py-2 text-md hover:bg-rose-400/30 border border-rose-400/30 cursor-pointer"
+                        onClick={handleDisablePomodoro}
+                      >
+                        Disable Pomodoro
+                      </button>
+                      <button
+                        type="button"
+                        className="flex-1 rounded-md font-offbit bg-white/10 text-zinc-200 px-4 py-2 text-md hover:bg-white/20 cursor-pointer"
+                        onClick={() => setShowSettings(false)}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <button
             type="button"
-            className="rounded-md font-offbit bg-white/5 px-3 py-2 text-md text-zinc-200 hover:bg-white/10"
-            onClick={() => setShowSettings(!showSettings)}
-            title="Pomodoro settings"
-          >
-            <svg className="w-6 h-6 inline -ml-1 mr-1" viewBox="0 0 100 125" fill="currentColor">
-              <path d="M46,38 L54,38 L54,42 L46,42 L46,38 Z M46,58 L54,58 L54,62 L46,62 L46,58 Z M38,46 L42,46 L42,54 L38,54 L38,46 Z M42,42 L46,42 L46,46 L42,46 L42,42 Z M54,42 L58,42 L58,46 L54,46 L54,42 Z M42,54 L46,54 L46,58 L42,58 L42,54 Z M54,54 L58,54 L58,58 L54,58 L54,54 Z M58,46 L62,46 L62,54 L58,54 L58,46 Z M42,22 L46,22 L46,30 L42,30 L42,22 Z M54,22 L58,22 L58,30 L54,30 L54,22 Z M46,18 L54,18 L54,22 L46,22 L46,18 Z M34,26 L38,26 L38,30 L34,30 L34,26 Z M58,30 L62,30 L62,34 L58,34 L58,30 Z M70,26 L74,26 L74,30 L70,30 L70,26 Z M74,30 L78,30 L78,34 L74,34 L74,30 Z M70,34 L74,34 L74,38 L70,38 L70,34 Z M30,22 L34,22 L34,26 L30,26 L30,22 Z M26,26 L30,26 L30,30 L26,30 L26,26 Z M26,34 L30,34 L30,38 L26,38 L26,34 Z M22,30 L26,30 L26,34 L22,34 L22,30 Z M62,26 L66,26 L66,30 L62,30 L62,26 Z M66,22 L70,22 L70,26 L66,26 L66,22 Z M38,30 L42,30 L42,34 L38,34 L38,30 Z M18,46 L22,46 L22,54 L18,54 L18,46 Z M22,42 L30,42 L30,46 L22,46 L22,42 Z M22,54 L30,54 L30,58 L22,58 L22,54 Z M82,46 L82,54 L78,54 L78,46 L82,46 Z M78,42 L78,46 L70,46 L70,42 L78,42 Z M78,54 L78,58 L70,58 L70,54 L78,54 Z M30,38 L34,38 L34,42 L30,42 L30,38 Z M66,38 L70,38 L70,42 L66,42 L66,38 Z M42,78 L42,70 L46,70 L46,78 L42,78 Z M54,78 L54,70 L58,70 L58,78 L54,78 Z M46,82 L46,78 L54,78 L54,82 L46,82 Z M34,74 L34,70 L38,70 L38,74 L34,74 Z M58,70 L58,66 L62,66 L62,70 L58,70 Z M70,74 L70,70 L74,70 L74,74 L70,74 Z M74,70 L74,66 L78,66 L78,70 L74,70 Z M70,66 L70,62 L74,62 L74,66 L70,66 Z M30,78 L30,74 L34,74 L34,78 L30,78 Z M26,74 L26,70 L30,70 L30,74 L26,74 Z M26,66 L26,62 L30,62 L30,66 L26,66 Z M22,70 L22,66 L26,66 L26,70 L22,70 Z M62,74 L62,70 L66,70 L66,74 L62,74 Z M66,78 L66,74 L70,74 L70,78 L66,78 Z M38,70 L38,66 L42,66 L42,70 L38,70 Z M30,62 L30,58 L34,58 L34,62 L30,62 Z M66,62 L66,58 L70,58 L70,62 L66,62 Z"/>
-            </svg>
-            Pomodoro Settings
-          </button>
-          <button
-            type="button"
-            className="rounded-md font-offbit bg-white/5 px-3 py-2 text-md text-zinc-200 hover:bg-white/10"
+            className="rounded-md font-offbit bg-white/5 px-3 py-2 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
             onClick={() => setView("timers")}
             title="Exit focus (Esc)"
           >
@@ -274,7 +460,7 @@ export function PomodoroPanel() {
               <div className="flex flex-wrap justify-center gap-2">
                 <button
                   type="button"
-                  className="rounded-md font-offbit bg-white/10 px-6 py-3 text-md text-zinc-100 hover:bg-white/20"
+                  className="rounded-md font-offbit bg-white/10 px-6 py-3 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
                   onClick={startPauseActive}
                 >
                   {status === "running" ? "Pause" : "Start"}
@@ -282,7 +468,7 @@ export function PomodoroPanel() {
 
                 <button
                   type="button"
-                  className="rounded-md font-offbit bg-white/5 px-6 py-3 text-md text-zinc-200 hover:bg-white/10"
+                  className="rounded-md font-offbit bg-white/5 px-6 py-3 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
                   onClick={resetActive}
                 >
                   Reset
@@ -290,110 +476,12 @@ export function PomodoroPanel() {
 
                 <button
                   type="button"
-                  className="rounded-md font-offbit bg-white/5 px-6 py-3 text-md text-zinc-200 hover:bg-white/10"
+                  className="rounded-md font-offbit bg-white/5 px-6 py-3 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
                   onClick={() => setFocusLock(!focusLock)}
                 >
                   {focusLock ? "Unlock" : "Focus Lock"}
                 </button>
               </div>
-            </div>
-          )}
-
-          {/* Pomodoro Settings */}
-          {showSettings && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h3 className="text-xl font-harmond text-zinc-200 mb-4">Pomodoro Settings</h3>
-              
-              {!pomodoroConfig ? (
-                <div className="space-y-4">
-                  <p className="text-zinc-300">Enable Pomodoro mode for this timer:</p>
-                  <button
-                    type="button"
-                    className="rounded-md font-offbit bg-emerald-400/20 text-emerald-200 px-6 py-3 text-md hover:bg-emerald-400/30 border border-emerald-400/30"
-                    onClick={handleEnablePomodoro}
-                  >
-                    Enable Pomodoro
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-offbit text-zinc-400 mb-1">Work Duration</label>
-                      <input
-                        type="text"
-                        className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md text-zinc-100 outline-none focus:border-white/20"
-                        placeholder="25:00"
-                        defaultValue={formatDurationMs(config.workDurationMs || 25 * 60 * 1000)}
-                        onChange={(e) => handleConfigUpdate({ workDurationMs: parseTimeString(e.target.value) })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-offbit text-zinc-400 mb-1">Short Break</label>
-                      <input
-                        type="text"
-                        className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md text-zinc-100 outline-none focus:border-white/20"
-                        placeholder="5:00"
-                        defaultValue={formatDurationMs(config.shortBreakDurationMs || 5 * 60 * 1000)}
-                        onChange={(e) => handleConfigUpdate({ shortBreakDurationMs: parseTimeString(e.target.value) })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-offbit text-zinc-400 mb-1">Long Break</label>
-                      <input
-                        type="text"
-                        className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md text-zinc-100 outline-none focus:border-white/20"
-                        placeholder="15:00"
-                        defaultValue={formatDurationMs(config.longBreakDurationMs || 15 * 60 * 1000)}
-                        onChange={(e) => handleConfigUpdate({ longBreakDurationMs: parseTimeString(e.target.value) })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-offbit text-zinc-400 mb-1">Long Break After</label>
-                      <input
-                        type="number"
-                        className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md text-zinc-100 outline-none focus:border-white/20"
-                        placeholder="4"
-                        min="2"
-                        max="10"
-                        defaultValue={config.longBreakInterval || 4}
-                        onChange={(e) => handleConfigUpdate({ longBreakInterval: parseInt(e.target.value) || 4 })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-zinc-300">
-                      <input
-                        type="checkbox"
-                        className="rounded border-white/10 bg-black/20 text-emerald-400 focus:ring-emerald-400/50"
-                        checked={config.autoStartBreaks || false}
-                        onChange={(e) => handleConfigUpdate({ autoStartBreaks: e.target.checked })}
-                      />
-                      <span className="font-offbit text-sm">Auto-start breaks</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-zinc-300">
-                      <input
-                        type="checkbox"
-                        className="rounded border-white/10 bg-black/20 text-emerald-400 focus:ring-emerald-400/50"
-                        checked={config.autoStartWork || false}
-                        onChange={(e) => handleConfigUpdate({ autoStartWork: e.target.checked })}
-                      />
-                      <span className="font-offbit text-sm">Auto-start work</span>
-                    </label>
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      type="button"
-                      className="rounded-md font-offbit bg-rose-400/20 text-rose-200 px-4 py-2 text-md hover:bg-rose-400/30 border border-rose-400/30"
-                      onClick={handleDisablePomodoro}
-                    >
-                      Disable Pomodoro
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -415,7 +503,7 @@ export function PomodoroPanel() {
                 >
                   {status.charAt(0).toUpperCase() + status.slice(1)}
                 </div>
-                <div className="text-zinc-500 text-sm">Enable Pomodoro for enhanced focus features</div>
+                <div className="text-zinc-500 text-md">Enable Pomodoro for enhanced focus features</div>
               </div>
 
               <div className="text-center font-offbit text-6xl tabular-nums tracking-tight text-zinc-50 mb-6">
@@ -425,7 +513,7 @@ export function PomodoroPanel() {
               <div className="flex flex-wrap justify-center gap-2">
                 <button
                   type="button"
-                  className="rounded-md font-offbit bg-white/10 px-5 py-2 text-md text-zinc-100 hover:bg-white/20"
+                  className="rounded-md font-offbit bg-white/10 px-5 py-2 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
                   onClick={startPauseActive}
                 >
                   Start / Pause
@@ -433,7 +521,7 @@ export function PomodoroPanel() {
 
                 <button
                   type="button"
-                  className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-200 hover:bg-white/10"
+                  className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
                   onClick={resetActive}
                 >
                   Reset
@@ -441,7 +529,7 @@ export function PomodoroPanel() {
 
                 <button
                   type="button"
-                  className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-200 hover:bg-white/10"
+                  className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
                   onClick={() => setFocusLock(true)}
                 >
                   Focus Lock

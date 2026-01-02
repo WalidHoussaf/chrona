@@ -33,7 +33,7 @@ export function StopwatchPanel() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="rounded-md font-offbit bg-white/10 px-5 py-2 text-md text-zinc-100 hover:bg-white/20"
+            className="rounded-md font-offbit bg-white/10 px-5 py-2 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
             onClick={() => {
               setActive(stopwatch.id);
               startPauseActive();
@@ -43,7 +43,7 @@ export function StopwatchPanel() {
           </button>
           <button
             type="button"
-            className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-300 hover:bg-white/10"
+            className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-300 hover:bg-white/10 cursor-pointer"
             onClick={() => {
               setActive(stopwatch.id);
               resetActive();
@@ -53,7 +53,7 @@ export function StopwatchPanel() {
           </button>
           <button
             type="button"
-            className="rounded-md font-offbit bg-emerald-500/20 px-5 py-2 text-md text-emerald-100 hover:bg-emerald-500/25"
+            className="rounded-md font-offbit bg-emerald-500/20 px-5 py-2 text-md text-emerald-100 hover:bg-emerald-500/25 cursor-pointer"
             onClick={() => {
               setActive(stopwatch.id);
               lapActive();

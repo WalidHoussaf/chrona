@@ -86,7 +86,7 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
               <button
                 type="button"
                 className={clsx(
-                  "rounded-md px-2 py-1",
+                  "rounded-md px-2 py-1 cursor-pointer",
                   timer.loop ? "bg-white/10 text-zinc-200" : "bg-white/5 text-zinc-400 hover:bg-white/10",
                 )}
                 onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
@@ -98,7 +98,7 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
             {timer.kind === "timer" && (
               <button
                 type="button"
-                className="rounded-md bg-white/5 px-2 py-1 text-zinc-400 hover:bg-white/10"
+                className="rounded-md bg-white/5 px-2 py-1 text-zinc-400 hover:bg-white/10 cursor-pointer"
                 onClick={() =>
                   updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })
                 }
@@ -113,7 +113,7 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
           <button
             type="button"
             className={clsx(
-              "w-28 rounded-md px-3 py-2 text-xl font-offbit",
+              "w-28 rounded-md px-3 py-2 text-xl font-offbit cursor-pointer",
               running ? "bg-white/10 text-zinc-100 hover:bg-white/20" : "bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/25",
             )}
             onClick={() => {
@@ -126,7 +126,7 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
 
           <button
             type="button"
-            className="w-28 rounded-md bg-white/5 px-3 py-2 text-xl font-offbit text-zinc-300 hover:bg-white/10"
+            className="w-28 rounded-md bg-white/5 px-3 py-2 text-xl font-offbit text-zinc-300 hover:bg-white/10 cursor-pointer"
             onClick={() => {
               setActive(timer.id);
               resetActive();
@@ -137,7 +137,7 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
 
           <button
             type="button"
-            className="w-28 rounded-md bg-rose-500/20 px-3 py-2 text-xl font-offbit text-rose-100 hover:bg-rose-500/25"
+            className="w-28 rounded-md bg-rose-500/20 px-3 py-2 text-xl font-offbit text-rose-100 hover:bg-rose-500/25 cursor-pointer"
             onClick={() => removeTimer(timer.id)}
           >
             Remove
@@ -182,7 +182,7 @@ const TimeFieldArrows = ({ onIncrement, onDecrement, disabled }: { onIncrement: 
         onIncrement();
       }}
       disabled={disabled}
-      className="flex h-6 w-6 items-center justify-center rounded-tr-md border-l border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors"
+      className="flex h-6 w-6 items-center justify-center rounded-tr-md border-l border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors cursor-pointer"
     >
       <svg
         width="12"
@@ -204,7 +204,7 @@ const TimeFieldArrows = ({ onIncrement, onDecrement, disabled }: { onIncrement: 
         onDecrement();
       }}
       disabled={disabled}
-      className="flex h-6 w-6 items-center justify-center rounded-br-md border-l border-t border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors"
+      className="flex h-6 w-6 items-center justify-center rounded-br-md border-l border-t border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors cursor-pointer"
     >
       <svg
         width="12"
@@ -246,7 +246,35 @@ function TimeField({
   };
 
   return (
-    <div className="flex items-end gap-2">
+    <div className="group relative flex items-end gap-2">
+      {/* --- Tooltip Start --- */}
+      <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-3 w-max -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-950/70 p-2.5 shadow-xl backdrop-blur-md">
+          {/* Scroll Section */}
+          <div className="flex items-center gap-1.5">
+            <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-offbit text-[11px] uppercase text-zinc-300">
+              Scroll
+            </span>
+            <span className="text-[18px] text-zinc-400">Adjust</span>
+          </div>
+          
+          {/* Vertical Separator */}
+          <div className="h-3 w-px bg-white/10" />
+          
+          {/* Shift Section */}
+          <div className="flex items-center gap-1.5">
+            <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-offbit text-[11px] uppercase text-zinc-300">
+              Shift + Scroll
+            </span>
+            <span className="text-[18px] text-zinc-400">Adjust by 5</span>
+          </div>
+        </div>
+        
+        {/* Tooltip Arrow */}
+        <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b border-r border-white/10 bg-zinc-950/70 backdrop-blur-md" />
+      </div>
+      {/* --- Tooltip End --- */}
+
       <label className="flex flex-1 flex-col gap-1.5">
         <span className="text-xl font-offbit text-zinc-400">{label}</span>
         <div className="flex items-stretch">
@@ -261,8 +289,12 @@ function TimeField({
             onChange={(e) => onChange(Number(e.target.value || 0))}
             onWheel={(e) => {
               if (disabled) return;
+              e.preventDefault();
               e.currentTarget.blur();
-              const dir = e.deltaY < 0 ? 1 : -1;
+              
+              const isShiftPressed = e.shiftKey;
+              const delta = isShiftPressed ? 5 : 1;
+              const dir = e.deltaY < 0 ? delta : -delta;
               const next = value + dir;
               onChange(max != null ? Math.min(max, Math.max(0, next)) : Math.max(0, next));
             }}
