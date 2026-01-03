@@ -6,62 +6,43 @@ import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, parseHmsToMs } from "@/lib/time";
 import type { PomodoroConfig } from "@/lib/timerProtocol";
 
-const TimeFieldArrows = ({ onIncrement, onDecrement, disabled }: { onIncrement: () => void; onDecrement: () => void; disabled: boolean }) => (
-  <div className="flex flex-col">
-    <button
-      type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        onIncrement();
-      }}
-      disabled={disabled}
-      className="flex flex-1 w-6 items-center justify-center rounded-tr-md border-l border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors cursor-pointer"
-    >
-      <svg
-        width="10"
-        height="10"
-        viewBox="0 0 100 125"
-        className="ml-px -rotate-90 transform"
-        fill="currentColor"
-      >
-        <path
-          d="M56 68L56 56 44 56 44 68 56 68M32 68L32 80 44 80 44 68 32 68M44 44L56 44 56 32 44 32 44 44M68 44L56 44 56 56 68 56 68 44M44 32L44 20 32 20 32 32 44 32Z"
-          className="text-zinc-300"
-        />
-      </svg>
-    </button>
-    <button
-      type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        onDecrement();
-      }}
-      disabled={disabled}
-      className="flex flex-1 w-6 items-center justify-center rounded-br-md border-l border-t border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors cursor-pointer"
-    >
-      <svg
-        width="10"
-        height="10"
-        viewBox="0 0 100 125"
-        className="-ml-px rotate-90 transform"
-        fill="currentColor"
-      >
-        <path
-          d="M56 68L56 56 44 56 44 68 56 68M32 68L32 80 44 80 44 68 32 68M44 44L56 44 56 32 44 32 44 44M68 44L56 44 56 56 68 56 68 44M44 32L44 20 32 20 32 32 44 32Z"
-          className="text-zinc-300"
-        />
-      </svg>
-    </button>
+// --- Styled Components ---
+
+const SettingsInput = ({ 
+  label, 
+  value, 
+  onChange, 
+  placeholder 
+}: { 
+  label: string; 
+  value: string; 
+  onChange: (val: string) => void; 
+  placeholder: string;
+}) => (
+  <div className="group flex flex-col gap-2">
+    <label className="font-offbit text-xs uppercase tracking-widest text-muted transition-colors group-hover:text-foreground">
+      {label}
+    </label>
+    <div className="relative">
+      <input
+        type="text"
+        className="w-full bg-transparent border-b border-border py-2 font-offbit text-xl text-foreground placeholder-muted/30 focus:border-accent focus:outline-none transition-all"
+        placeholder={placeholder}
+        defaultValue={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="text-[10px] text-muted">MM:SS</span>
+      </div>
+    </div>
   </div>
 );
 
 function parseTimeString(timeStr: string): number {
   const parts = timeStr.split(':');
   if (parts.length === 2) {
-    // MM:SS format
     return parseHmsToMs(0, parseInt(parts[0]) || 0, parseInt(parts[1]) || 0);
   } else if (parts.length === 3) {
-    // HH:MM:SS format
     return parseHmsToMs(parseInt(parts[0]) || 0, parseInt(parts[1]) || 0, parseInt(parts[2]) || 0);
   }
   return 0;
@@ -81,12 +62,13 @@ export function PomodoroPanel() {
 
   const [focusLock, setFocusLock] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
   
   const display = runtime?.displayMs ?? 0;
   const status = runtime?.status ?? "idle";
   const pomodoroConfig = timer?.pomodoroConfig;
   
+  // Default configuration used when initializing
   const config = useMemo(() => ({
     workDurationMs: pomodoroConfig?.workDurationMs || 25 * 60 * 1000,
     shortBreakDurationMs: pomodoroConfig?.shortBreakDurationMs || 5 * 60 * 1000,
@@ -94,21 +76,27 @@ export function PomodoroPanel() {
     longBreakInterval: pomodoroConfig?.longBreakInterval || 4,
     autoStartBreaks: pomodoroConfig?.autoStartBreaks || false,
     autoStartWork: pomodoroConfig?.autoStartWork || false,
-  }), [pomodoroConfig?.workDurationMs, pomodoroConfig?.shortBreakDurationMs, pomodoroConfig?.longBreakDurationMs, pomodoroConfig?.longBreakInterval, pomodoroConfig?.autoStartBreaks, pomodoroConfig?.autoStartWork]);
+  }), [pomodoroConfig]);
+
+  // Click outside to close settings
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setShowSettings(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (focusLock) {
-          setFocusLock(false);
-        } else if (showSettings) {
-          setShowSettings(false);
-        } else {
-          setView("timers");
-        }
+        if (focusLock) setFocusLock(false);
+        else if (showSettings) setShowSettings(false);
+        else setView("timers");
       }
     };
-
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [setView, focusLock, showSettings]);
@@ -117,10 +105,8 @@ export function PomodoroPanel() {
   useEffect(() => {
     if (focusLock) {
       document.body.style.overflow = "hidden";
-      // Prevent right-click
       const preventContextMenu = (e: MouseEvent) => e.preventDefault();
       document.addEventListener("contextmenu", preventContextMenu);
-      
       return () => {
         document.body.style.overflow = "";
         document.removeEventListener("contextmenu", preventContextMenu);
@@ -128,15 +114,11 @@ export function PomodoroPanel() {
     }
   }, [focusLock]);
 
+  // --- Handlers ---
+
   const handleEnablePomodoro = () => {
     if (!timer) return;
     enablePomodoro(timer.id, config);
-    setShowSettings(false);
-  };
-
-  const handleDisablePomodoro = () => {
-    if (!timer) return;
-    disablePomodoro(timer.id);
     setShowSettings(false);
   };
 
@@ -146,59 +128,33 @@ export function PomodoroPanel() {
     }
   };
 
-  const getPhaseColor = (phase?: string) => {
+  const getPhaseStyles = (phase?: string) => {
     switch (phase) {
       case "work":
-        return "bg-emerald-400/20 text-emerald-200 border-emerald-400/30";
+        return { color: "text-accent", border: "border-accent", bg: "bg-accent/10", label: "Work Phase" };
       case "shortBreak":
-        return "bg-blue-400/20 text-blue-200 border-blue-400/30";
+        return { color: "text-blue-400", border: "border-blue-400", bg: "bg-blue-400/10", label: "Decompress" };
       case "longBreak":
-        return "bg-purple-400/20 text-purple-200 border-purple-400/30";
+        return { color: "text-purple-400", border: "border-purple-400", bg: "bg-purple-400/10", label: "Deep Rest" };
       default:
-        return "bg-white/10 text-zinc-300 border-white/20";
+        return { color: "text-foreground", border: "border-foreground", bg: "bg-foreground/5", label: "Focus" };
     }
   };
 
-  const getPhaseLabel = (phase?: string) => {
-    switch (phase) {
-      case "work":
-        return "Work Session";
-      case "shortBreak":
-        return "Short Break";
-      case "longBreak":
-        return "Long Break";
-      default:
-        return "Focus";
-    }
-  };
+  const currentStyles = getPhaseStyles(pomodoroConfig?.currentPhase);
 
   if (!timer) {
     return (
-      <div className="flex h-full flex-col">
-        <header className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-          <div className="min-w-0">
-            <div className="font-harmond text-3xl text-zinc-200">Focus</div>
-            <div className="truncate text-lg font-offbit text-zinc-100">No active timer</div>
-          </div>
-          <button
-            type="button"
-            className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-200 hover:bg-white/10"
-            onClick={() => setView("timers")}
-          >
-            Exit
-          </button>
-        </header>
-
-        <div className="flex flex-1 items-center justify-center px-6">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
-            <div className="text-2xl text-zinc-200 mb-4">Create a timer first</div>
-            <button
-              type="button"
-              className="rounded-md font-offbit bg-white/10 px-6 py-3 text-md text-zinc-100 hover:bg-white/20"
-              onClick={() => setView("timers")}
-            >
-              Go to Timers
-            </button>
+      <div className="flex h-full flex-col bg-background">
+        <div className="flex items-end justify-between border-b border-border/60 px-8 py-6">
+           <h1 className="font-harmond text-4xl text-foreground">Focus</h1>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <span className="font-harmond text-2xl text-muted">No Active Context</span>
+            <ActionButton onClick={() => setView("timers")} variant="primary">
+              Select Timer
+            </ActionButton>
           </div>
         </div>
       </div>
@@ -206,338 +162,271 @@ export function PomodoroPanel() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Focus Lock Overlay */}
-      {focusLock && (
-        <div className="fixed inset-0 z-50 bg-black backdrop-blur-sm flex items-center justify-center">
-          <div className="text-center">
-            <div className="font-offbit text-6xl text-white mb-4">
-              {formatDurationMs(display)}
-            </div>
-            <div className={clsx(
-              "inline-block rounded-md px-4 py-2 text-xl font-offbit mb-6",
-              getPhaseColor(pomodoroConfig?.currentPhase)
-            )}>
-              {getPhaseLabel(pomodoroConfig?.currentPhase)}
-            </div>
-            <div className="font-harmond text-xl text-zinc-400 mb-4">Focus Mode Active</div>
-            <button
-              type="button"
-              className="rounded-md font-offbit bg-white/10 px-6 py-3 text-md text-zinc-200 hover:bg-white/20"
-              onClick={() => setFocusLock(false)}
-            >
-              Exit Focus Lock (Esc)
-            </button>
-          </div>
+    <div className="flex h-full flex-col bg-background relative overflow-hidden">
+      
+      {/* --- FOCUS LOCK OVERLAY --- */}
+      <div 
+        className={clsx(
+          "fixed inset-0 z-50 flex items-center justify-center bg-background transition-all duration-700",
+          focusLock ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+      >
+        <div className="flex flex-col items-center gap-12">
+           <div className={clsx(
+             "relative flex items-center justify-center rounded-full p-24 border-2 animate-pulse",
+             currentStyles.border,
+             currentStyles.bg
+           )}>
+             <div className="absolute inset-0 rounded-full blur-3xl opacity-20 bg-current text-inherit" />
+             <span className="font-offbit text-[12rem] leading-none tracking-tighter tabular-nums text-foreground">
+                {formatDurationMs(display)}
+             </span>
+           </div>
+           
+           <div className="flex flex-col items-center gap-2">
+             <span className={clsx("font-offbit text-xl uppercase tracking-[0.5em]", currentStyles.color)}>
+               {currentStyles.label}
+             </span>
+             <span className="font-harmond text-muted text-sm italic">
+               Press ESC to break focus
+             </span>
+           </div>
         </div>
-      )}
+      </div>
 
-      <header className="flex items-center justify-between border-b border-white/10 px-6 py-4 relative">
-        <div className="min-w-0">
-          <div className="font-harmond text-3xl text-zinc-200">Focus</div>
-          <div className="truncate text-lg font-offbit text-zinc-100">{timer.label}</div>
+      {/* --- HEADER --- */}
+      <header className="flex items-end justify-between border-b border-border/60 bg-background/50 px-8 py-6 backdrop-blur-sm z-20">
+        <div>
+          <h1 className="font-harmond text-4xl font-medium tracking-tight text-foreground">
+            Focus
+          </h1>
+          <p className="font-offbit text-xs uppercase tracking-widest text-muted">
+            {timer.label}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-4">
           {pomodoroConfig && (
-            <button
-              type="button"
-              className={clsx(
-                "rounded-md font-offbit px-4 py-2 text-md transition-colors cursor-pointer",
-                focusLock 
-                  ? "bg-rose-400/20 text-rose-200 border border-rose-400/30" 
-                  : "bg-white/5 text-zinc-200 hover:bg-white/10"
-              )}
-              onClick={() => setFocusLock(!focusLock)}
-              title={focusLock ? "Disable focus lock" : "Enable focus lock"}
-            >
-              {focusLock ? (
-                <>
-                  <svg className="w-6 h-6 inline -ml-1 mr-1" viewBox="-5.0 -10.0 110.0 135.0" fill="currentColor">
-                    <path d="m56.398 11.602v6.3984h-12.797v-6.3984zm0 12.801h6.3984l0.003906-6.4023h-6.4023zm-19.199 0h6.3984l0.003906-6.4023h-6.4023zm38.402 19.199v38.398h6.3984v-38.398zm-6.3984-6.3984-0.003906-12.805h-6.3984v12.801h-25.602v-12.801h-6.3984v12.801h-6.4023v6.3984l51.203 0.003906v-6.4023zm-51.203 6.3984v38.398h6.3984v-38.398zm6.3984 38.398v6.3984h51.203v-6.3984z"/>
-                  </svg>
-                  Locked
-                </>
-              ) : (
-                <>
-                  <svg className="w-6 h-6 inline -ml-1 mr-1" viewBox="-5.0 -10.0 110.0 135.0" fill="currentColor">
-                    <path d="m56.398 11.602v6.3984h-12.797v-6.3984zm0 12.801h6.3984l0.003906-6.4023h-6.4023zm-19.199 0h6.3984l0.003906-6.4023h-6.4023zm38.402 19.199v38.398h6.3984v-38.398zm-6.3984-6.3984-0.003906-12.805h-6.3984v12.801h-25.602v-12.801h-6.3984v12.801h-6.4023v6.3984l51.203 0.003906v-6.4023zm-51.203 6.3984v38.398h6.3984v-38.398zm6.3984 38.398v6.3984h51.203v-6.3984z"/>
-                  </svg>
-                  Focus Lock
-                </>
-              )}
-            </button>
+             <button
+               type="button"
+               onClick={() => setFocusLock(true)}
+               className="group flex items-center gap-2 font-offbit text-xs uppercase tracking-wider text-muted hover:text-accent transition-colors"
+             >
+               <span className="h-2 w-2 rounded-full bg-border group-hover:bg-accent transition-colors" />
+               Enter Lock
+             </button>
           )}
-          <div className="relative">
+          
+          <div className="relative" ref={settingsRef}>
             <button
-              ref={settingsButtonRef}
-              type="button"
-              className="rounded-md font-offbit bg-white/5 px-3 py-2 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
               onClick={() => setShowSettings(!showSettings)}
+              className={clsx(
+                "p-2 rounded-full border transition-all duration-300",
+                showSettings ? "border-accent text-accent bg-accent/10" : "border-transparent text-muted hover:text-foreground"
+              )}
             >
-              <svg className="w-6 h-6 inline -ml-1 mr-1" viewBox="0 0 100 125" fill="currentColor">
-                <path d="M46,38 L54,38 L54,42 L46,42 L46,38 Z M46,58 L54,58 L54,62 L46,62 L46,58 Z M38,46 L42,46 L42,54 L38,54 L38,46 Z M42,42 L46,42 L46,46 L42,46 L42,42 Z M54,42 L58,42 L58,46 L54,46 L54,42 Z M42,54 L46,54 L46,58 L42,58 L42,54 Z M54,54 L58,54 L58,58 L54,58 L54,54 Z M58,46 L62,46 L62,54 L58,54 L58,46 Z M42,22 L46,22 L46,30 L42,30 L42,22 Z M54,22 L58,22 L58,30 L54,30 L54,22 Z M46,18 L54,18 L54,22 L46,22 L46,18 Z M34,26 L38,26 L38,30 L34,30 L34,26 Z M58,30 L62,30 L62,34 L58,34 L58,30 Z M70,26 L74,26 L74,30 L70,30 L70,26 Z M74,30 L78,30 L78,34 L74,34 L74,30 Z M70,34 L74,34 L74,38 L70,38 L70,34 Z M30,22 L34,22 L34,26 L30,26 L30,22 Z M26,26 L30,26 L30,30 L26,30 L26,26 Z M26,34 L30,34 L30,38 L26,38 L26,34 Z M22,30 L26,30 L26,34 L22,34 L22,30 Z M62,26 L66,26 L66,30 L62,30 L62,26 Z M66,22 L70,22 L70,26 L66,26 L66,22 Z M38,30 L42,30 L42,34 L38,34 L38,30 Z M18,46 L22,46 L22,54 L18,54 L18,46 Z M22,42 L30,42 L30,46 L22,46 L22,42 Z M22,54 L30,54 L30,58 L22,58 L22,54 Z M82,46 L82,54 L78,54 L78,46 L82,46 Z M78,42 L78,46 L70,46 L70,42 L78,42 Z M78,54 L78,58 L70,58 L70,54 L78,54 Z M30,38 L34,38 L34,42 L30,42 L30,38 Z M66,38 L70,38 L70,42 L66,42 L66,38 Z M42,78 L42,70 L46,70 L46,78 L42,78 Z M54,78 L54,70 L58,70 L58,78 L54,78 Z M46,82 L46,78 L54,78 L54,82 L46,82 Z M34,74 L34,70 L38,70 L38,74 L34,74 Z M58,70 L58,66 L62,66 L62,70 L58,70 Z M70,74 L70,70 L74,70 L74,74 L70,74 Z M74,70 L74,66 L78,66 L78,70 L74,70 Z M70,66 L70,62 L74,62 L74,66 L70,66 Z M30,78 L30,74 L34,74 L34,78 L30,78 Z M26,74 L26,70 L30,70 L30,74 L26,74 Z M26,66 L26,62 L30,62 L30,66 L26,66 Z M22,70 L22,66 L26,66 L26,70 L22,70 Z M62,74 L62,70 L66,70 L66,74 L62,74 Z M66,78 L66,74 L70,74 L70,78 L66,78 Z M38,70 L38,66 L42,66 L42,70 L38,70 Z M30,62 L30,58 L34,58 L34,62 L30,62 Z M66,62 L66,58 L70,58 L70,62 L66,62 Z"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
-              Pomodoro Settings
             </button>
 
-            {/* Pomodoro Settings Dropdown */}
+            {/* --- SETTINGS DROPDOWN --- */}
             {showSettings && (
-              <div className="absolute top-full right-0 mt-2 z-50 w-lg rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-2xl font-harmond text-zinc-200">Pomodoro Settings</h3>
-                  <button
-                    type="button"
-                    className="rounded-md bg-white/5 px-2 py-1 text-zinc-300 hover:bg-white/10 cursor-pointer"
-                    onClick={() => setShowSettings(false)}
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
+              <div className="absolute right-0 top-full mt-4 w-80 rounded-xl border border-border bg-background/90 p-6 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className="font-harmond text-lg text-foreground">Configuration</h3>
                 </div>
                 
                 {!pomodoroConfig ? (
-                  <div className="space-y-4">
-                    <p className="text-lg text-zinc-300">Enable Pomodoro mode for this timer:</p>
-                    <button
-                      type="button"
-                      className="w-full rounded-md font-offbit bg-emerald-400/20 text-emerald-200 px-6 py-3 text-md hover:bg-emerald-400/30 border border-emerald-400/30 cursor-pointer"
-                      onClick={handleEnablePomodoro}
-                    >
-                      Enable Pomodoro
-                    </button>
+                  <div className="flex flex-col gap-4">
+                    <p className="text-sm text-muted">Initialize standard Pomodoro protocol for this timer.</p>
+                    <ActionButton onClick={handleEnablePomodoro} variant="primary" fullWidth>
+                      Initialize
+                    </ActionButton>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-base font-offbit text-zinc-400 mb-1">Work Duration</label>
-                        <input
-                          type="text"
-                          className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md font-offbit text-zinc-100 outline-none focus:border-white/20"
-                          placeholder="25:00"
-                          defaultValue={formatDurationMs(config.workDurationMs || 25 * 60 * 1000)}
-                          onChange={(e) => handleConfigUpdate({ workDurationMs: parseTimeString(e.target.value) })}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-base font-offbit text-zinc-400 mb-1">Short Break</label>
-                        <input
-                          type="text"
-                          className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md font-offbit text-zinc-100 outline-none focus:border-white/20"
-                          placeholder="5:00"
-                          defaultValue={formatDurationMs(config.shortBreakDurationMs || 5 * 60 * 1000)}
-                          onChange={(e) => handleConfigUpdate({ shortBreakDurationMs: parseTimeString(e.target.value) })}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-base font-offbit text-zinc-400 mb-1">Long Break</label>
-                        <input
-                          type="text"
-                          className="w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-md font-offbit text-zinc-100 outline-none focus:border-white/20"
-                          placeholder="15:00"
-                          defaultValue={formatDurationMs(config.longBreakDurationMs || 15 * 60 * 1000)}
-                          onChange={(e) => handleConfigUpdate({ longBreakDurationMs: parseTimeString(e.target.value) })}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-base font-offbit text-zinc-400 mb-1">Long Break After</label>
-                        <div className="flex items-stretch">
-                          <input
-                            type="number"
-                            className="w-full rounded-l-md border border-r-0 border-white/10 bg-black/30 px-3 py-2 text-md font-offbit text-zinc-100 outline-none focus:border-white/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                            placeholder="4"
-                            min="2"
-                            max="10"
-                            value={config.longBreakInterval || 4}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value) || 4;
-                              handleConfigUpdate({ longBreakInterval: Math.min(10, Math.max(2, value)) });
-                            }}
-                          />
-                          <TimeFieldArrows
-                            onIncrement={() => {
-                              const current = config.longBreakInterval || 4;
-                              const next = Math.min(10, current + 1);
-                              handleConfigUpdate({ longBreakInterval: next });
-                            }}
-                            onDecrement={() => {
-                              const current = config.longBreakInterval || 4;
-                              const next = Math.max(2, current - 1);
-                              handleConfigUpdate({ longBreakInterval: next });
-                            }}
-                            disabled={false}
-                          />
-                        </div>
-                      </div>
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <SettingsInput 
+                        label="Work Interval" 
+                        placeholder="25:00"
+                        value={formatDurationMs(config.workDurationMs)}
+                        onChange={(v) => handleConfigUpdate({ workDurationMs: parseTimeString(v) })}
+                      />
+                      <SettingsInput 
+                        label="Short Break" 
+                        placeholder="05:00"
+                        value={formatDurationMs(config.shortBreakDurationMs)}
+                        onChange={(v) => handleConfigUpdate({ shortBreakDurationMs: parseTimeString(v) })}
+                      />
+                      <SettingsInput 
+                        label="Long Break" 
+                        placeholder="15:00"
+                        value={formatDurationMs(config.longBreakDurationMs)}
+                        onChange={(v) => handleConfigUpdate({ longBreakDurationMs: parseTimeString(v) })}
+                      />
                     </div>
 
-                    <div className="flex items-center gap-25">
-                      <label className="flex items-center gap-2 text-zinc-300">
-                        <input
-                          type="checkbox"
-                          className="rounded border-white/10 bg-black/20 text-emerald-400 focus:ring-emerald-400/50"
-                          checked={config.autoStartBreaks || false}
+                    <div className="space-y-3 pt-2 border-t border-border/50">
+                       <label className="flex cursor-pointer items-center justify-between">
+                        <span className="font-offbit text-xs uppercase tracking-wider text-muted">Auto-start Breaks</span>
+                        <input 
+                          type="checkbox" 
+                          checked={config.autoStartBreaks}
                           onChange={(e) => handleConfigUpdate({ autoStartBreaks: e.target.checked })}
+                          className="accent-accent h-4 w-4 rounded border-gray-300" 
                         />
-                        <span className="font-offbit text-base">Auto-start breaks</span>
                       </label>
-                      <label className="flex items-center gap-2 text-zinc-300">
-                        <input
-                          type="checkbox"
-                          className="rounded border-white/10 bg-black/20 text-emerald-400 focus:ring-emerald-400/50"
-                          checked={config.autoStartWork || false}
+                      <label className="flex cursor-pointer items-center justify-between">
+                        <span className="font-offbit text-xs uppercase tracking-wider text-muted">Auto-start Work</span>
+                        <input 
+                          type="checkbox" 
+                          checked={config.autoStartWork}
                           onChange={(e) => handleConfigUpdate({ autoStartWork: e.target.checked })}
+                          className="accent-accent h-4 w-4 rounded border-gray-300" 
                         />
-                        <span className="font-offbit text-md">Auto-start work</span>
                       </label>
                     </div>
 
-                    <div className="flex gap-2 pt-2">
-                      <button
-                        type="button"
-                        className="flex-1 rounded-md font-offbit bg-rose-400/20 text-rose-200 px-4 py-2 text-md hover:bg-rose-400/30 border border-rose-400/30 cursor-pointer"
-                        onClick={handleDisablePomodoro}
-                      >
-                        Disable Pomodoro
-                      </button>
-                      <button
-                        type="button"
-                        className="flex-1 rounded-md font-offbit bg-white/10 text-zinc-200 px-4 py-2 text-md hover:bg-white/20 cursor-pointer"
-                        onClick={() => setShowSettings(false)}
-                      >
-                        Close
-                      </button>
+                    <div className="pt-4">
+                      <ActionButton onClick={() => { disablePomodoro(timer.id); setShowSettings(false); }} variant="ghost" fullWidth>
+                        Disable Protocol
+                      </ActionButton>
                     </div>
                   </div>
                 )}
               </div>
             )}
           </div>
-          <button
-            type="button"
-            className="rounded-md font-offbit bg-white/5 px-3 py-2 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
-            onClick={() => setView("timers")}
-            title="Exit focus (Esc)"
-          >
-            <svg className="w-6 h-6 inline -ml-1 mr-1" viewBox="0 0 26 32.5" fill="currentColor">
-              <rect x="6" y="5" width="10" height="1"/>
-              <rect x="5" y="6" width="1" height="14"/>
-              <rect x="6" y="20" width="10" height="1"/>
-              <rect x="16" y="15" width="1" height="5"/>
-              <rect x="16" y="6" width="1" height="4"/>
-              <rect x="18" y="10" width="1" height="1"/>
-              <polygon points="21,12 20,12 20,11 19,11 19,12 12,12 12,13 19,13 19,14 20,14 20,13 21,13 "/>
-              <rect x="18" y="14" width="1" height="1"/>
-            </svg>
+          
+          <ActionButton onClick={() => setView("timers")} variant="ghost">
             Exit
-          </button>
+          </ActionButton>
         </div>
       </header>
 
-      <div className="flex flex-1 items-start justify-center px-6 pt-4">
-        <div className="w-full max-w-2xl space-y-4">
-          {/* Phase Indicator */}
-          {pomodoroConfig && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={clsx(
-                  "rounded-md px-3 py-1 text-lg font-offbit border",
-                  getPhaseColor(pomodoroConfig.currentPhase)
-                )}>
-                  {getPhaseLabel(pomodoroConfig.currentPhase)}
-                </div>
-                <div className="text-zinc-400 font-offbit">
-                  Cycle {pomodoroConfig.currentCycle}
-                </div>
+      {/* --- MAIN DISPLAY --- */}
+      <div className="flex flex-1 flex-col items-center justify-center p-8">
+        <div className="w-full max-w-3xl">
+          {/* Main Card */}
+          <div className={clsx(
+            "relative flex flex-col items-center justify-center rounded-3xl border transition-all duration-700 p-12 md:p-20",
+            status === "running" ? "bg-card shadow-[0_0_50px_-20px_rgba(0,0,0,0.5)]" : "bg-card/50",
+            pomodoroConfig ? currentStyles.border : "border-border",
+            status === "running" && pomodoroConfig ? `shadow-[0_0_30px_-10px_${getPhaseShadowColor(pomodoroConfig.currentPhase)}]` : ""
+          )}>
+            
+            {/* Phase Badge */}
+            {pomodoroConfig && (
+              <div className={clsx(
+                "absolute top-8 left-1/2 -translate-x-1/2 rounded-full border px-4 py-1 backdrop-blur-md",
+                currentStyles.border,
+                currentStyles.bg
+              )}>
+                <span className={clsx("font-offbit text-xs uppercase tracking-[0.2em]", currentStyles.color)}>
+                  {currentStyles.label} • Cycle {pomodoroConfig.currentCycle}
+                </span>
               </div>
-              
-              <div className="text-center font-offbit text-7xl tabular-nums tracking-tight text-zinc-50 mb-6">
-                {formatDurationMs(display)}
-              </div>
+            )}
 
-              <div className="flex flex-wrap justify-center gap-2">
-                <button
-                  type="button"
-                  className="rounded-md font-offbit bg-white/10 px-6 py-3 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
-                  onClick={startPauseActive}
-                >
-                  {status === "running" ? "Pause" : "Start"}
-                </button>
-
-                <button
-                  type="button"
-                  className="rounded-md font-offbit bg-white/5 px-6 py-3 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
-                  onClick={resetActive}
-                >
-                  Reset
-                </button>
-
-                <button
-                  type="button"
-                  className="rounded-md font-offbit bg-white/5 px-6 py-3 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
-                  onClick={() => setFocusLock(!focusLock)}
-                >
-                  {focusLock ? "Unlock" : "Focus Lock"}
-                </button>
-              </div>
+            {/* Timer Digits */}
+            <div className={clsx(
+              "font-offbit text-8xl md:text-9xl tabular-nums tracking-tighter transition-colors duration-500",
+              pomodoroConfig && status === "running" ? currentStyles.color : "text-foreground"
+            )}>
+              {formatDurationMs(display)}
             </div>
-          )}
 
-          {/* Regular Timer Display (when no Pomodoro) */}
-          {!pomodoroConfig && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-8">
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className={clsx(
-                    "rounded-md px-2 py-1 text-xl font-offbit",
-                    status === "running"
-                      ? "bg-emerald-400/20 text-emerald-200"
-                      : status === "paused"
-                        ? "bg-amber-400/20 text-amber-200"
-                        : status === "completed"
-                          ? "bg-rose-400/20 text-rose-200"
-                          : "bg-white/10 text-zinc-300",
-                  )}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </div>
-                <div className="text-zinc-500 font-offbit text-md">Enable Pomodoro for enhanced focus features</div>
-              </div>
-
-              <div className="text-center font-offbit text-6xl tabular-nums tracking-tight text-zinc-50 mb-6">
-                {formatDurationMs(display)}
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-2">
-                <button
-                  type="button"
-                  className="rounded-md font-offbit bg-white/10 px-5 py-2 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
+            {/* Controls */}
+            <div className="mt-12 flex items-center gap-6">
+               <RoundButton 
                   onClick={startPauseActive}
-                >
-                  Start / Pause
-                </button>
+                  isActive={status === "running"}
+                  variant={pomodoroConfig ? pomodoroConfig.currentPhase : "default"}
+               >
+                 {status === "running" ? (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                 ) : (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+                 )}
+               </RoundButton>
 
-                <button
-                  type="button"
-                  className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
-                  onClick={resetActive}
-                >
-                  Reset
-                </button>
-
-                <button
-                  type="button"
-                  className="rounded-md font-offbit bg-white/5 px-5 py-2 text-md text-zinc-200 hover:bg-white/10 cursor-pointer"
-                  onClick={() => setFocusLock(true)}
-                >
-                  Focus Lock
-                </button>
-              </div>
+               <button 
+                onClick={resetActive}
+                className="font-offbit text-xs uppercase tracking-widest text-muted hover:text-foreground transition-colors"
+               >
+                 Reset
+               </button>
             </div>
-          )}
+
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+// --- Helper Sub-Components ---
+
+function ActionButton({
+  children,
+  onClick,
+  variant = "primary",
+  fullWidth = false
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  variant?: "primary" | "secondary" | "ghost";
+  fullWidth?: boolean;
+}) {
+  const variants = {
+    primary: "border-border text-foreground hover:border-accent hover:text-accent bg-background",
+    secondary: "border-transparent bg-white/5 text-foreground hover:bg-white/10 hover:text-accent",
+    ghost: "border-transparent text-muted hover:text-red-400 hover:bg-transparent",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={clsx(
+        "group relative overflow-hidden rounded-full border px-6 py-2 transition-all duration-300 ease-out",
+        "font-offbit text-xs font-medium uppercase tracking-wider",
+        variants[variant],
+        fullWidth ? "w-full" : ""
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function RoundButton({ onClick, isActive, children, variant }: { onClick: () => void, isActive: boolean, children: React.ReactNode, variant: "work" | "shortBreak" | "longBreak" | "default" }) {
+  const colors = {
+    work: "hover:border-accent hover:text-accent",
+    shortBreak: "hover:border-blue-400 hover:text-blue-400",
+    longBreak: "hover:border-purple-400 hover:text-purple-400",
+    default: "hover:border-accent hover:text-accent"
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={clsx(
+        "flex h-16 w-16 items-center justify-center rounded-full border transition-all duration-300",
+        isActive ? "border-foreground text-foreground" : "border-border text-muted",
+        colors[variant] || colors.default
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function getPhaseShadowColor(phase: string) {
+    if (phase === 'work') return 'rgba(204,255,0,0.15)'; // Accent
+    if (phase === 'shortBreak') return 'rgba(96,165,250,0.15)'; // Blue
+    if (phase === 'longBreak') return 'rgba(192,132,252,0.15)'; // Purple
+    return 'transparent';
 }

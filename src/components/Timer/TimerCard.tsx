@@ -5,6 +5,18 @@ import clsx from "clsx";
 import gsap from "gsap";
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, splitMsToHms, parseHmsToMs } from "@/lib/time";
+import { 
+  Play, 
+  Pause, 
+  RotateCcw, 
+  Trash2,  
+  ArrowUp, 
+  ArrowDown, 
+  ChevronsUp, 
+  ChevronsDown, 
+  Zap, 
+  Infinity as InfinityIcon 
+} from "lucide-react";
 
 export function TimerCard({ id, active }: { id: string; active: boolean }) {
   const timer = useTimerStore((s) => s.timers.find((t) => t.id === id));
@@ -27,6 +39,7 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
     return splitMsToHms(timer.durationMs);
   }, [timer]);
 
+  // Animation for Completion
   useEffect(() => {
     if (!ref.current) return;
     if (lastStatusRef.current === status) return;
@@ -35,8 +48,15 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
     if (status === "completed") {
       gsap.fromTo(
         ref.current,
-        { scale: 1 },
-        { scale: 1.03, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 },
+        { scale: 1, boxShadow: "0 0 0px rgba(204, 255, 0, 0)" },
+        { 
+          scale: 1.02, 
+          boxShadow: "0 0 30px rgba(204, 255, 0, 0.3)",
+          duration: 0.2, 
+          ease: "power2.out", 
+          yoyo: true, 
+          repeat: 3 
+        },
       );
     }
   }, [status]);
@@ -48,178 +68,187 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
   return (
     <div
       ref={ref}
-      className={clsx(
-        "rounded-xl border p-4 transition-colors",
-        active ? "border-white/20 bg-white/10" : "border-white/10 bg-white/5 hover:bg-white/10",
-      )}
       onMouseDown={() => setActive(timer.id)}
+      className={clsx(
+        "group relative flex flex-col justify-between overflow-hidden rounded-3xl border p-6 transition-all duration-500",
+        // Active State logic
+        active 
+          ? "border-accent/50 bg-card shadow-[0_0_40px_-15px_rgba(204,255,0,0.15)] ring-1 ring-accent/20" 
+          : "border-border bg-card/40 hover:border-border hover:bg-card hover:shadow-xl",
+        // Completion State
+        status === "completed" && "border-accent bg-accent/5"
+      )}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+        <Zap size={120} strokeWidth={1} />
+      </div>
+
+      {/* --- HEADER SECTION --- */}
+      <div className="relative z-10 flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+             <div className={clsx(
+               "h-2 w-2 rounded-full transition-colors duration-300",
+               status === "running" ? "bg-accent shadow-[0_0_8px_rgba(204,255,0,0.8)] animate-pulse" : "bg-muted/30"
+             )} />
+             <span className="font-offbit text-[10px] uppercase tracking-widest text-muted">
+               {status === "idle" ? "Ready" : status}
+             </span>
+          </div>
           <input
-            className="w-full bg-transparent text-5xl text-zinc-100 outline-none placeholder:text-zinc-600"
+            className="w-full bg-transparent font-harmond text-3xl tracking-tight text-foreground outline-none placeholder:text-muted/30 transition-colors focus:text-accent"
             value={timer.label}
             onChange={(e) => updateTimer(timer.id, { label: e.target.value })}
-            placeholder="Timer"
+            placeholder="Untitled Timer"
           />
-          <div className="mt-2 font-offbit text-6xl tabular-nums tracking-tight text-zinc-50">
-            {formatDurationMs(display)}
-          </div>
-          <div className="mt-3 flex flex-wrap items-center font-offbit gap-2 text-xl text-zinc-400">
-            <span
-              className={clsx(
-                "rounded-md px-2 py-1",
-                status === "running"
-                  ? "bg-emerald-400/20 font-offbit text-emerald-200"
-                  : status === "paused"
-                    ? "bg-amber-400/20 font-offbit text-amber-200"
-                    : status === "completed"
-                      ? "bg-rose-400/20 font-offbit text-rose-200"
-                      : "bg-white/10 font-offbit text-zinc-300",
-              )}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </span>
-
-            {timer.kind === "timer" && (
-              <button
-                type="button"
-                className={clsx(
-                  "rounded-md px-2 py-1 cursor-pointer",
-                  timer.loop ? "bg-white/10 text-zinc-200" : "bg-white/5 text-zinc-400 hover:bg-white/10",
-                )}
-                onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
-              >
-                Loop
-              </button>
-            )}
-
-            {timer.kind === "timer" && (
-              <button
-                type="button"
-                className="rounded-md bg-white/5 px-2 py-1 text-zinc-400 hover:bg-white/10 cursor-pointer"
-                onClick={() =>
-                  updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })
-                }
-              >
-                {timer.direction === "down" ? "Count Down" : "Count Up"}
-              </button>
-            )}
-          </div>
         </div>
 
-        <div className="flex shrink-0 flex-col items-end gap-2">
-          <button
-            type="button"
-            className={clsx(
-              "w-28 rounded-md px-3 py-2 text-xl font-offbit cursor-pointer",
-              running ? "bg-white/10 text-zinc-100 hover:bg-white/20" : "bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/25",
-            )}
-            onClick={() => {
-              setActive(timer.id);
-              startPauseActive();
-            }}
-          >
-            {running ? "Pause" : "Start"}
-          </button>
+        {/* Top Right Config Toggles */}
+        {timer.kind === "timer" && (
+          <div className="flex gap-1">
+             <ConfigToggle 
+               active={timer.loop} 
+               onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
+               icon={InfinityIcon}
+               label="Loop"
+             />
+             <ConfigToggle 
+               active={timer.direction === "up"} 
+               onClick={() => updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })}
+               icon={timer.direction === "up" ? ChevronsUp : ChevronsDown}
+               label={timer.direction === "up" ? "Count Up" : "Count Down"}
+             />
+          </div>
+        )}
+      </div>
 
-          <button
-            type="button"
-            className="w-28 rounded-md bg-white/5 px-3 py-2 text-xl font-offbit text-zinc-300 hover:bg-white/10 cursor-pointer"
-            onClick={() => {
-              setActive(timer.id);
-              resetActive();
-            }}
-          >
-            Reset
-          </button>
-
-          <button
-            type="button"
-            className="w-28 rounded-md bg-rose-500/20 px-3 py-2 text-xl font-offbit text-rose-100 hover:bg-rose-500/25 cursor-pointer"
-            onClick={() => removeTimer(timer.id)}
-          >
-            Remove
-          </button>
+      {/* --- MAIN DISPLAY --- */}
+      <div className="relative z-10 my-8">
+        <div className={clsx(
+          "font-offbit text-7xl font-bold tracking-tighter tabular-nums transition-colors duration-300 select-none",
+          running ? "text-accent drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]" : "text-foreground"
+        )}>
+          {formatDurationMs(display)}
         </div>
       </div>
 
-      {timer.kind === "timer" && (
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <TimeField
-            label="HH (Hours)"
-            value={hms.h}
-            disabled={running}
-            onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(v, hms.m, hms.s) })}
-          />
-          <TimeField
-            label="MM (Minutes)"
-            value={hms.m}
-            disabled={running}
-            onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, v, hms.s) })}
-            max={59}
-          />
-          <TimeField
-            label="SS (Seconds)"
-            value={hms.s}
-            disabled={running}
-            onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, hms.m, v) })}
-            max={59}
-          />
+      {/* --- INPUTS & CONTROLS --- */}
+      <div className="relative z-10 flex flex-col gap-6">
+        
+        {/* Time Inputs (Only visible/editable when not running for better UX, or disabled styling) */}
+        {timer.kind === "timer" && (
+          <div className={clsx(
+            "grid grid-cols-3 gap-4 transition-opacity duration-300",
+            running ? "opacity-30 pointer-events-none grayscale" : "opacity-100"
+          )}>
+            <TimeField
+              label="HRS"
+              value={hms.h}
+              disabled={running}
+              onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(v, hms.m, hms.s) })}
+            />
+            <TimeField
+              label="MIN"
+              value={hms.m}
+              disabled={running}
+              onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, v, hms.s) })}
+              max={59}
+            />
+            <TimeField
+              label="SEC"
+              value={hms.s}
+              disabled={running}
+              onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, hms.m, v) })}
+              max={59}
+            />
+          </div>
+        )}
+
+        {/* Action Bar */}
+        <div className="flex items-center gap-3 pt-2">
+           {/* Primary Play/Pause */}
+           <button
+             type="button"
+             onClick={(e) => {
+               e.stopPropagation();
+               setActive(timer.id);
+               startPauseActive();
+             }}
+             className={clsx(
+               "flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 font-offbit",
+               running 
+                 ? "bg-card border border-accent text-accent hover:bg-accent hover:text-background" 
+                 : "bg-accent text-background hover:brightness-110 shadow-[0_0_20px_-5px_rgba(204,255,0,0.4)]"
+             )}
+           >
+             {running ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
+             {running ? "Pause" : "Start"}
+           </button>
+
+           {/* Secondary Actions */}
+           <div className="flex gap-2">
+             <SecondaryAction 
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setActive(timer.id);
+                 resetActive();
+               }}
+               icon={RotateCcw}
+               title="Reset Timer"
+             />
+             <SecondaryAction 
+               onClick={(e) => {
+                 e.stopPropagation();
+                 removeTimer(timer.id);
+               }}
+               icon={Trash2}
+               title="Delete Timer"
+               isDestructive
+             />
+           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-const TimeFieldArrows = ({ onIncrement, onDecrement, disabled }: { onIncrement: () => void; onDecrement: () => void; disabled: boolean }) => (
-  <div className="flex flex-col">
+// --- Sub-components ---
+
+function ConfigToggle({ active, onClick, icon: Icon, label }: { active: boolean, onClick: () => void, icon: React.ComponentType<{ size?: number; strokeWidth?: number }>, label: string }) {
+  return (
+    <button 
+      onClick={onClick}
+      title={label}
+      className={clsx(
+        "p-2 rounded-lg border transition-all duration-200",
+        active 
+          ? "bg-accent text-background border-accent" 
+          : "bg-transparent text-muted border-transparent hover:bg-white/5 hover:text-foreground"
+      )}
+    >
+      <Icon size={14} strokeWidth={2.5} />
+    </button>
+  );
+}
+
+function SecondaryAction({ onClick, icon: Icon, title, isDestructive }: { onClick: (e: React.MouseEvent<HTMLButtonElement>) => void, icon: React.ComponentType<{ size?: number }>, title: string, isDestructive?: boolean }) {
+  return (
     <button
       type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        onIncrement();
-      }}
-      disabled={disabled}
-      className="flex h-6 w-6 items-center justify-center rounded-tr-md border-l border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors cursor-pointer"
+      onClick={onClick}
+      title={title}
+      className={clsx(
+        "p-3.5 rounded-xl border transition-all duration-200 active:scale-95",
+        isDestructive
+          ? "border-border bg-transparent text-muted hover:border-red-500 hover:text-red-500 hover:bg-red-500/10"
+          : "border-border bg-transparent text-muted hover:border-foreground hover:text-foreground hover:bg-white/5"
+      )}
     >
-      <svg
-        width="12"
-        height="12"
-        viewBox="0 0 100 125"
-        className="ml-[2px] -rotate-90 transform"
-        fill="currentColor"
-      >
-        <path
-          d="M56 68L56 56 44 56 44 68 56 68M32 68L32 80 44 80 44 68 32 68M44 44L56 44 56 32 44 32 44 44M68 44L56 44 56 56 68 56 68 44M44 32L44 20 32 20 32 32 44 32Z"
-          className="text-zinc-300"
-        />
-      </svg>
+      <Icon size={18} />
     </button>
-    <button
-      type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        onDecrement();
-      }}
-      disabled={disabled}
-      className="flex h-6 w-6 items-center justify-center rounded-br-md border-l border-t border-white/10 bg-white/20 hover:bg-white/30 disabled:opacity-30 backdrop-blur-sm transition-colors cursor-pointer"
-    >
-      <svg
-        width="12"
-        height="12"
-        viewBox="0 0 100 125"
-        className="ml-[-2px] rotate-90 transform"
-        fill="currentColor"
-      >
-        <path
-          d="M56 68L56 56 44 56 44 68 56 68M32 68L32 80 44 80 44 68 32 68M44 44L56 44 56 32 44 32 44 44M68 44L56 44 56 56 68 56 68 44M44 32L44 20 32 20 32 32 44 32Z"
-          className="text-zinc-300"
-        />
-      </svg>
-    </button>
-  </div>
-);
+  );
+}
 
 function TimeField({
   label,
@@ -245,66 +274,65 @@ function TimeField({
   };
 
   return (
-    <div className="group relative flex items-end gap-2">
-      {/* --- Tooltip Start --- */}
-      <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-3 w-max -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100">
-        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-950/70 p-2.5 shadow-xl backdrop-blur-md">
-          {/* Scroll Section */}
-          <div className="flex items-center gap-1.5">
-            <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-offbit text-[11px] uppercase text-zinc-300">
-              Scroll
-            </span>
-            <span className="text-[18px] text-zinc-400">Adjust</span>
-          </div>
-          
-          {/* Vertical Separator */}
-          <div className="h-3 w-px bg-white/10" />
-          
-          {/* Shift Section */}
-          <div className="flex items-center gap-1.5">
-            <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-offbit text-[11px] uppercase text-zinc-300">
-              Shift + Scroll
-            </span>
-            <span className="text-[18px] text-zinc-400">Adjust by 5</span>
-          </div>
-        </div>
-        
-        {/* Tooltip Arrow */}
-        <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b border-r border-white/10 bg-zinc-950/70 backdrop-blur-md" />
-      </div>
-      {/* --- Tooltip End --- */}
+    <div className="group/field relative flex flex-col gap-1">
+      {/* Label */}
+      <span className="font-offbit text-[10px] font-bold text-muted/50 text-center uppercase tracking-widest group-hover/field:text-accent transition-colors">
+        {label}
+      </span>
 
-      <label className="flex flex-1 flex-col gap-1.5">
-        <span className="text-xl font-offbit text-zinc-400">{label}</span>
-        <div className="flex items-stretch">
-          <input
-            type="number"
-            inputMode="numeric"
-            className="w-full rounded-l-md border border-r-0 border-white/10 bg-black/30 px-3 py-2 font-offbit text-2xl text-zinc-100 outline-none transition-all focus:border-white/30 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            value={value}
-            disabled={disabled}
-            min={0}
-            max={max}
-            onChange={(e) => onChange(Number(e.target.value || 0))}
-            onWheel={(e) => {
-              if (disabled) return;
-              e.preventDefault();
-              e.currentTarget.blur();
-              
-              const isShiftPressed = e.shiftKey;
-              const delta = isShiftPressed ? 5 : 1;
-              const dir = e.deltaY < 0 ? delta : -delta;
-              const next = value + dir;
-              onChange(max != null ? Math.min(max, Math.max(0, next)) : Math.max(0, next));
-            }}
-          />
-          <TimeFieldArrows
-            onIncrement={handleIncrement}
-            onDecrement={handleDecrement}
-            disabled={disabled}
-          />
+      {/* Input Container */}
+      <div className="relative flex flex-col items-center justify-center rounded-xl border border-border bg-black/20 p-1 group-hover/field:border-white/20 transition-colors">
+        
+        {/* Hover Controls - Top */}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); handleIncrement(); }}
+          disabled={disabled}
+          className="w-full flex items-center justify-center h-4 text-muted hover:text-accent opacity-0 group-hover/field:opacity-100 transition-all disabled:hidden"
+        >
+          <ArrowUp size={12} />
+        </button>
+
+        {/* Number Input */}
+        <div className="relative w-full">
+            <input
+              type="number"
+              inputMode="numeric"
+              className="w-full bg-transparent text-center font-offbit text-2xl font-medium text-foreground outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none selection:bg-accent selection:text-background"
+              value={value.toString().padStart(2, '0')}
+              disabled={disabled}
+              min={0}
+              max={max}
+              onChange={(e) => onChange(Number(e.target.value || 0))}
+              onWheel={(e) => {
+                if (disabled) return;
+                // e.preventDefault(); // careful with this in passive listeners
+                e.currentTarget.blur();
+                const isShiftPressed = e.shiftKey;
+                const delta = isShiftPressed ? 5 : 1;
+                const dir = e.deltaY < 0 ? delta : -delta;
+                const next = value + dir;
+                onChange(max != null ? Math.min(max, Math.max(0, next)) : Math.max(0, next));
+              }}
+            />
+            {/* Tooltip on Hover */}
+            <div className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover/field:opacity-100 z-50 min-w-max">
+               <div className="flex items-center gap-2 rounded bg-card border border-border px-2 py-1 text-[10px] text-muted shadow-xl">
+                 <span className="font-bold text-foreground">SCROLL</span> to adjust
+               </div>
+            </div>
         </div>
-      </label>
+
+        {/* Hover Controls - Bottom */}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); handleDecrement(); }}
+          disabled={disabled}
+          className="w-full flex items-center justify-center h-4 text-muted hover:text-accent opacity-0 group-hover/field:opacity-100 transition-all disabled:hidden"
+        >
+          <ArrowDown size={12} />
+        </button>
+      </div>
     </div>
   );
 }

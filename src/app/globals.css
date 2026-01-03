@@ -1,23 +1,34 @@
 @import "tailwindcss";
 
 @theme {
+  /* Fonts */
   --font-harmond: var(--font-harmond);
   --font-offbit: var(--font-offbit);
-
-  /* Mapping the font-family utilities */
   --font-family-harmond: var(--font-harmond), sans-serif;
   --font-family-offbit: var(--font-offbit), monospace;
+
+  /* Color Mappings */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
 }
 
 /* Set default styles */
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  /* The Void Color Palette */
+  --background: #050505;
+  --foreground: #E6E6E6;
+  --muted: #888888;
+  --card: #0F0F0F;
+  --accent: #CCFF00;
+  --border: #262626;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  /* Set the default font */
   font-family: var(--font-harmond), sans-serif; 
 }

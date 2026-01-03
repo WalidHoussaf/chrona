@@ -5,6 +5,8 @@ import { DragEndEvent } from "@dnd-kit/core";
 import { useTimerStore } from "@/store/timerStore";
 import { DragDropProvider } from "@/components/UI/DragDropContext";
 import { DraggablePreset } from "@/components/Sidebar/DraggablePreset";
+import { Download, Upload, Plus, Save, ChevronRight, FileJson } from "lucide-react";
+import clsx from "clsx";
 
 export function Presets() {
   const presets = useTimerStore((s) => s.presets);
@@ -16,6 +18,7 @@ export function Presets() {
   const [name, setName] = useState("");
   const [importText, setImportText] = useState("");
   const [exportText, setExportText] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const sorted = useMemo(() => {
     return [...presets].sort((a, b) => {
@@ -40,6 +43,7 @@ export function Presets() {
   const onExport = async () => {
     const json = exportPresetsJson();
     setExportText(json);
+    setIsExpanded(true); // Auto-open details to show result
 
     try {
       await navigator.clipboard.writeText(json);
@@ -49,43 +53,64 @@ export function Presets() {
   };
 
   return (
-    <section className="mt-6">
-      <div className="mb-2 flex items-center justify-between">
-        <div className="text-3xl tracking-wide text-zinc-400">Presets</div>
+    <section className="flex flex-col gap-4">
+      
+      {/* --- Header Row --- */}
+      <div className="flex items-end justify-between border-b border-border pb-2">
+        <h2 className="font-harmond text-3xl tracking-wide text-foreground">
+          Presets
+        </h2>
         <button
           type="button"
-          className="rounded-md font-offbit bg-white/5 px-2 py-1 text-md text-zinc-300 hover:bg-white/10 cursor-pointer"
           onClick={onExport}
+          className="group flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-card cursor-pointer"
+          title="Copy Presets JSON"
         >
-          Export
+          <span className="font-offbit text-[12px] uppercase tracking-wider text-muted group-hover:text-foreground cursor-pointer">
+            Export
+          </span>
+          <Download size={12} className="text-muted group-hover:text-accent" />
         </button>
       </div>
 
+      {/* --- Input Row --- */}
       <div className="flex gap-2">
-        <input
-          className="min-w-0 flex-1 rounded-md font-offbit border border-white/10 bg-black/20 px-2 py-1 text-md text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-white/20"
-          placeholder="Save active preset…"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div className="relative flex-1">
+          <input
+            className="w-full rounded-lg border border-border bg-card px-3 py-3 pr-8 font-offbit text-md text-foreground placeholder:text-muted/50 focus:border-accent focus:outline-none transition-colors"
+            placeholder="Name active timer..."
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <div className={clsx(
+            "absolute right-2 top-1/2 -translate-y-1/2 transition-colors duration-200",
+            name.trim() ? "text-accent" : "text-muted/70"
+          )}>
+            <Save size={18} />
+          </div>
+        </div>
+        
         <button
           type="button"
-          className="shrink-0 rounded-md font-offbit bg-white/10 px-2 py-1 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
+          className="shrink-0 flex items-center justify-center rounded-lg border border-border bg-card px-3 py-3 text-muted hover:border-accent hover:text-accent transition-all active:scale-95 cursor-pointer"
           onClick={() => {
             const n = name.trim();
             if (!n) return;
             savePresetFromActive(n);
             setName("");
           }}
+          title="Save Current State"
         >
-          Save
+          <Plus size={16} />
         </button>
       </div>
 
-      <div className="mt-3 flex flex-col gap-1">
+      {/* --- List Area --- */}
+      <div className="flex flex-col gap-2 min-h-[100px]">
         {sorted.length === 0 ? (
-          <div className="rounded-md border font-offbit border-white/10 bg-white/5 px-3 py-1 text-md text-zinc-500">
-            No presets yet.
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/30 py-8 text-center">
+            <FileJson size={24} className="mb-2 text-muted" />
+            <p className="font-offbit text-md text-muted">No presets saved.</p>
           </div>
         ) : (
           <DragDropProvider
@@ -99,48 +124,72 @@ export function Presets() {
         )}
       </div>
 
-      <details className="mt-3">
-        <summary className="cursor-pointer font-offbit select-none text-md text-zinc-500 hover:text-zinc-300">
-          Import
-        </summary>
-        <div className="mt-2 flex flex-col gap-2">
-          <textarea
-            className="min-h-24 w-full resize-y rounded-md border border-white/10 bg-black/20 p-2 text-md text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-white/20 font-offbit"
-            placeholder="Paste presets JSON here…"
-            value={importText}
-            onChange={(e) => setImportText(e.target.value)}
+      {/* --- Advanced / Import Section --- */}
+      <div className="mt-4 border-t border-border pt-4">
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex w-full items-center justify-between group cursor-pointer"
+        >
+          <span className="font-offbit text-[15px] uppercase tracking-widest text-muted group-hover:text-foreground transition-colors">
+            Advanced Operations
+          </span>
+          <ChevronRight 
+            size={14} 
+            className={clsx(
+              "text-muted transition-transform duration-300",
+              isExpanded ? "rotate-90" : "rotate-0"
+            )} 
           />
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="rounded-md font-offbit bg-white/10 px-2 py-1 text-md text-zinc-100 hover:bg-white/20 cursor-pointer"
-              onClick={() => {
-                importPresetsJson(importText);
-                setImportText("");
-              }}
-            >
-              Import
-            </button>
-            {exportText ? (
+        </button>
+        
+        {isExpanded && (
+          <div className="mt-3 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <textarea
+              className="min-h-[100px] w-full resize-y rounded-lg border border-border bg-black/40 p-3 font-offbit text-sm text-muted outline-none focus:border-accent focus:text-foreground transition-colors"
+              placeholder="Paste JSON configuration..."
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+            />
+            
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-md font-offbit bg-white/5 px-2 py-1 text-md text-zinc-300 hover:bg-white/10 cursor-pointer"
-                onClick={() => setExportText(null)}
+                className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1 font-offbit text-[12px] text-foreground hover:border-accent hover:text-accent transition-all cursor-pointer"
+                onClick={() => {
+                  importPresetsJson(importText);
+                  setImportText("");
+                }}
               >
-                Hide export
+                <Upload size={12} />
+                IMPORT JSON
               </button>
-            ) : null}
-          </div>
+              
+              {exportText && (
+                <button
+                  type="button"
+                  className="rounded-md px-3 py-1.5 font-offbit text-xs text-muted hover:text-foreground transition-colors cursor-pointer"
+                  onClick={() => setExportText(null)}
+                >
+                  Clear Output
+                </button>
+              )}
+            </div>
 
-          {exportText ? (
-            <textarea
-              readOnly
-              className="min-h-24 w-full resize-y rounded-md border border-white/10 bg-black/20 p-2 text-sm text-zinc-100 outline-none font-offbit"
-              value={exportText}
-            />
-          ) : null}
-        </div>
-      </details>
+            {exportText && (
+              <div className="relative group">
+                <div className="absolute -top-2 left-2 bg-background px-1 font-offbit text-[9px] text-accent">
+                  OUTPUT
+                </div>
+                <textarea
+                  readOnly
+                  className="min-h-[80px] w-full resize-y rounded-lg border border-accent/30 bg-accent/5 p-3 font-offbit text-[10px] text-foreground outline-none"
+                  value={exportText}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
