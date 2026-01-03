@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTimerStore } from "@/store/timerStore";
 import { motion, AnimatePresence } from "framer-motion";
-import { Command, Copy, Check, Keyboard, MousePointer2, Bell, LayoutGrid, Zap,Database} from "lucide-react";
+import { Command, Copy, Check, Keyboard, MousePointer2, Bell, LayoutGrid, Zap, Database } from "lucide-react";
 import { notificationManager } from "@/lib/notifications";
 
 // --- Animation Variants ---

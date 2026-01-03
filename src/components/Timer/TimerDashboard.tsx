@@ -1,10 +1,8 @@
 "use client";
 
 import { DragEndEvent } from "@dnd-kit/core";
-
 import { ScrollArea } from "@/components/UI/ScrollArea";
 import { DragDropProvider } from "@/components/UI/DragDropContext";
-
 import { useTimerStore } from "@/store/timerStore";
 import { DraggableTimerCard } from "@/components/Timer/DraggableTimerCard";
 

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo, useRef } from "react";
 import clsx from "clsx";
-
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, parseHmsToMs } from "@/lib/time";
 import type { PomodoroConfig } from "@/lib/timerProtocol";

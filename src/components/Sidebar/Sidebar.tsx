@@ -1,7 +1,6 @@
 "use client";
 
 import clsx from "clsx";
-
 import { useTimerStore } from "@/store/timerStore";
 import { Presets } from "@/components/Sidebar/Presets";
 

@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-
 import { useTimerStore } from "@/store/timerStore";
 import { useGlobalShortcuts, requestFullscreen } from "@/lib/shortcuts";
 import { notificationManager } from "@/lib/notifications";
-
 import { Sidebar } from "@/components/Sidebar/Sidebar";
 import { TimerDashboard } from "@/components/Timer/TimerDashboard";
 import { StopwatchPanel } from "@/components/Stopwatch/StopwatchPanel";

@@ -1,7 +1,6 @@
 "use client";
 
 import { ScrollArea } from "@/components/UI/ScrollArea";
-
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs } from "@/lib/time";
 

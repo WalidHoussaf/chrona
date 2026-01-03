@@ -3,19 +3,10 @@
 import { nanoid } from "nanoid";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-
 import { chronaStorage } from "@/lib/storage";
 import { getTimerEngine } from "@/lib/timerEngine";
 import { notificationManager } from "@/lib/notifications";
-import type {
-  TimerConfig,
-  TimerId,
-  TimerKind,
-  TimerPersistedRuntime,
-  TimerRuntime,
-  WorkerEvent,
-  PomodoroConfig,
-} from "@/lib/timerProtocol";
+import type { TimerConfig, TimerId, TimerKind, TimerPersistedRuntime, TimerRuntime, WorkerEvent, PomodoroConfig } from "@/lib/timerProtocol";
 
 export type Lap = {
   id: string;

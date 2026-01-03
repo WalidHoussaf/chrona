@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { DragEndEvent } from "@dnd-kit/core";
-
 import { useTimerStore } from "@/store/timerStore";
 import { DragDropProvider } from "@/components/UI/DragDropContext";
 import { DraggablePreset } from "@/components/Sidebar/DraggablePreset";

@@ -3,7 +3,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import clsx from "clsx";
-
 import { useTimerStore } from "@/store/timerStore";
 import type { Preset } from "@/store/timerStore";
 
