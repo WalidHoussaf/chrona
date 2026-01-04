@@ -47,7 +47,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
         {...listeners}
         className={clsx(
           "flex h-8 w-4 cursor-grab items-center justify-center rounded transition-opacity duration-200",
-          isDragging ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          "opacity-100"
         )}
         title="Drag to reorder"
       >
@@ -71,7 +71,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
           )} />
           
           <div className="flex flex-col overflow-hidden">
-            <span className="truncate font-offbit text-xs font-medium text-foreground transition-colors group-hover:text-white">
+            <span className="truncate font-offbit text-md text-foreground transition-colors group-hover:text-white tracking-tighter">
               {preset.name}
             </span>
           </div>

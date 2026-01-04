@@ -77,7 +77,7 @@ export function Presets() {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <input
-            className="w-full rounded-lg border border-border bg-card px-3 py-3 pr-8 font-offbit text-md text-foreground placeholder:text-muted/50 focus:border-accent focus:outline-none transition-colors"
+            className="w-full rounded-lg border border-border bg-card px-3 py-2 pr-8 font-offbit text-md text-foreground placeholder:text-muted/50 focus:border-accent focus:outline-none transition-colors"
             placeholder="Name active timer..."
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -110,7 +110,7 @@ export function Presets() {
         {sorted.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/30 py-8 text-center">
             <FileJson size={24} className="mb-2 text-muted" />
-            <p className="font-galgo tracking-wider text-2xl text-muted">No presets saved.</p>
+            <p className="font-offbit tracking-wider text-sm text-muted">No presets saved.</p>
           </div>
         ) : (
           <DragDropProvider
@@ -130,7 +130,7 @@ export function Presets() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex w-full items-center justify-between group cursor-pointer"
         >
-          <span className="font-offbit text-[12px] uppercase tracking-widest text-muted group-hover:text-foreground transition-colors">
+          <span className="font-galgo text-4xl tracking-wider text-muted group-hover:text-foreground transition-colors">
             Advanced Operations
           </span>
           <ChevronRight 
@@ -145,13 +145,13 @@ export function Presets() {
         {isExpanded && (
           <div className="mt-3 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <textarea
-              className="min-h-[100px] w-full resize-y rounded-lg border border-border bg-black/40 p-3 font-galgo tracking-wider text-2xl text-muted outline-none focus:border-accent focus:text-foreground transition-colors"
+              className="min-h-[100px] w-full resize-y rounded-lg border border-border bg-black/40 p-3 font-offbit tracking-wider text-sm text-muted outline-none focus:border-accent focus:text-foreground transition-colors"
               placeholder="Paste JSON configuration..."
               value={importText}
               onChange={(e) => setImportText(e.target.value)}
             />
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-end">
               <button
                 type="button"
                 className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1 font-offbit text-[12px] text-foreground hover:border-accent hover:text-accent transition-all cursor-pointer"

@@ -14,11 +14,11 @@ export function Sidebar() {
     <aside className="w-72 shrink-0 border-r border-border bg-background flex flex-col h-screen overflow-hidden transition-colors duration-500">
       
       {/* --- HEADER --- */}
-      <div className="p-8 pb-4 shrink-0">
+      <div className="p-8 pb-1 shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 -mt-2 -ml-2">
+          <div className="flex items-center gap-3 -mt-6 -ml-2">
             <Image 
-              src="/logo.png" 
+              src="/logo1.png" 
               alt="Chrona Logo" 
               width={48} 
               height={48}
@@ -26,8 +26,11 @@ export function Sidebar() {
               unoptimized
               className="h-12 w-auto"
             />
+            <span className="font-galgo font-extralight text-6xl tracking-widest text-foreground mt-4 -ml-2">
+              CHRONA
+            </span>
           </div>
-          <span className="self-start mt-6 font-offbit text-[10px] uppercase tracking-wider text-accent">
+          <span className="self-start mt-[1.8rem] font-offbit text-[10px] uppercase tracking-wider text-accent mr-6">
             V1.0.0
           </span>
         </div>
