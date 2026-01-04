@@ -41,7 +41,6 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
       )}
     >
       {/* --- Drag Handle --- */}
-      {/* Hidden by default, appears on group hover to reduce visual noise */}
       <div
         {...attributes}
         {...listeners}
@@ -77,7 +76,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
           </div>
         </button>
 
-        {/* --- Action Toolbar (Right Side) --- */}
+        {/* --- Action Toolbar --- */}
         <div className="flex shrink-0 items-center gap-0.5 border-l border-border pl-1 ml-2">
           
           {/* Apply to Active */}

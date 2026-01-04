@@ -254,15 +254,15 @@ export function SettingsPanel() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center group">
                     <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Save Preset</span> 
-                    <div className="flex gap-1"><Key>Ctrl</Key> <Key>S</Key></div>
+                    <div className="flex gap-1"><Key>Ctrl</Key> <Key>Shift</Key> <Key>S</Key></div>
                   </div>
                   <div className="flex justify-between items-center group">
                     <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Kill All</span> 
-                    <div className="flex gap-1"><Key>Ctrl</Key> <Key>X</Key></div>
+                    <div className="flex gap-1"><Key>Ctrl</Key> <Key>Shift</Key> <Key>X</Key></div>
                   </div>
                   <div className="flex justify-between items-center group">
                     <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Fullscreen</span> 
-                    <div className="flex gap-1"><Key>Ctrl</Key> <Key>E</Key></div>
+                    <div className="flex gap-1"><Key>Ctrl</Key> <Key>Enter</Key></div>
                   </div>
                   <div className="flex justify-between items-center group">
                     <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Exit Focus</span> 

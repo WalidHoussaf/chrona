@@ -102,7 +102,7 @@ function NavButton({
         "group relative flex items-center gap-4 rounded-xl px-4 py-3 text-left transition-all duration-300 cursor-pointer",
         active 
           ? "bg-card text-accent" 
-          : "text-muted hover:bg-card/50 hover:text-foreground hover:pl-5" // Subtle slide effect on hover
+          : "text-muted hover:bg-card/50 hover:text-foreground hover:pl-5"
       )}
     >
       {/* Active Indicator Line */}
