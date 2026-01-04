@@ -29,6 +29,29 @@ const offbit = localFont({
   preload: false,
 });
 
+const galgo = localFont({
+  variable: "--font-galgo",
+  src: [
+    {
+      path: "./fonts/Galgo-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Galgo-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Galgo-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  preload: false,
+});
+
 export const metadata: Metadata = {
   title: "Chrona Desktop",
   description: "Precision-focused, distraction-free desktop timer.",
@@ -42,7 +65,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${harmond.variable} ${offbit.variable} antialiased bg-zinc-950 text-zinc-50`}
+        className={`${harmond.variable} ${offbit.variable} ${galgo.variable} antialiased bg-zinc-950 text-zinc-50`}
       >
         <KeyboardShortcuts />
         {children}

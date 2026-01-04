@@ -2,10 +2,12 @@
 
 @theme {
   /* Fonts */
-  --font-harmond: var(--font-harmond);
-  --font-offbit: var(--font-offbit);
+  --font-harmond: 'Harmond', sans-serif;
+  --font-offbit: 'OffBit', monospace;
+  --font-galgo: 'Galgo', sans-serif;
   --font-family-harmond: var(--font-harmond), sans-serif;
   --font-family-offbit: var(--font-offbit), monospace;
+  --font-family-galgo: var(--font-galgo), sans-serif;
 
   /* Color Mappings */
   --color-background: var(--background);

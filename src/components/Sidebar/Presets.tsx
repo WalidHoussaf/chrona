@@ -57,7 +57,7 @@ export function Presets() {
       
       {/* --- Header Row --- */}
       <div className="flex items-end justify-between border-b border-border pb-2">
-        <h2 className="font-harmond text-3xl tracking-wide text-foreground">
+        <h2 className="font-galgo text-4xl tracking-wider text-foreground">
           Presets
         </h2>
         <button
@@ -110,7 +110,7 @@ export function Presets() {
         {sorted.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/30 py-8 text-center">
             <FileJson size={24} className="mb-2 text-muted" />
-            <p className="font-offbit text-md text-muted">No presets saved.</p>
+            <p className="font-galgo tracking-wider text-2xl text-muted">No presets saved.</p>
           </div>
         ) : (
           <DragDropProvider
@@ -130,7 +130,7 @@ export function Presets() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex w-full items-center justify-between group cursor-pointer"
         >
-          <span className="font-offbit text-[15px] uppercase tracking-widest text-muted group-hover:text-foreground transition-colors">
+          <span className="font-offbit text-[12px] uppercase tracking-widest text-muted group-hover:text-foreground transition-colors">
             Advanced Operations
           </span>
           <ChevronRight 
@@ -145,7 +145,7 @@ export function Presets() {
         {isExpanded && (
           <div className="mt-3 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <textarea
-              className="min-h-[100px] w-full resize-y rounded-lg border border-border bg-black/40 p-3 font-offbit text-sm text-muted outline-none focus:border-accent focus:text-foreground transition-colors"
+              className="min-h-[100px] w-full resize-y rounded-lg border border-border bg-black/40 p-3 font-galgo tracking-wider text-2xl text-muted outline-none focus:border-accent focus:text-foreground transition-colors"
               placeholder="Paste JSON configuration..."
               value={importText}
               onChange={(e) => setImportText(e.target.value)}

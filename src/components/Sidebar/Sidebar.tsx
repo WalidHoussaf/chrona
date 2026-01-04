@@ -28,13 +28,13 @@ export function Sidebar() {
             />
           </div>
           <span className="self-start mt-6 font-offbit text-[10px] uppercase tracking-wider text-accent">
-            V1.0
+            V1.0.0
           </span>
         </div>
       </div>
 
       {/* --- NAVIGATION --- */}
-      <nav className="flex flex-col gap-1 px-4 py-6 shrink-0">
+      <nav className="flex flex-col gap-1 px-4 py-3 shrink-0">
         <NavButton 
           active={view === "timers"} 
           onClick={() => setView("timers")}
@@ -119,7 +119,7 @@ function NavButton({
 
       {/* Text label */}
       <span className={clsx(
-        "font-harmond text-3xl tracking-wide transition-colors duration-300",
+        "font-galgo font-extralight text-4xl tracking-wider transition-colors duration-300",
       )}>
         {children}
       </span>
