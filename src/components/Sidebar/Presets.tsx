@@ -125,7 +125,7 @@ export function Presets() {
       </div>
 
       {/* --- Advanced / Import Section --- */}
-      <div className="mt-4 border-t border-border pt-4">
+      <div className="mt-1 border-t border-border pt-4">
         <button 
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex w-full items-center justify-between group cursor-pointer"

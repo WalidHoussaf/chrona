@@ -29,6 +29,19 @@ const offbit = localFont({
   preload: false,
 });
 
+const nohemi = localFont({
+  variable: "--font-nohemi",
+  src: [
+    {
+      path: "./fonts/Nohemi-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  preload: false,
+});
+
 const galgo = localFont({
   variable: "--font-galgo",
   src: [
@@ -65,7 +78,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${harmond.variable} ${offbit.variable} ${galgo.variable} antialiased bg-zinc-950 text-zinc-50`}
+        className={`${harmond.variable} ${offbit.variable} ${galgo.variable} ${nohemi.variable} antialiased bg-zinc-950 text-zinc-50`}
       >
         <KeyboardShortcuts />
         {children}

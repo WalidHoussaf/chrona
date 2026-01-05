@@ -82,7 +82,7 @@ export function SettingsPanel() {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-background text-foreground selection:bg-accent/20 selection:text-accent">
+    <div className="h-full w-full overflow-y-auto bg-background text-foreground">
       
       <motion.div 
         variants={containerVariants}

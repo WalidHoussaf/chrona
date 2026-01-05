@@ -14,9 +14,9 @@ export function Sidebar() {
     <aside className="w-72 shrink-0 border-r border-border bg-background flex flex-col h-screen overflow-hidden transition-colors duration-500">
       
       {/* --- HEADER --- */}
-      <div className="p-8 pb-1 shrink-0">
+      <div className="p-8 pb-1 shrink-0 mb-1">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 -mt-6 -ml-2">
+          <div className="flex items-center gap-3 -mt-2 -ml-2">
             <Image 
               src="/logo1.png" 
               alt="Chrona Logo" 
@@ -26,24 +26,24 @@ export function Sidebar() {
               unoptimized
               className="h-12 w-auto"
             />
-            <span className="font-galgo font-extralight text-6xl tracking-widest text-foreground mt-4 -ml-2">
-              CHRONA
+            <span className="font-nohemi text-5xl tracking-tighter text-foreground mt-5 -ml-3">
+              Chrona
             </span>
           </div>
-          <span className="self-start mt-[1.8rem] font-offbit text-[10px] uppercase tracking-wider text-accent mr-6">
+          <span className="self-start mt-10 font-offbit text-[10px] uppercase tracking-wider text-accent -mr-1">
             V1.0.0
           </span>
         </div>
       </div>
 
       {/* --- NAVIGATION --- */}
-      <nav className="flex flex-col gap-1 px-4 py-3 shrink-0">
+      <nav className="flex flex-col gap-1 px-4 py-2 shrink-0">
         <NavButton 
           active={view === "timers"} 
           onClick={() => setView("timers")}
           icon={LayoutGrid}
         >
-          Timers
+          Timers Dashboard
         </NavButton>
 
         <NavButton 

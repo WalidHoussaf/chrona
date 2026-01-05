@@ -7,16 +7,18 @@ import clsx from "clsx";
 export function ScrollArea({
   className,
   children,
+  ref,
 }: {
   className?: string;
   children: ReactNode;
+  ref?: React.Ref<HTMLDivElement>;
 }) {
   return (
     <ScrollAreaPrimitive.Root
       className={clsx("relative overflow-hidden", className)}
       type="auto"
     >
-      <ScrollAreaPrimitive.Viewport className="h-full w-full">
+      <ScrollAreaPrimitive.Viewport className="h-full w-full" ref={ref}>
         {children}
       </ScrollAreaPrimitive.Viewport>
       <ScrollAreaPrimitive.Scrollbar
@@ -29,3 +31,5 @@ export function ScrollArea({
     </ScrollAreaPrimitive.Root>
   );
 }
+
+ScrollArea.displayName = "ScrollArea";

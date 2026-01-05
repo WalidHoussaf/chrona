@@ -5,9 +5,11 @@
   --font-harmond: 'Harmond', sans-serif;
   --font-offbit: 'OffBit', monospace;
   --font-galgo: 'Galgo', sans-serif;
+  --font-nohemi: 'Nohemi', sans-serif;
   --font-family-harmond: var(--font-harmond), sans-serif;
   --font-family-offbit: var(--font-offbit), monospace;
   --font-family-galgo: var(--font-galgo), sans-serif;
+  --font-family-nohemi: var(--font-nohemi), sans-serif;
 
   /* Color Mappings */
   --color-background: var(--background);
@@ -33,4 +35,17 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-harmond), sans-serif; 
+}
+
+/* Marker-style text selection */
+::selection {
+  background: rgba(204, 255, 0, 0.3);
+  color: var(--accent);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: rgba(204, 255, 0, 0.3);
+  color: var(--accent);
+  text-shadow: none;
 }
