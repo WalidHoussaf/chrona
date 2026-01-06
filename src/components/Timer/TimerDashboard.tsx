@@ -7,7 +7,7 @@ import { DragDropProvider } from "@/components/UI/DragDropContext";
 import { useTimerStore } from "@/store/timerStore";
 import { DraggableTimerCard } from "@/components/Timer/DraggableTimerCard";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { Plus, Trash2, LayoutList, AlertTriangle, X } from "lucide-react";
+import { Plus, Trash2, LayoutList, AlertTriangle, X, Hourglass } from "lucide-react";
 import clsx from "clsx";
 
 // --- Animation Variants ---
@@ -94,21 +94,7 @@ export function TimerDashboard() {
       >
         <div className="space-y-2">
           <div className="flex items-center gap-3 text-accent mb-1">
-            <svg className="mb-0.5" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5.0 -10.0 110.0 135.0" width="20" height="20" fill="currentColor">
-              <path d="m76.91 0h-53.824v7.6953h53.824z"/>
-              <path d="m23.086 7.6953h-7.6875v7.6953h7.6875z"/>
-              <path d="m84.602 15.387v-7.6953h-7.6875v7.6953z"/>
-              <path d="m15.398 15.387h-7.6875v7.6953h7.6875z"/>
-              <path d="m92.289 23.074v-7.6953h-7.6875v7.6953z"/>
-              <path d="m7.7031 23.074h-7.6875v53.852h7.6875z"/>
-              <path d="m53.84 23.074h-7.6875v23.074h-23.07v7.6953h30.758z"/>
-              <path d="m99.984 76.926v-53.852h-7.6875v53.852z"/>
-              <path d="m7.7031 76.926v7.6953h7.6875v-7.6953z"/>
-              <path d="m84.602 84.617h7.6875v-7.6953h-7.6875z"/>
-              <path d="m15.398 84.617v7.6953h7.6875v-7.6953z"/>
-              <path d="m76.91 92.305h7.6875v-7.6953h-7.6875z"/>
-              <path d="m23.086 100h53.824v-7.6953h-53.824z"/>
-            </svg>
+            <Hourglass size={18} className="mb-1" />
             <span className="font-offbit text-md uppercase tracking-[0.2em] font-light">Focus Mode</span>
           </div>
           <h1 className="font-galgo text-6xl tracking-wider text-foreground leading-[0.85]">
@@ -173,7 +159,8 @@ export function TimerDashboard() {
                       <DraggableTimerCard 
                         key={t.id} 
                         id={t.id} 
-                        active={t.id === activeId} 
+                        active={t.id === activeId}
+                        totalTimers={sorted.length}
                       />
                     ))}
                   </div>

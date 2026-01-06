@@ -18,7 +18,7 @@ import {
   Infinity as InfinityIcon 
 } from "lucide-react";
 
-export function TimerCard({ id, active }: { id: string; active: boolean }) {
+export function TimerCard({ id, active, dragHandle }: { id: string; active: boolean; dragHandle?: React.ReactNode }) {
   const timer = useTimerStore((s) => s.timers.find((t) => t.id === id));
   const runtime = useTimerStore((s) => s.runtimeById[id]);
 
@@ -80,8 +80,8 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
       )}
     >
       {/* Background Decor */}
-      <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-        <Zap size={120} strokeWidth={1} />
+      <div className="absolute top-0 right-0 -m-8 opacity-5 pointer-events-none">
+        <Zap size={250} strokeWidth={1} className="rotate-12" />
       </div>
 
       {/* --- HEADER SECTION --- */}
@@ -105,22 +105,25 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
         </div>
 
         {/* Top Right Config Toggles */}
-        {timer.kind === "timer" && (
-          <div className="absolute top-0 right-0 flex gap-1">
-             <ConfigToggle 
-               active={timer.loop} 
-               onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
-               icon={InfinityIcon}
-               label="Loop"
-             />
-             <ConfigToggle 
-               active={timer.direction === "up"} 
-               onClick={() => updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })}
-               icon={timer.direction === "up" ? ChevronsUp : ChevronsDown}
-               label={timer.direction === "up" ? "Count Up" : "Count Down"}
-             />
-          </div>
-        )}
+        <div className="absolute top-0 right-0 flex gap-1 -mt-1">
+          {timer.kind === "timer" && (
+            <>
+              <ConfigToggle 
+                active={timer.loop} 
+                onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
+                icon={InfinityIcon}
+                label="Loop"
+              />
+              <ConfigToggle 
+                active={timer.direction === "up"} 
+                onClick={() => updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })}
+                icon={timer.direction === "up" ? ChevronsUp : ChevronsDown}
+                label={timer.direction === "up" ? "Count Up" : "Count Down"}
+              />
+            </>
+          )}
+          {dragHandle}
+        </div>
       </div>
 
       {/* --- MAIN DISPLAY --- */}
@@ -167,6 +170,19 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
 
         {/* Action Bar */}
         <div className="flex items-center justify-center gap-3 pt-2">
+           {/* Secondary Actions */}
+           <div className="flex gap-2 justify-center">
+             <SecondaryAction 
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setActive(timer.id);
+                 resetActive();
+               }}
+               icon={RotateCcw}
+               title="Reset Timer"
+             />
+           </div>
+
            {/* Primary Play/Pause */}
            <button
              type="button"
@@ -188,15 +204,6 @@ export function TimerCard({ id, active }: { id: string; active: boolean }) {
 
            {/* Secondary Actions */}
            <div className="flex gap-2 justify-center">
-             <SecondaryAction 
-               onClick={(e) => {
-                 e.stopPropagation();
-                 setActive(timer.id);
-                 resetActive();
-               }}
-               icon={RotateCcw}
-               title="Reset Timer"
-             />
              <SecondaryAction 
                onClick={(e) => {
                  e.stopPropagation();
@@ -227,7 +234,9 @@ function ConfigToggle({ active, onClick, icon: Icon, label }: { active: boolean,
           : "bg-transparent text-muted border-transparent hover:bg-white/5 hover:text-foreground"
       )}
     >
-      <Icon size={24} strokeWidth={2} />
+      <span className="-mt-0.5 inline-block">
+        <Icon size={24} strokeWidth={1} />
+      </span>
       <span>{label}</span>
     </button>
   );
@@ -264,6 +273,19 @@ function TimeField({
   disabled: boolean;
   max?: number;
 }) {
+  // 1. Create a Ref to access the actual DOM input element
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // 2. We use a Ref to store the latest value so we don't have to 
+  // re-bind the event listener on every single number change.
+  const valueRef = useRef(value);
+  
+  // Update the ref when value changes
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  // 3. Helper functions for clicking arrows
   const handleIncrement = () => {
     const next = value + 1;
     onChange(max != null ? Math.min(max, next) : next);
@@ -273,6 +295,45 @@ function TimeField({
     const next = value - 1;
     onChange(Math.max(0, next));
   };
+
+  // 4. THE FIX: Attach a non-passive wheel listener
+  useEffect(() => {
+    const element = inputRef.current;
+    if (!element) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (disabled) return;
+      
+      // CRITICAL: This stops the main page from scrolling!
+      e.preventDefault(); 
+      
+      // Optional: Blur input so you don't see the text cursor
+      element.blur(); 
+
+      // Logic:
+      // If user holds Shift, we do +5 (optional feature).
+      // If not, we do +1. 
+      // Since preventDefault works now, the user isn't forced to hold Shift.
+      const isShiftPressed = e.shiftKey;
+      const delta = isShiftPressed ? 5 : 1; 
+      
+      // Determine direction (up or down)
+      const dir = e.deltaY < 0 ? delta : -delta;
+      
+      // Calculate next value using the Ref (current value)
+      const next = valueRef.current + dir;
+      const final = max != null ? Math.min(max, Math.max(0, next)) : Math.max(0, next);
+      
+      onChange(final);
+    };
+
+    // { passive: false } allows us to call preventDefault()
+    element.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      element.removeEventListener("wheel", handleWheel);
+    };
+  }, [disabled, max, onChange]); // Dependencies
 
   return (
     <div className="group/field relative flex flex-col gap-1">
@@ -297,6 +358,7 @@ function TimeField({
         {/* Number Input */}
         <div className="relative w-full">
             <input
+              ref={inputRef} // Attached the Ref here
               type="number"
               inputMode="numeric"
               className="w-full bg-transparent text-center font-offbit text-2xl font-medium text-foreground outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none selection:bg-accent selection:text-background"
@@ -304,16 +366,8 @@ function TimeField({
               disabled={disabled}
               min={0}
               max={max}
+              // Removed the inline onWheel prop here because we are handling it in useEffect
               onChange={(e) => onChange(Number(e.target.value || 0))}
-              onWheel={(e) => {
-                if (disabled) return;
-                e.currentTarget.blur();
-                const isShiftPressed = e.shiftKey;
-                const delta = isShiftPressed ? 5 : 1;
-                const dir = e.deltaY < 0 ? delta : -delta;
-                const next = value + dir;
-                onChange(max != null ? Math.min(max, Math.max(0, next)) : Math.max(0, next));
-              }}
             />
             {/* Tooltip on Hover */}
             <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover/field:opacity-100 z-50 min-w-max">
@@ -336,3 +390,5 @@ function TimeField({
     </div>
   );
 }
+
+// ... (rest of the code remains the same)
