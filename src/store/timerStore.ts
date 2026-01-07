@@ -59,6 +59,10 @@ type TimerState = {
   removeTimer: (id: TimerId) => void;
   updateTimer: (id: TimerId, patch: Partial<TimerConfig>) => void;
 
+  startPauseById: (id: TimerId) => void;
+  resetById: (id: TimerId) => void;
+  lapById: (id: TimerId) => void;
+
   startPauseActive: () => void;
   resetActive: () => void;
   switchActive: () => void;
@@ -195,6 +199,24 @@ export const useTimerStore = create<TimerState>()(
           ensureEngine();
           if (!get().hasHydrated) return;
 
+          const currentTimers = get().timers;
+          let didSanitize = false;
+          const sanitizedTimers = currentTimers.map((t) => {
+            if (t.kind !== "stopwatch") return t;
+            if (!t.pomodoroConfig) return t;
+            didSanitize = true;
+            return {
+              ...t,
+              pomodoroConfig: undefined,
+              durationMs: 0,
+              baseElapsedMs: 0,
+              runningSinceUnixMs: null,
+            };
+          });
+          if (didSanitize) {
+            set({ timers: sanitizedTimers });
+          }
+
           const presets = get().presets;
           if (presets.some((p) => !Number.isFinite(p.order))) {
             set({
@@ -204,7 +226,7 @@ export const useTimerStore = create<TimerState>()(
               })),
             });
           }
-          const timers = get().timers.map(toEnginePayload);
+          const timers = (didSanitize ? sanitizedTimers : currentTimers).map(toEnginePayload);
           engine.send({ type: "init", timers });
         },
 
@@ -414,9 +436,8 @@ export const useTimerStore = create<TimerState>()(
           syncTimer(id);
         },
 
-        startPauseActive() {
+        startPauseById(id) {
           ensureEngine();
-          const id = get().activeId;
           if (!id) return;
 
           const t = get().timers.find((x) => x.id === id);
@@ -442,9 +463,8 @@ export const useTimerStore = create<TimerState>()(
           syncTimer(id);
         },
 
-        resetActive() {
+        resetById(id) {
           ensureEngine();
-          const id = get().activeId;
           if (!id) return;
           set((s) => ({
             timers: s.timers.map((t) =>
@@ -455,6 +475,26 @@ export const useTimerStore = create<TimerState>()(
           }));
           engine.send({ type: "reset", id });
           syncTimer(id);
+        },
+
+        lapById(id) {
+          ensureEngine();
+          if (!id) return;
+          const t = get().timers.find((x) => x.id === id);
+          if (!t || t.kind !== "stopwatch") return;
+          engine.send({ type: "lap", id });
+        },
+
+        startPauseActive() {
+          const id = get().activeId;
+          if (!id) return;
+          get().startPauseById(id);
+        },
+
+        resetActive() {
+          const id = get().activeId;
+          if (!id) return;
+          get().resetById(id);
         },
 
         switchActive() {
@@ -473,15 +513,15 @@ export const useTimerStore = create<TimerState>()(
         },
 
         lapActive() {
-          ensureEngine();
           const id = get().activeId;
           if (!id) return;
-          const t = get().timers.find((x) => x.id === id);
-          if (!t || t.kind !== "stopwatch") return;
-          engine.send({ type: "lap", id });
+          get().lapById(id);
         },
 
         enablePomodoro(id, config) {
+          const t = get().timers.find((x) => x.id === id);
+          if (!t || t.kind === "stopwatch") return;
+
           const defaultConfig: PomodoroConfig = {
             enabled: true,
             workDurationMs: 25 * 60 * 1000, // 25 minutes
@@ -512,6 +552,8 @@ export const useTimerStore = create<TimerState>()(
         },
 
         disablePomodoro(id) {
+          const t = get().timers.find((x) => x.id === id);
+          if (!t || t.kind === "stopwatch") return;
           set((s) => ({
             timers: s.timers.map((t) =>
               t.id === id
@@ -528,6 +570,8 @@ export const useTimerStore = create<TimerState>()(
         },
 
         updatePomodoroConfig(id, config) {
+          const t = get().timers.find((x) => x.id === id);
+          if (!t || t.kind === "stopwatch") return;
           set((s) => ({
             timers: s.timers.map((t) =>
               t.id === id && t.pomodoroConfig
@@ -578,7 +622,7 @@ export const useTimerStore = create<TimerState>()(
             return { presets: updatedPresets };
           });
         },
-      };
+      } satisfies TimerState;
     },
     {
       name: "chrona.timerStore",

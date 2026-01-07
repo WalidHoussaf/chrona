@@ -3,19 +3,6 @@ import localFont from "next/font/local";
 import { KeyboardShortcuts } from "@/components/KeyboardShortcuts/KeyboardShortcuts";
 import "./globals.css";
 
-const harmond = localFont({
-  variable: "--font-harmond",
-  src: [
-    {
-      path: "./fonts/Harmond-SemiBoldCondensed.otf",
-      weight: "600",
-      style: "normal",
-    },
-  ],
-  display: "swap",
-  preload: false,
-});
-
 const offbit = localFont({
   variable: "--font-offbit",
   src: [
@@ -78,7 +65,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${harmond.variable} ${offbit.variable} ${galgo.variable} ${nohemi.variable} antialiased bg-zinc-950 text-zinc-50`}
+        className={`${offbit.variable} ${galgo.variable} ${nohemi.variable} antialiased bg-zinc-950 text-zinc-50`}
       >
         <KeyboardShortcuts />
         {children}

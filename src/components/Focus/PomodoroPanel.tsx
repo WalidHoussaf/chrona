@@ -7,6 +7,7 @@ import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, parseHmsToMs } from "@/lib/time";
 import type { PomodoroConfig } from "@/lib/timerProtocol";
 import { motion, AnimatePresence } from "framer-motion";
+import ElectricBorder from "@/components/UI/ElectricBorder";
 
 // --- Styled Sub-Components ---
 
@@ -78,6 +79,46 @@ function ActionButton({
   );
 }
 
+function ElectricHeaderButton({
+  children,
+  onClick,
+  icon,
+  active,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  icon?: React.ReactNode;
+  active?: boolean;
+}) {
+  return (
+    <ElectricBorder
+      mode="rect"
+      color={`var(--accent)`}
+      speed={0.4}
+      chaos={0.16}
+      svgDisplacement={6}
+      thickness={1}
+      fuzziness={0.4}
+      glow={1}
+      borderRadius={999}
+      showOutline={false}
+      className={clsx(
+        "group relative flex items-center justify-center overflow-hidden rounded-full border border-accent/30 bg-accent/5 transition-all duration-300 cursor-pointer hover:bg-accent/10 hover:border-accent hover:shadow-[0_0_20px_-5px_rgba(204,255,0,0.2)] active:scale-[0.98]",
+        active && "border-accent bg-accent/10"
+      )}
+    >
+      <button
+        type="button"
+        onClick={onClick}
+        className="relative flex items-center gap-3 w-full h-full bg-transparent cursor-pointer font-offbit text-xs font-bold uppercase tracking-wider text-accent px-6 py-3"
+      >
+        {icon && <span className="transition-transform group-hover:scale-110">{icon}</span>}
+        <span className="relative z-10">{children}</span>
+      </button>
+    </ElectricBorder>
+  );
+}
+
 const ModernToggle = ({ label, checked, onChange }: { label: string, checked: boolean, onChange: (c: boolean) => void }) => (
     <div 
         onClick={() => onChange(!checked)}
@@ -124,12 +165,20 @@ function parseTimeString(timeStr: string): number {
 
 export function PomodoroPanel() {
   const activeId = useTimerStore((s) => s.activeId);
-  const timer = useTimerStore((s) => s.timers.find((t) => t.id === activeId));
-  const runtime = useTimerStore((s) => (activeId ? s.runtimeById[activeId] : undefined));
+  const timers = useTimerStore((s) => s.timers);
+  const pomodoroTimer = useMemo(() => {
+    const withPomodoro = timers.find((t) => t.kind !== "stopwatch" && t.pomodoroConfig);
+    if (withPomodoro) return withPomodoro;
+    const activeNonStopwatch = timers.find((t) => t.id === activeId && t.kind !== "stopwatch");
+    if (activeNonStopwatch) return activeNonStopwatch;
+    return timers.find((t) => t.kind !== "stopwatch");
+  }, [timers, activeId]);
+  const runtime = useTimerStore((s) => (pomodoroTimer ? s.runtimeById[pomodoroTimer.id] : undefined));
 
   const setView = useTimerStore((s) => s.setView);
-  const startPauseActive = useTimerStore((s) => s.startPauseActive);
-  const resetActive = useTimerStore((s) => s.resetActive);
+  const setActive = useTimerStore((s) => s.setActive);
+  const startPauseById = useTimerStore((s) => s.startPauseById);
+  const resetById = useTimerStore((s) => s.resetById);
   const enablePomodoro = useTimerStore((s) => s.enablePomodoro);
   const disablePomodoro = useTimerStore((s) => s.disablePomodoro);
   const updatePomodoroConfig = useTimerStore((s) => s.updatePomodoroConfig);
@@ -139,7 +188,7 @@ export function PomodoroPanel() {
   
   const display = runtime?.displayMs ?? 0;
   const status = runtime?.status ?? "idle";
-  const pomodoroConfig = timer?.pomodoroConfig;
+  const pomodoroConfig = pomodoroTimer?.pomodoroConfig;
   
   const config = useMemo(() => ({
     workDurationMs: pomodoroConfig?.workDurationMs || 25 * 60 * 1000,
@@ -150,6 +199,13 @@ export function PomodoroPanel() {
     autoStartWork: pomodoroConfig?.autoStartWork || false,
   }), [pomodoroConfig]);
 
+
+  // Ensure pomodoro timer is the active timer when in focus view
+  useEffect(() => {
+    if (pomodoroTimer && activeId !== pomodoroTimer.id) {
+      setActive(pomodoroTimer.id);
+    }
+  }, [pomodoroTimer, activeId, setActive]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -189,14 +245,14 @@ export function PomodoroPanel() {
   // --- Helpers ---
 
   const handleEnablePomodoro = () => {
-    if (!timer) return;
-    enablePomodoro(timer.id, config);
+    if (!pomodoroTimer) return;
+    enablePomodoro(pomodoroTimer.id, config);
     setShowSettings(false);
   };
 
   const handleConfigUpdate = (updates: Partial<PomodoroConfig>) => {
-    if (timer && pomodoroConfig) {
-      updatePomodoroConfig(timer.id, updates);
+    if (pomodoroTimer && pomodoroConfig) {
+      updatePomodoroConfig(pomodoroTimer.id, updates);
     }
   };
 
@@ -216,7 +272,7 @@ export function PomodoroPanel() {
   const currentStyles = getPhaseStyles(pomodoroConfig?.currentPhase);
 
   // --- Render Empty State ---
-  if (!timer) {
+  if (!pomodoroTimer) {
     return (
       <div className="flex h-full flex-col bg-background relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--tw-gradient-stops))] from-accent/5 via-transparent to-transparent opacity-50" />
@@ -254,8 +310,19 @@ export function PomodoroPanel() {
       <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none" />
       
       {/* Decorative Icon */}
-      <div className="absolute -right-12 -top-4 text-foreground/5 pointer-events-none select-none z-0">
-        <Zap size={300} strokeWidth={0.5} />
+      <div className="absolute -right-18 -top-10 text-foreground/5 pointer-events-none select-none z-0">
+        <ElectricBorder
+          mode="svg"
+          color={`var(--accent)`}
+          speed={0.5}
+          chaos={0.3}
+          svgDisplacement={12}
+          thickness={0.4}
+          fuzziness={0.4}
+          glow={2}
+        >
+          <Zap size={450} strokeWidth={0.5} />
+        </ElectricBorder>
       </div>
 
       {/* --- SETTINGS MODAL (Awwwards Style) --- */}
@@ -289,7 +356,7 @@ export function PomodoroPanel() {
                     <div className="flex flex-col">
                       <span className="font-galgo text-5xl tracking-wider text-white">SYSTEM CONFIG</span>
                       <span className="font-offbit text-xs uppercase tracking-[0.2em] text-accent/80">
-                         {timer.label} Protocol
+                         {pomodoroTimer.label} Protocol
                       </span>
                     </div>
                     <button 
@@ -364,8 +431,8 @@ export function PomodoroPanel() {
                          {/* Footer / Danger */}
                          <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                             <button 
-                                onClick={() => { disablePomodoro(timer.id); setShowSettings(false); }} 
-                                className="group flex items-center gap-2 font-galgo font-extralight text-2xl uppercase tracking-widest text-red-500/50 hover:text-red-400 transition-colors cursor-pointer"
+                                onClick={() => { disablePomodoro(pomodoroTimer.id); setShowSettings(false); }} 
+                                className="group flex items-center gap-2 font-galgo font-extralight text-2xl uppercase tracking-[0.2em] text-red-500/50 hover:text-red-400 transition-colors cursor-pointer"
                             >
                                 <Power size={20} className="group-hover:scale-110 transition-transform mb-1" />
                                 <span>Terminate Pomodoro</span>
@@ -460,7 +527,7 @@ export function PomodoroPanel() {
             </span>
           </div>
           <h1 className="font-galgo text-6xl tracking-wider text-foreground leading-[0.85]">
-            {timer.label}
+            {pomodoroTimer.label}
           </h1>
           <p className="font-offbit text-md text-muted max-w-sm leading-relaxed opacity-80">
             Focus sessions with timed work and break intervals.
@@ -469,33 +536,32 @@ export function PomodoroPanel() {
 
         <div className="flex items-center gap-3">
           {pomodoroConfig && (
-              <ActionButton 
-                onClick={() => setFocusLock(true)} 
-                variant="primary" 
-                icon={
-                    <div className="relative h-3.5 w-3.5">
-                        <LockOpen 
-                            size={14} 
-                            className="absolute inset-0 transition-all duration-300 group-hover:scale-0 group-hover:opacity-0 -mt-0.5" 
-                        />
-                        <Lock 
-                            size={14} 
-                            className="absolute inset-0 scale-0 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 -mt-0.5" 
-                        />
-                    </div>
-                }
-              >
-                Lock
-              </ActionButton>
+            <ElectricHeaderButton
+              onClick={() => setFocusLock(true)}
+              icon={
+                <div className="relative h-3.5 w-3.5">
+                  <LockOpen
+                    size={14}
+                    className="absolute inset-0 transition-all duration-300 group-hover:scale-0 group-hover:opacity-0 -mt-0.5"
+                  />
+                  <Lock
+                    size={14}
+                    className="absolute inset-0 scale-0 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 -mt-0.5"
+                  />
+                </div>
+              }
+            >
+              Lock
+            </ElectricHeaderButton>
           )}
-          
-          <ActionButton 
-            onClick={() => setShowSettings(true)} 
-            variant={showSettings ? "active" : "primary"} 
+
+          <ElectricHeaderButton
+            onClick={() => setShowSettings(true)}
+            active={showSettings}
             icon={<Settings size={14} className="-mt-0.5" />}
           >
             Pomodoro
-          </ActionButton>
+          </ElectricHeaderButton>
         </div>
       </motion.header>
 
@@ -506,20 +572,63 @@ export function PomodoroPanel() {
         <div className="relative flex flex-col items-center w-full max-w-4xl transition-all duration-700">
            {/* Phase Badge */}
            {pomodoroConfig && (
-             <motion.div 
+             <motion.div
                initial={{ opacity: 0, y: -10 }}
                animate={{ opacity: 1, y: 0 }}
                key={pomodoroConfig.currentPhase}
-               className={clsx(
-                 "mb-8 flex items-center gap-3 rounded-full border px-4 py-1.5 backdrop-blur-md",
-                 currentStyles.border,
-                 currentStyles.bg
-               )}
+               className="mb-8 inline-block"
              >
-                <div className={clsx("h-1.5 w-1.5 rounded-full animate-pulse", currentStyles.color === "text-accent" ? "bg-accent" : currentStyles.color.replace('text-', 'bg-'))} />
-                <span className={clsx("font-offbit text-[10px] uppercase tracking-[0.25em]", currentStyles.color)}>
-                  {currentStyles.label} • {pomodoroConfig.currentCycle}/{config.longBreakInterval}
-                </span>
+               {pomodoroConfig.currentPhase === "work" ? (
+                 <ElectricBorder
+                   mode="rect"
+                   color={`var(--accent)`}
+                   speed={0.4}
+                   chaos={0.16}
+                   svgDisplacement={3}
+                   thickness={1}
+                   fuzziness={0.4}
+                   glow={1}
+                   borderRadius={999}
+                   showOutline={false}
+                   className="inline-block w-fit"
+                 >
+                   <div
+                     className={clsx(
+                       "flex items-center gap-3 rounded-full border px-4 py-1.5 backdrop-blur-md",
+                       currentStyles.border,
+                       currentStyles.bg
+                     )}
+                   >
+                     <div
+                       className={clsx(
+                         "h-1.5 w-1.5 rounded-full animate-pulse",
+                         currentStyles.color === "text-accent" ? "bg-accent" : currentStyles.color.replace('text-', 'bg-')
+                       )}
+                     />
+                     <span className={clsx("font-offbit text-[10px] uppercase tracking-[0.25em]", currentStyles.color)}>
+                       {currentStyles.label} • {pomodoroConfig.currentCycle}/{config.longBreakInterval}
+                     </span>
+                   </div>
+                 </ElectricBorder>
+               ) : (
+                 <div
+                   className={clsx(
+                     "flex items-center gap-3 rounded-full border px-4 py-1.5 backdrop-blur-md",
+                     currentStyles.border,
+                     currentStyles.bg
+                   )}
+                 >
+                   <div
+                     className={clsx(
+                       "h-1.5 w-1.5 rounded-full animate-pulse",
+                       currentStyles.color === "text-accent" ? "bg-accent" : currentStyles.color.replace('text-', 'bg-')
+                     )}
+                   />
+                   <span className={clsx("font-offbit text-[10px] uppercase tracking-[0.25em]", currentStyles.color)}>
+                     {currentStyles.label} • {pomodoroConfig.currentCycle}/{config.longBreakInterval}
+                   </span>
+                 </div>
+               )}
              </motion.div>
            )}
 
@@ -544,31 +653,48 @@ export function PomodoroPanel() {
                <motion.button
                  whileHover={{ scale: 1.1 }}
                  whileTap={{ scale: 0.95 }}
-                 onClick={resetActive}
+                 onClick={() => resetById(pomodoroTimer.id)}
                  className="group flex h-14 w-14 items-center justify-center rounded-full border border-border bg-card/50 text-muted transition-colors hover:border-red-500/50 hover:text-red-400 cursor-pointer"
                >
                  <RotateCcw size={20} strokeWidth={1.5} />
                </motion.button>
 
-               <motion.button
-                 whileHover={{ scale: 1.05 }}
-                 whileTap={{ scale: 0.95 }}
-                 onClick={startPauseActive}
-                 className={clsx(
-                    "flex h-24 w-24 items-center justify-center rounded-4xl border-2 transition-all duration-300 shadow-xl cursor-pointer",
-                    status === "running" 
-                      ? "border-accent bg-accent text-background shadow-[0_0_40px_-10px_rgba(204,255,0,0.6)]" 
-                      : "border-border bg-card text-foreground hover:border-accent hover:text-accent"
-                 )}
-               >
-                 {status === "running" ? (
-                    <Pause size={32} fill="currentColor" className="opacity-90" />
-                 ) : (
-                    <Play size={32} fill="currentColor" className="ml-1 opacity-90" />
-                 )}
-               </motion.button>
-               
-               <div className="w-14" /> 
+               {status === "running" ? (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => startPauseById(pomodoroTimer.id)}
+                  className="flex h-24 w-24 items-center justify-center rounded-4xl border-2 transition-all duration-300 cursor-pointer border-accent bg-accent text-background shadow-[0_0_40px_-10px_rgba(204,255,0,0.6)]"
+                >
+                  <Pause size={32} fill="currentColor" className="opacity-90" />
+                </motion.button>
+              ) : (
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="inline-block">
+                  <ElectricBorder
+                    mode="rect"
+                    color={`var(--accent)`}
+                    speed={0.4}
+                    chaos={0.16}
+                    svgDisplacement={6}
+                    thickness={1}
+                    fuzziness={0.4}
+                    glow={1}
+                    borderRadius={32}
+                    showOutline={false}
+                    className="inline-block"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => startPauseById(pomodoroTimer.id)}
+                      className="flex h-24 w-24 items-center justify-center rounded-4xl border-2 transition-all duration-300 shadow-xl cursor-pointer border-border bg-card text-foreground hover:text-accent"
+                    >
+                      <Play size={32} fill="currentColor" className="ml-1 opacity-90" />
+                    </button>
+                  </ElectricBorder>
+                </motion.div>
+              )}
+              
+              <div className="w-14" /> 
            </div>
 
         </div>

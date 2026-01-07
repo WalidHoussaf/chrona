@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useTimerStore } from "@/store/timerStore";
 import { motion, AnimatePresence } from "framer-motion";
-import { Command, Copy, Check, Keyboard, MousePointer2, Bell,Zap, LayoutGrid, Database, Monitor, Cpu, Pointer, GamepadDirectional, AudioLines } from "lucide-react";
+import { Command, Copy, Check, Keyboard, MousePointer2, Bell, Zap, LayoutGrid, Database, Monitor, Cpu, Pointer, GamepadDirectional, AudioLines } from "lucide-react";
 import { notificationManager } from "@/lib/notifications";
 import clsx from "clsx";
+import ElectricBorder from "@/components/UI/ElectricBorder";
 
 // --- Animation Variants ---
 const containerVariants = {
@@ -31,16 +32,44 @@ const itemVariants = {
 // --- Reusable UI Components ---
 
 const Key = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-flex items-center justify-center min-w-8 px-2 py-1 text-[12px] uppercase font-bold font-offbit text-muted bg-card border border-border border-b-2 rounded-[6px] select-none shadow-sm">
-    {children}
-  </span>
+  <ElectricBorder
+    mode="rect"
+    color={`var(--accent)`}
+    speed={0.4}
+    chaos={0.16}
+    svgDisplacement={6}
+    thickness={1}
+    fuzziness={0.4}
+    glow={1}
+    borderRadius={6}
+    showOutline={false}
+    className="inline-block"
+  >
+    <span className="inline-flex items-center justify-center min-w-8 px-2 py-1 text-[12px] uppercase font-bold font-offbit text-muted bg-card select-none shadow-sm">
+      {children}
+    </span>
+  </ElectricBorder>
 );
 
 const SectionHeader = ({ icon: Icon, title }: { icon: React.ComponentType<{ size?: number; className?: string }>, title: string }) => (
   <div className="flex items-center gap-3 mb-6">
-    <div className="p-2 rounded-full bg-card border border-border text-muted">
-      <Icon size={18} />
-    </div>
+    <ElectricBorder
+      mode="rect"
+      color={`var(--accent)`}
+      speed={0.4}
+      chaos={0.16}
+      svgDisplacement={6}
+      thickness={1}
+      fuzziness={0.4}
+      glow={1}
+      borderRadius={8}
+      showOutline={false}
+      className="inline-block"
+    >
+      <div className="p-2 rounded-full bg-card text-muted">
+        <Icon size={18} />
+      </div>
+    </ElectricBorder>
     <span className="font-galgo text-3xl uppercase tracking-widest text-muted">{title}</span>
   </div>
 );
@@ -50,12 +79,32 @@ const Card = ({ children, className = "", onClick }: { children: React.ReactNode
     variants={itemVariants}
     onClick={onClick}
     className={clsx(
-      "relative overflow-hidden rounded-xl border border-border bg-card/50 p-8 backdrop-blur-sm transition-all duration-500",
-      "hover:bg-card hover:border-accent/50 hover:shadow-[0_0_30px_-10px_rgba(204,255,0,0.1)]", // Subtle neon glow on hover
+      "relative flex",
       className
     )}
   >
-    {children}
+    <ElectricBorder
+      mode="rect"
+      color={`var(--accent)`}
+      speed={0.4}
+      chaos={0.4}
+      svgDisplacement={6}
+      thickness={1}
+      fuzziness={0.8}
+      glow={1}
+      borderRadius={12}
+      showOutline={false}
+      className="flex-1 w-full"
+    >
+      <div
+        className={clsx(
+          "h-full w-full overflow-hidden rounded-xl bg-card/50 p-8 backdrop-blur-sm transition-all duration-500",
+          "hover:bg-card hover:shadow-[0_0_30px_-10px_rgba(204,255,0,0.1)]"
+        )}
+      >
+        {children}
+      </div>
+    </ElectricBorder>
   </motion.div>
 );
 
@@ -91,7 +140,7 @@ export function SettingsPanel() {
         className="relative z-10 mx-auto w-full max-w-7xl p-6 md:p-12 pb-32"
       >
         {/* Header Section */}
-        <motion.div variants={itemVariants} className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-border pb-8">
+        <motion.div variants={itemVariants} className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
             <h1 className="font-galgo text-6xl md:text-[65px] tracking-wider text-foreground">Settings</h1>
             <p className="mt-2 font-offbit text-sm uppercase tracking-widest text-accent max-w-md">
@@ -138,45 +187,76 @@ export function SettingsPanel() {
         {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           
-          {/* Stats Card */}
-          <Card className="md:col-span-4 flex flex-col justify-between min-h-[240px]">
-            <SectionHeader icon={Database} title="Local Storage" />
-            <div className="flex flex-col gap-8">
-              <div className="flex items-baseline justify-between border-b border-border pb-4 group">
-                <span className="text-foreground font-galgo font-light text-[28px] uppercase tracking-widest group-hover:text-accent transition-colors">Active Timers</span>
-                <span className="font-offbit text-4xl text-foreground">{timersCount}</span>
-              </div>
-              <div className="flex items-baseline justify-between group">
-                <span className="text-foreground font-galgo font-light text-[28px] uppercase tracking-widest group-hover:text-accent transition-colors">Saved Presets</span>
-                <span className="font-offbit text-4xl text-foreground">{presetsCount}</span>
-              </div>
+          {/* Stats Card (Local Storage) */}
+          <Card className="md:col-span-4 h-full">
+            {/* Inner content wrapper ensures the space inside fills the Card's full height */}
+            <div className="flex flex-col justify-between h-full">
+                <SectionHeader icon={Database} title="Local Storage" />
+                <div className="flex flex-col gap-8">
+                    <div className="flex items-baseline justify-between">
+                        <span className="text-foreground font-galgo font-light text-[28px] uppercase tracking-widest group-hover:text-accent transition-colors">Active Timers</span>
+                        <span className="font-offbit text-4xl text-foreground">{timersCount}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                        <span className="text-foreground font-galgo font-light text-[28px] uppercase tracking-widest group-hover:text-accent transition-colors">Saved Presets</span>
+                        <span className="font-offbit text-4xl text-foreground">{presetsCount}</span>
+                    </div>
+                </div>
             </div>
           </Card>
 
-          {/* Pro Tips Card */}
-          <Card className="md:col-span-8">
+          {/* Efficiency Tips Card */}
+          <Card className="md:col-span-8 h-full">
              <SectionHeader icon={Zap} title="Efficiency Tips" />
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 h-full">
                <div className="flex gap-4 items-start group">
-                 <div className="p-2 rounded-lg bg-card border border-border text-muted group-hover:text-accent group-hover:border-accent transition-colors cursor-pointer">
-                    <MousePointer2 size={16} />
-                 </div>
+                 <ElectricBorder
+                   mode="rect"
+                   color={`var(--accent)`}
+                   speed={0.4}
+                   chaos={0.16}
+                   svgDisplacement={6}
+                   thickness={1}
+                   fuzziness={0.4}
+                   glow={1}
+                   borderRadius={8}
+                   showOutline={false}
+                   className="inline-block"
+                 >
+                   <div className="p-2 rounded-lg bg-card text-muted group-hover:text-accent transition-colors cursor-pointer">
+                      <MousePointer2 size={16} />
+                   </div>
+                 </ElectricBorder>
                  <div>
                    <h4 className="font-galgo font-light text-4xl text-foreground mb-2 group-hover:text-accent transition-colors tracking-wider cursor-pointer">Precision Scrubbing</h4>
-                   <p className="text-md font-offbit text-muted leading-relaxed">
+                   <div className="text-md font-offbit text-muted leading-relaxed">
                      Hover over any time field and scroll. Hold <Key>Shift</Key> while scrolling to increment by 5 units.
-                   </p>
+                   </div>
                  </div>
                </div>
                <div className="flex gap-4 items-start group">
-                 <div className="p-2 rounded-lg bg-card border border-border text-muted group-hover:text-accent group-hover:border-accent transition-colors cursor-pointer">
-                    <LayoutGrid size={16} />
-                 </div>
+                 <ElectricBorder
+                   mode="rect"
+                   color={`var(--accent)`}
+                   speed={0.4}
+                   chaos={0.16}
+                   svgDisplacement={6}
+                   thickness={1}
+                   fuzziness={0.4}
+                   glow={1}
+                   borderRadius={8}
+                   showOutline={false}
+                   className="inline-block"
+                 >
+                   <div className="p-2 rounded-lg bg-card text-muted group-hover:text-accent transition-colors cursor-pointer">
+                      <LayoutGrid size={16} />
+                   </div>
+                 </ElectricBorder>
                  <div>
                    <h4 className="font-galgo font-light text-4xl text-foreground mb-2 group-hover:text-accent transition-colors tracking-wider cursor-pointer">Drag & Organize</h4>
-                   <p className="text-md font-offbit text-muted leading-relaxed">
+                   <div className="text-md font-offbit text-muted leading-relaxed">
                      Every timer and preset is draggable. Grab the handle to reorganize your workspace instantly.
-                   </p>
+                   </div>
                  </div>
                </div>
              </div>
@@ -190,11 +270,26 @@ export function SettingsPanel() {
               {/* Navigation Group */}
               <div className="space-y-6">
                 <div className="flex gap-4 items-center group">
-                  <div className="p-2 rounded-lg bg-card border border-border text-muted group-hover:text-accent group-hover:border-accent transition-colors cursor-pointer">
-                     <GamepadDirectional size={16} />
-                  </div>
+                  <ElectricBorder
+                    mode="rect"
+                    color={`var(--accent)`}
+                    speed={0.4}
+                    chaos={0.16}
+                    svgDisplacement={6}
+                    thickness={1}
+                    fuzziness={0.4}
+                    glow={1}
+                    borderRadius={8}
+                    showOutline={false}
+                    className="inline-block"
+                  >
+                    <div className="p-2 rounded-lg bg-card text-muted group-hover:text-accent transition-colors cursor-pointer">
+                       <GamepadDirectional size={16} />
+                    </div>
+                  </ElectricBorder>
                   <h3 className="font-galgo text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">Navigation</h3>
                 </div>
+
                 <div className="space-y-4">
                   <div className="flex justify-between items-center group">
                     <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Timer Dashboard</span> 
@@ -218,11 +313,26 @@ export function SettingsPanel() {
               {/* Actions Group */}
               <div className="space-y-6">
                 <div className="flex gap-4 items-center group">
-                  <div className="p-2 rounded-lg bg-card border border-border text-muted group-hover:text-accent group-hover:border-accent transition-colors cursor-pointer">
-                     <Keyboard size={16} />
-                  </div>
+                  <ElectricBorder
+                    mode="rect"
+                    color={`var(--accent)`}
+                    speed={0.4}
+                    chaos={0.16}
+                    svgDisplacement={6}
+                    thickness={1}
+                    fuzziness={0.4}
+                    glow={1}
+                    borderRadius={8}
+                    showOutline={false}
+                    className="inline-block"
+                  >
+                    <div className="p-2 rounded-lg bg-card text-muted group-hover:text-accent transition-colors cursor-pointer">
+                       <Keyboard size={16} />
+                    </div>
+                  </ElectricBorder>
                   <h3 className="font-galgo text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">Controls</h3>
                 </div>
+
                 <div className="space-y-4">
                   <div className="flex justify-between items-center group">
                     <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Toggle Play/Pause</span> 
@@ -246,11 +356,26 @@ export function SettingsPanel() {
               {/* System Group */}
               <div className="space-y-6">
                 <div className="flex gap-4 items-center group">
-                  <div className="p-2 rounded-lg bg-card border border-border text-muted group-hover:text-accent group-hover:border-accent transition-colors cursor-pointer">
-                     <Cpu size={16} />
-                  </div>
+                  <ElectricBorder
+                    mode="rect"
+                    color={`var(--accent)`}
+                    speed={0.4}
+                    chaos={0.16}
+                    svgDisplacement={6}
+                    thickness={1}
+                    fuzziness={0.4}
+                    glow={1}
+                    borderRadius={8}
+                    showOutline={false}
+                    className="inline-block"
+                  >
+                    <div className="p-2 rounded-lg bg-card text-muted group-hover:text-accent transition-colors cursor-pointer">
+                       <Cpu size={16} />
+                    </div>
+                  </ElectricBorder>
                   <h3 className="font-galgo text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">System</h3>
                 </div>
+
                 <div className="space-y-4">
                   <div className="flex justify-between items-center group">
                     <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Save Preset</span> 
@@ -295,23 +420,53 @@ export function SettingsPanel() {
              <Card className="flex flex-col gap-4">
                <div className="flex items-center justify-between">
                  <SectionHeader icon={Bell} title="System Alerts" />
-                 <button 
-                  onClick={onTestNotification}
-                  className="-mt-5 p-2 bg-card border border-border rounded-md text-muted hover:text-accent hover:border-accent transition-colors cursor-pointer"
-                  title="Test Audio"
-                 >
-                   <AudioLines size={20} />
-                 </button>
+                 <div className="-mt-5">
+                   <ElectricBorder
+                     mode="rect"
+                     color={`var(--accent)`}
+                     speed={0.4}
+                     chaos={0.16}
+                     svgDisplacement={6}
+                     thickness={1}
+                     fuzziness={0.4}
+                     glow={1}
+                     borderRadius={6}
+                     showOutline={false}
+                     className="inline-block"
+                   >
+                     <button 
+                      onClick={onTestNotification}
+                      className="p-2 bg-card rounded-md text-muted hover:text-accent transition-colors cursor-pointer"
+                      title="Test Audio"
+                     >
+                       <AudioLines size={20} />
+                     </button>
+                   </ElectricBorder>
+                 </div>
                </div>
                <p className="text-md font-offbit text-muted leading-relaxed opacity-80">
                  Audio cues play on completion and phase changes. Notifications persist if the window is not focused.
                </p>
-               <button
-                 onClick={onTestNotification}
-                 className="mt-auto w-full py-3 border border-border rounded-md font-offbit text-xs uppercase tracking-wider text-muted hover:bg-card hover:border-accent hover:text-accent transition-all cursor-pointer"
+               <ElectricBorder
+                 mode="rect"
+                 color={`var(--accent)`}
+                 speed={0.4}
+                 chaos={0.16}
+                 svgDisplacement={6}
+                 thickness={1}
+                 fuzziness={0.4}
+                 glow={1}
+                 borderRadius={6}
+                 showOutline={false}
+                 className="mt-auto w-full"
                >
-                 Trigger Test Alert
-               </button>
+                 <button
+                   onClick={onTestNotification}
+                   className="w-full py-3 rounded-md font-offbit text-xs uppercase tracking-wider text-muted hover:bg-card hover:text-accent transition-all cursor-pointer"
+                 >
+                   Trigger Test Alert
+                 </button>
+               </ElectricBorder>
              </Card>
           </div>
         </div>

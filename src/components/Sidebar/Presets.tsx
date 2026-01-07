@@ -7,6 +7,7 @@ import { DragDropProvider } from "@/components/UI/DragDropContext";
 import { DraggablePreset } from "@/components/Sidebar/DraggablePreset";
 import { Download, Upload, Plus, Save, ChevronRight, FileJson } from "lucide-react";
 import clsx from "clsx";
+import ElectricBorder from "@/components/UI/ElectricBorder";
 
 export function Presets() {
   const presets = useTimerStore((s) => s.presets);
@@ -64,7 +65,6 @@ export function Presets() {
           type="button"
           onClick={onExport}
           className="group flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-card cursor-pointer"
-          title="Copy Presets JSON"
         >
           <span className="font-offbit text-[12px] uppercase tracking-wider text-muted group-hover:text-foreground cursor-pointer">
             Export
@@ -77,7 +77,7 @@ export function Presets() {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <input
-            className="w-full rounded-lg border border-border bg-card px-3 py-2 pr-8 font-offbit text-md text-foreground placeholder:text-muted/50 focus:border-accent focus:outline-none transition-colors"
+            className="w-full rounded-lg border border-border bg-card px-3 py-2 pr-8 font-offbit text-md text-foreground placeholder:text-muted/50 focus:outline-none focus:border-accent hover:border-accent transition-colors"
             placeholder="Name active timer..."
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -90,23 +90,38 @@ export function Presets() {
           </div>
         </div>
         
-        <button
-          type="button"
-          className="shrink-0 flex items-center justify-center rounded-lg border border-border bg-card px-3 py-3 text-muted hover:border-accent hover:text-accent transition-all active:scale-95 cursor-pointer"
-          onClick={() => {
-            const n = name.trim();
-            if (!n) return;
-            savePresetFromActive(n);
-            setName("");
-          }}
-          title="Save Current State"
-        >
-          <Plus size={16} />
-        </button>
+        <div title="Save Current State">
+          <ElectricBorder
+            mode="rect"
+            color={`var(--accent)`}
+            speed={0.4}
+            chaos={0.16}
+            svgDisplacement={6}
+            thickness={1}
+            fuzziness={0.4}
+            glow={1}
+            borderRadius={8}
+            showOutline={false}
+            className="shrink-0 flex items-center justify-center rounded-lg border border-border bg-card px-3 py-3 text-muted hover:text-accent transition-all active:scale-95 cursor-pointer"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                const n = name.trim();
+                if (!n) return;
+                savePresetFromActive(n);
+                setName("");
+              }}
+              className="w-full h-full bg-transparent cursor-pointer flex items-center gap-2"
+            >
+              <Plus size={16} />
+            </button>
+          </ElectricBorder>
+        </div>
       </div>
 
       {/* --- List Area --- */}
-      <div className="flex flex-col gap-2 min-h-[100px]">
+      <div className="flex flex-col gap-2 min-h-[100px] overflow-x-hidden">
         {sorted.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/30 py-8 text-center">
             <FileJson size={24} className="mb-2 text-muted" />

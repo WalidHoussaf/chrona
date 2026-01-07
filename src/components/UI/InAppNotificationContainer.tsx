@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Bell } from "lucide-react";
 
 interface InAppNotification {
   id: string;
@@ -52,21 +52,18 @@ export function InAppNotificationContainer() {
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className="pointer-events-auto"
           >
-            <div className="group relative overflow-hidden bg-card/80 backdrop-blur-2xl border border-white/8 rounded-2xl shadow-2xl shadow-black/50">
-              
-              {/* Subtle Ambient Glow (Accent Color) */}
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/20 blur-[60px] rounded-full pointer-events-none opacity-100 transition-opacity duration-700" />
-              
+            <div className="group relative overflow-hidden rounded-xl border border-accent/30 bg-card/50 backdrop-blur-sm shadow-lg">
               <div className="relative p-5 pr-12">
                 {/* Header Section */}
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3 mb-2">
+                  <Bell size={20} className="text-accent" />
                   <h4 className="font-galgo text-4xl text-foreground tracking-wider">
                     {notification.title}
                   </h4>
                 </div>
 
                 {/* Body Section */}
-                <p className="font-offbit text-muted/80 text-sm leading-relaxed tracking-wide">
+                <p className="font-offbit text-muted/80 text-lg leading-relaxed tracking-wide">
                   {notification.body}
                 </p>
 
@@ -75,12 +72,9 @@ export function InAppNotificationContainer() {
                   onClick={() => removeNotification(notification.id)}
                   className="absolute top-4 right-4 p-1.5 rounded-full text-muted/40 hover:text-foreground hover:bg-white/10 transition-all duration-300 cursor-pointer"
                 >
-                  <X size={14} />
+                  <X size={20} />
                 </button>
               </div>
-
-              {/* Animated Bottom Border/Progress Hint */}
-              <div className="absolute bottom-0 left-0 h-[2px] w-full bg-linear-to-r from-transparent via-accent/50 to-transparent opacity-100 transition-opacity duration-500" />
             </div>
           </motion.div>
         ))}

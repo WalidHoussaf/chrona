@@ -18,7 +18,7 @@ Chrona Desktop is a precision-focused, distraction-free desktop timer built for 
 - **Animations**: GSAP for industry-grade motion design
 - **UI Components**: Radix UI for accessibility primitives
 - **Icons**: Lucide React for consistent iconography
-- **Fonts**: Custom Harmond and OffBit typefaces
+- **Fonts**: Custom Galgo, OffBit and Nohemi typefaces
 
 #### **Timer Engine**
 - **Web Worker Architecture**: Dedicated worker for high-precision timing

@@ -2,11 +2,24 @@
 
 import { useState } from "react";
 import { Keyboard } from "lucide-react";
+import ElectricBorder from "@/components/UI/ElectricBorder";
 
 const Key = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-flex items-center justify-center min-w-8 px-2 py-1 text-[12px] uppercase font-bold font-offbit text-muted bg-card border border-border border-b-2 rounded-[6px] select-none shadow-sm">
+  <ElectricBorder
+    mode="rect"
+    color={`var(--accent)`}
+    speed={0.4}
+    chaos={0.16}
+    svgDisplacement={6}
+    thickness={1}
+    fuzziness={0.4}
+    glow={1}
+    borderRadius={6}
+    showOutline={false}
+    className="inline-flex items-center justify-center min-w-8 px-2 py-1 text-[12px] uppercase font-bold font-offbit text-muted bg-card border border-border border-b-2 rounded-[6px] select-none shadow-sm"
+  >
     {children}
-  </span>
+  </ElectricBorder>
 );
 
 export function KeyboardShortcuts() {
@@ -27,7 +40,19 @@ export function KeyboardShortcuts() {
         </button>
         
         {isHovered && (
-          <div className="absolute right-0 bottom-10 w-120 rounded-lg bg-card/95 p-4 text-foreground shadow-xl backdrop-blur-sm border border-border">
+          <ElectricBorder
+            mode="rect"
+            color={`var(--accent)`}
+            speed={0.4}
+            chaos={0.16}
+            svgDisplacement={6}
+            thickness={1}
+            fuzziness={0.4}
+            glow={1}
+            borderRadius={12}
+            showOutline={false}
+            className="absolute right-0 bottom-10 w-120 rounded-lg bg-card/95 p-4 text-foreground shadow-xl backdrop-blur-sm border border-border"
+          >
             {/* Header text */}
             <h3 className="mb-3 font-galgo tracking-widest text-4xl text-foreground">Keyboard Shortcuts</h3>
 
@@ -79,7 +104,7 @@ export function KeyboardShortcuts() {
               </div>
 
             </div>
-          </div>
+          </ElectricBorder>
         )}
       </div>
     </div>

@@ -9,6 +9,7 @@ import { DraggableTimerCard } from "@/components/Timer/DraggableTimerCard";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Plus, Trash2, LayoutList, AlertTriangle, X, Hourglass } from "lucide-react";
 import clsx from "clsx";
+import ElectricBorder from "@/components/UI/ElectricBorder";
 
 // --- Animation Variants ---
 const containerVariants = {
@@ -108,18 +109,30 @@ export function TimerDashboard() {
         {/* Action Controls */}
         <div className="flex items-center gap-3">
             {/* Add Timer */}
-            <button
-              onClick={() => newTimer("timer")}
-              className={clsx(
-                "group relative flex items-center gap-3 overflow-hidden rounded-full border border-accent/30 bg-accent/5 px-6 py-3 transition-all duration-300 cursor-pointer",
-                "hover:bg-accent/10 hover:border-accent hover:shadow-[0_0_20px_-5px_rgba(204,255,0,0.2)] active:scale-[0.98]"
-              )}
+            <ElectricBorder
+              mode="rect"
+              color={`var(--accent)`}
+              speed={0.4}
+              chaos={0.16}
+              svgDisplacement={6}
+              thickness={1}
+              fuzziness={0.4}
+              glow={1}
+              borderRadius={999}
+              showOutline={false}
+              className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-accent/30 bg-accent/5 px-6 py-3 transition-all duration-300 cursor-pointer hover:bg-accent/10 hover:border-accent hover:shadow-[0_0_20px_-5px_rgba(204,255,0,0.2)] active:scale-[0.98]"
             >
-               <Plus size={18} className="text-accent transition-transform group-hover:rotate-90 mb-0.5" strokeWidth={2.5} />
-               <span className="font-offbit text-xs font-bold uppercase tracking-wider text-accent">
-                 New Timer
-               </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => newTimer("timer")}
+                className="relative flex items-center gap-3 w-full h-full bg-transparent cursor-pointer"
+              >
+                <Plus size={18} className="text-accent transition-transform group-hover:rotate-90 mb-0.5" strokeWidth={2.5} />
+                <span className="font-offbit text-xs font-bold uppercase tracking-wider text-accent">
+                  New Timer
+                </span>
+              </button>
+            </ElectricBorder>
 
             {/* Clear All */}
             <button

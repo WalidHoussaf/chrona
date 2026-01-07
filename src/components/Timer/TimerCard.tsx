@@ -5,6 +5,7 @@ import clsx from "clsx";
 import gsap from "gsap";
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, splitMsToHms, parseHmsToMs } from "@/lib/time";
+import ElectricBorder from "@/components/UI/ElectricBorder";
 import { 
   Play, 
   Pause, 
@@ -66,157 +67,171 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
   const running = timer.runningSinceUnixMs != null;
 
   return (
-    <div
-      ref={ref}
-      onMouseDown={() => setActive(timer.id)}
-      className={clsx(
-        "group relative flex flex-col justify-between overflow-hidden rounded-3xl border p-6 transition-all duration-500",
-        // Active State logic
-        active 
-          ? "border-accent/50 bg-card shadow-[0_0_40px_-15px_rgba(204,255,0,0.15)] ring-1 ring-accent/20" 
-          : "border-border bg-card/40 hover:border-border hover:bg-card hover:shadow-xl",
-        // Completion State
-        status === "completed" && "border-accent bg-accent/5"
-      )}
+    <ElectricBorder
+      mode="rect"
+      color={`var(--accent)`}
+      speed={0.4}
+      chaos={0.16}
+      svgDisplacement={6}
+      thickness={1}
+      fuzziness={0.4}
+      glow={1}
+      borderRadius={12}
+      showOutline={false}
+      className="h-full w-full"
     >
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 -m-8 opacity-5 pointer-events-none">
-        <Zap size={250} strokeWidth={1} className="rotate-12" />
-      </div>
-
-      {/* --- HEADER SECTION --- */}
-      <div className="relative z-10 flex items-start justify-between">
-        <div className="flex-1 flex flex-col items-start">
-          <div className="flex items-center gap-2 mb-1">
-             <div className={clsx(
-               "h-2 w-2 rounded-full transition-colors duration-300 mb-1",
-               status === "running" ? "bg-accent shadow-[0_0_8px_rgba(204,255,0,0.8)] animate-pulse" : "bg-muted/30"
-             )} />
-             <span className="font-offbit text-sm uppercase tracking-wide text-muted">
-               {status === "idle" ? "Ready" : status}
-             </span>
-          </div>
-          <input
-            className="w-full bg-transparent font-galgo text-6xl tracking-wider text-foreground outline-none placeholder:text-muted/30 transition-colors focus:text-accent"
-            value={timer.label}
-            onChange={(e) => updateTimer(timer.id, { label: e.target.value })}
-            placeholder="Untitled Timer"
-          />
-        </div>
-
-        {/* Top Right Config Toggles */}
-        <div className="absolute top-0 right-0 flex gap-1 -mt-1">
-          {timer.kind === "timer" && (
-            <>
-              <ConfigToggle 
-                active={timer.loop} 
-                onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
-                icon={InfinityIcon}
-                label="Loop"
-              />
-              <ConfigToggle 
-                active={timer.direction === "up"} 
-                onClick={() => updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })}
-                icon={timer.direction === "up" ? ChevronsUp : ChevronsDown}
-                label={timer.direction === "up" ? "Count Up" : "Count Down"}
-              />
-            </>
-          )}
-          {dragHandle}
-        </div>
-      </div>
-
-      {/* --- MAIN DISPLAY --- */}
-      <div className="relative z-10 my-8 flex justify-center">
-        <div className={clsx(
-          "font-offbit text-9xl font-bold tracking-tighter tabular-nums transition-colors duration-300 select-none text-center",
-          running ? "text-accent drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]" : "text-foreground"
-        )}>
-          {formatDurationMs(display)}
-        </div>
-      </div>
-
-      {/* --- INPUTS & CONTROLS --- */}
-      <div className="relative z-10 flex flex-col gap-6">
-        
-        {/* Time Inputs (Only visible/editable when not running for better UX, or disabled styling) */}
-        {timer.kind === "timer" && (
-          <div className={clsx(
-            "grid grid-cols-3 gap-4 transition-opacity duration-300",
-            running ? "opacity-30 pointer-events-none grayscale" : "opacity-100"
-          )}>
-            <TimeField
-              label="HRS"
-              value={hms.h}
-              disabled={running}
-              onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(v, hms.m, hms.s) })}
-            />
-            <TimeField
-              label="MIN"
-              value={hms.m}
-              disabled={running}
-              onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, v, hms.s) })}
-              max={59}
-            />
-            <TimeField
-              label="SEC"
-              value={hms.s}
-              disabled={running}
-              onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, hms.m, v) })}
-              max={59}
-            />
-          </div>
+      <div
+        ref={ref}
+        onMouseDown={() => setActive(timer.id)}
+        className={clsx(
+          "group relative flex flex-col justify-between overflow-hidden rounded-xl p-6 transition-all duration-500 h-full w-full",
+          // Active State logic
+          active 
+            ? "bg-card shadow-[0_0_40px_-15px_rgba(204,255,0,0.15)]" 
+            : "bg-card/40 hover:shadow-xl",
+          // Completion State
+          status === "completed" && "bg-accent/10"
         )}
+      >
+        {/* Background Decor */}
+        <div className="absolute top-0 right-0 -m-8 opacity-5 pointer-events-none">
+          <Zap size={250} strokeWidth={1} className="rotate-12" />
+        </div>
 
-        {/* Action Bar */}
-        <div className="flex items-center justify-center gap-3 pt-2">
-           {/* Secondary Actions */}
-           <div className="flex gap-2 justify-center">
-             <SecondaryAction 
+        {/* --- HEADER SECTION --- */}
+        <div className="relative z-10 flex items-start justify-between">
+          <div className="flex-1 flex flex-col items-start">
+            <div className="flex items-center gap-2 mb-1">
+               <div className={clsx(
+                     "h-2 w-2 rounded-full transition-colors duration-300 mb-1",
+                     status === "running" ? "bg-accent shadow-[0_0_8px_rgba(204,255,0,0.8)] animate-pulse" : "bg-muted/30"
+               )} />
+               <span className="font-offbit text-sm uppercase tracking-wide text-muted">
+                 {status === "idle" ? "Ready" : status}
+               </span>
+            </div>
+            <input
+              className="w-full bg-transparent font-galgo text-6xl tracking-wider text-foreground outline-none placeholder:text-muted/30 transition-colors focus:text-accent"
+              value={timer.label}
+              onChange={(e) => updateTimer(timer.id, { label: e.target.value })}
+              placeholder="Untitled Timer"
+            />
+          </div>
+
+          {/* Top Right Config Toggles */}
+          <div className="absolute top-0 right-0 flex gap-1 -mt-1">
+            {timer.kind === "timer" && (
+              <>
+                <ConfigToggle 
+                  active={timer.loop} 
+                  onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
+                  icon={InfinityIcon}
+                  label="Loop"
+                />
+                <ConfigToggle 
+                  active={timer.direction === "up"} 
+                  onClick={() => updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })}
+                  icon={timer.direction === "up" ? ChevronsUp : ChevronsDown}
+                  label={timer.direction === "up" ? "Count Up" : "Count Down"}
+                />
+              </>
+            )}
+            {dragHandle}
+          </div>
+        </div>
+
+        {/* --- MAIN DISPLAY --- */}
+        <div className="relative z-10 my-8 flex justify-center">
+          <div className={clsx(
+            "font-offbit text-9xl font-bold tracking-tighter tabular-nums transition-colors duration-300 select-none text-center",
+            running ? "text-accent drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]" : "text-foreground"
+          )}>
+            {formatDurationMs(display)}
+          </div>
+        </div>
+
+        {/* --- INPUTS & CONTROLS --- */}
+        <div className="relative z-10 flex flex-col gap-6">
+          
+          {/* Time Inputs (Only visible/editable when not running for better UX, or disabled styling) */}
+          {timer.kind === "timer" && (
+            <div className={clsx(
+              "grid grid-cols-3 gap-4 transition-opacity duration-300",
+              running ? "opacity-30 pointer-events-none grayscale" : "opacity-100"
+            )}>
+              <TimeField
+                label="HRS"
+                value={hms.h}
+                disabled={running}
+                onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(v, hms.m, hms.s) })}
+              />
+              <TimeField
+                label="MIN"
+                value={hms.m}
+                disabled={running}
+                onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, v, hms.s) })}
+                max={59}
+              />
+              <TimeField
+                label="SEC"
+                value={hms.s}
+                disabled={running}
+                onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, hms.m, v) })}
+                max={59}
+              />
+            </div>
+          )}
+
+          {/* Action Bar */}
+          <div className="flex items-center justify-center gap-3 pt-2">
+             {/* Secondary Actions */}
+             <div className="flex gap-2 justify-center">
+               <SecondaryAction 
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   setActive(timer.id);
+                   resetActive();
+                 }}
+                 icon={RotateCcw}
+                 title="Reset Timer"
+               />
+             </div>
+
+             {/* Primary Play/Pause */}
+             <button
+               type="button"
                onClick={(e) => {
                  e.stopPropagation();
                  setActive(timer.id);
-                 resetActive();
+                 startPauseActive();
                }}
-               icon={RotateCcw}
-               title="Reset Timer"
-             />
-           </div>
+               className={clsx(
+                 "flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 font-offbit cursor-pointer",
+                 running 
+                   ? "bg-card border border-accent text-accent hover:bg-accent hover:text-background" 
+                   : "bg-accent text-background hover:brightness-110 shadow-[0_0_20px_-5px_rgba(204,255,0,0.4)]"
+               )}
+             >
+               {running ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
+               {running ? "Pause" : "Start"}
+             </button>
 
-           {/* Primary Play/Pause */}
-           <button
-             type="button"
-             onClick={(e) => {
-               e.stopPropagation();
-               setActive(timer.id);
-               startPauseActive();
-             }}
-             className={clsx(
-               "flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 font-offbit cursor-pointer",
-               running 
-                 ? "bg-card border border-accent text-accent hover:bg-accent hover:text-background" 
-                 : "bg-accent text-background hover:brightness-110 shadow-[0_0_20px_-5px_rgba(204,255,0,0.4)]"
-             )}
-           >
-             {running ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
-             {running ? "Pause" : "Start"}
-           </button>
-
-           {/* Secondary Actions */}
-           <div className="flex gap-2 justify-center">
-             <SecondaryAction 
-               onClick={(e) => {
-                 e.stopPropagation();
-                 removeTimer(timer.id);
-               }}
-               icon={Trash2}
-               title="Delete Timer"
-               isDestructive
-             />
-           </div>
+             {/* Secondary Actions */}
+             <div className="flex gap-2 justify-center">
+               <SecondaryAction 
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   removeTimer(timer.id);
+                 }}
+                 icon={Trash2}
+                 title="Delete Timer"
+                 isDestructive
+               />
+             </div>
+          </div>
         </div>
       </div>
-    </div>
+    </ElectricBorder>
   );
 }
 
@@ -228,7 +243,7 @@ function ConfigToggle({ active, onClick, icon: Icon, label }: { active: boolean,
       onClick={onClick}
       title={label}
       className={clsx(
-        "flex items-center gap-1 px-2 py-1 rounded-lg border transition-all duration-200 cursor-pointer text-lg font-offbit",
+        "flex items-center gap-1 px-2 py-1 rounded-md border transition-all duration-200 cursor-pointer text-lg font-offbit",
         active 
           ? "bg-accent text-background border-accent" 
           : "bg-transparent text-muted border-transparent hover:bg-white/5 hover:text-foreground"
@@ -263,7 +278,7 @@ function SecondaryAction({ onClick, icon: Icon, title, isDestructive }: { onClic
 function TimeField({
   label,
   value,
-  onChange,
+  onChange, 
   disabled,
   max,
 }: {

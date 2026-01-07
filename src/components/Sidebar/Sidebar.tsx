@@ -11,18 +11,15 @@ export function Sidebar() {
   const setView = useTimerStore((s) => s.setView);
 
   return (
-    // 1. Added 'group' and 'relative' to the aside
-    // 2. Removed 'border-r' and 'border-border'
     <aside className="group relative w-72 shrink-0 bg-background flex flex-col h-screen overflow-hidden transition-colors duration-500">
       
       {/* --- CREATIVE SEPARATOR --- */}
-      {/* This replaces the border. It fades out at top/bottom and highlights on hover. */}
       <div className="absolute right-0 top-0 h-full w-px bg-linear-to-b from-transparent via-accent/50 to-transparent opacity-20 transition-opacity duration-700 group-hover:opacity-100" />
       
       {/* --- HEADER --- */}
       <div className="p-8 pb-1 shrink-0 mb-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 -mt-6 -ml-3">
+          <div className="flex items-center gap-3 -mt-4 -ml-3">
             <Image 
               src="/logo1.png" 
               alt="Chrona Logo" 
@@ -32,11 +29,11 @@ export function Sidebar() {
               unoptimized
               className="h-12 w-auto"
             />
-            <span className="font-nohemi text-5xl tracking-tighter text-foreground mt-5 -ml-3">
+            <span className="font-nohemi text-5xl tracking-tighter text-foreground mt-4 -ml-3">
               Chrona
             </span>
           </div>
-          <span className="self-start mt-6 font-offbit text-[10px] uppercase tracking-wider text-accent -mr-1">
+          <span className="self-start mt-7 font-offbit text-[10px] uppercase tracking-wider text-accent -mr-1">
             V1.0.0
           </span>
         </div>
@@ -134,7 +131,6 @@ function NavButton({
       </span>
       
       {/* Active Dot (Right side) */}
-      {/* Added group-hover check here to make the dot pop on hover too if you want */}
       {active && (
         <span className="ml-auto block h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(204,255,0,0.8)]" />
       )}

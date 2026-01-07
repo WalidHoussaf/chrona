@@ -23,11 +23,11 @@ export function ScrollArea({
       </ScrollAreaPrimitive.Viewport>
       <ScrollAreaPrimitive.Scrollbar
         orientation="vertical"
-        className="flex w-2 select-none touch-none bg-white/5 p-[2px]"
+        className="flex w-2 select-none touch-none bg-(--border)/20 p-[2px]"
       >
-        <ScrollAreaPrimitive.Thumb className="flex-1 rounded-full bg-white/20" />
+        <ScrollAreaPrimitive.Thumb className="flex-1 rounded-full bg-(--muted)/40 hover:bg-(--muted)/60" />
       </ScrollAreaPrimitive.Scrollbar>
-      <ScrollAreaPrimitive.Corner className="bg-white/5" />
+      <ScrollAreaPrimitive.Corner className="bg-(--border)/20" />
     </ScrollAreaPrimitive.Root>
   );
 }

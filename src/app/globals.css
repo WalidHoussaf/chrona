@@ -2,11 +2,9 @@
 
 @theme {
   /* Fonts */
-  --font-harmond: 'Harmond', sans-serif;
   --font-offbit: 'OffBit', monospace;
   --font-galgo: 'Galgo', sans-serif;
   --font-nohemi: 'Nohemi', sans-serif;
-  --font-family-harmond: var(--font-harmond), sans-serif;
   --font-family-offbit: var(--font-offbit), monospace;
   --font-family-galgo: var(--font-galgo), sans-serif;
   --font-family-nohemi: var(--font-nohemi), sans-serif;
@@ -33,8 +31,7 @@
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-harmond), sans-serif; 
+  color: var(--foreground); 
 }
 
 /* Marker-style text selection */
