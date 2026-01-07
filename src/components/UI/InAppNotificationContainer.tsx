@@ -39,7 +39,6 @@ export function InAppNotificationContainer() {
   };
 
   return (
-    // Container: Fixed Top Right
     <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 w-full max-w-sm pointer-events-none">
       <AnimatePresence mode="popLayout">
         {notifications.map((notification) => (
@@ -67,7 +66,7 @@ export function InAppNotificationContainer() {
                   {notification.body}
                 </p>
 
-                {/* Dismiss Button (Absolute positioned top-right) */}
+                {/* Dismiss Button */}
                 <button
                   onClick={() => removeNotification(notification.id)}
                   className="absolute top-4 right-4 p-1.5 rounded-full text-muted/40 hover:text-foreground hover:bg-white/10 transition-all duration-300 cursor-pointer"

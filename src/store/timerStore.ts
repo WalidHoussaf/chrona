@@ -46,7 +46,7 @@ type TimerState = {
   setView: (view: View) => void;
   setActive: (id: TimerId) => void;
 
-  newTimer: (kind?: TimerKind) => void;
+  newTimer: (kind?: TimerKind) => TimerId;
   applyPreset: (presetId: string, mode?: "new" | "active") => void;
   savePresetFromActive: (name: string) => void;
   renamePreset: (presetId: string, name: string) => void;
@@ -184,6 +184,7 @@ export const useTimerStore = create<TimerState>()(
           activeId: s.activeId ?? timer.id,
         }));
         engine.send({ type: "upsert", timer: toEnginePayload(timer) });
+        return timer.id;
       };
 
       return {
@@ -237,10 +238,6 @@ export const useTimerStore = create<TimerState>()(
         setView(view) {
           ensureEngine();
           set({ view });
-          if (view === "stopwatch") {
-            const existing = get().timers.find((t) => t.kind === "stopwatch");
-            if (!existing) get().newTimer("stopwatch");
-          }
         },
 
         setActive(id) {
@@ -266,6 +263,7 @@ export const useTimerStore = create<TimerState>()(
           };
 
           addTimer(base);
+          return id;
         },
 
         applyPreset(presetId, mode = "new") {

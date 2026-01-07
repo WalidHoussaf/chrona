@@ -186,12 +186,18 @@ export function StopwatchPanel() {
   const stopwatch = useTimerStore((s) => s.timers.find((t) => t.kind === "stopwatch"));
   const runtime = useTimerStore((s) => (stopwatch ? s.runtimeById[stopwatch.id] : undefined));
 
+  const newTimer = useTimerStore((s) => s.newTimer);
   const startPauseById = useTimerStore((s) => s.startPauseById);
   const resetById = useTimerStore((s) => s.resetById);
   const lapById = useTimerStore((s) => s.lapById);
 
   const display = runtime?.displayMs ?? 0;
   const running = runtime?.status === "running";
+
+  const ensureStopwatchId = () => {
+    if (stopwatch) return stopwatch.id;
+    return newTimer("stopwatch");
+  };
 
   const laps = useMemo(() => {
     if (!stopwatch) return [];
@@ -205,20 +211,6 @@ export function StopwatchPanel() {
     if (!hasLaps) return;
     scrollViewportRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, [hasLaps, laps.length]);
-
-  if (!stopwatch) {
-    return (
-      <div className="flex h-full items-center justify-center bg-background relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none" />
-        <div className="flex flex-col items-center gap-6 animate-pulse opacity-50">
-          <div className="p-6 rounded-full border border-dashed border-muted">
-            <History className="h-8 w-8 text-muted" strokeWidth={1} />
-          </div>
-          <span className="font-offbit text-xs uppercase tracking-[0.2em] text-muted">Module Offline</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full flex-col bg-background relative overflow-hidden">
@@ -278,7 +270,10 @@ export function StopwatchPanel() {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => resetById(stopwatch.id)}
+              onClick={() => {
+                if (!stopwatch) return;
+                resetById(stopwatch.id);
+              }}
               disabled={display === 0}
               className="group flex h-14 w-14 items-center justify-center rounded-full border border-border bg-card/50 text-muted transition-colors hover:border-red-500/50 hover:text-red-400 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             >
@@ -289,7 +284,10 @@ export function StopwatchPanel() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => startPauseById(stopwatch.id)}
+                onClick={() => {
+                  if (!stopwatch) return;
+                  startPauseById(stopwatch.id);
+                }}
                 className="flex h-24 w-24 items-center justify-center rounded-4xl border-2 transition-all duration-300 cursor-pointer border-accent bg-accent text-background shadow-[0_0_40px_-10px_rgba(204,255,0,0.6)]"
               >
                 <Pause size={32} fill="currentColor" className="opacity-90" />
@@ -311,7 +309,7 @@ export function StopwatchPanel() {
                 >
                   <button
                     type="button"
-                    onClick={() => startPauseById(stopwatch.id)}
+                    onClick={() => startPauseById(ensureStopwatchId())}
                     className="flex h-24 w-24 items-center justify-center rounded-4xl border-2 transition-all duration-300 shadow-xl cursor-pointer border-border bg-card text-foreground hover:text-accent"
                   >
                     <Play size={32} fill="currentColor" className="ml-1 opacity-90" />
@@ -323,7 +321,10 @@ export function StopwatchPanel() {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => lapById(stopwatch.id)}
+              onClick={() => {
+                if (!stopwatch) return;
+                lapById(stopwatch.id);
+              }}
               disabled={!running && display === 0}
               className="group flex h-14 w-14 items-center justify-center rounded-full border border-border bg-card/50 text-muted transition-colors hover:border-accent/50 hover:text-accent cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             >

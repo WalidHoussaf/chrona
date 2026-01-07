@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import clsx from "clsx";
-import { Settings, Lock, LockOpen, Play, Pause, RotateCcw, ArrowLeft, Power, Zap, X, Clock, Repeat, CheckCircle2 } from "lucide-react";
+import { 
+  Settings, Lock, LockOpen, Play, Pause, RotateCcw, ArrowLeft, 
+  Power, Zap, X, Clock, Repeat, CheckCircle2, ChevronRight, 
+  Activity, BrainCircuit, Coffee 
+} from "lucide-react";
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, parseHmsToMs } from "@/lib/time";
 import type { PomodoroConfig } from "@/lib/timerProtocol";
@@ -151,6 +155,80 @@ const ModernToggle = ({ label, checked, onChange }: { label: string, checked: bo
     </div>
 );
 
+// --- New Aesthetic Components ---
+
+const GridBackground = () => (
+  <div className="absolute inset-0 pointer-events-none z-0">
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-30%,rgba(204,255,0,0.06),transparent)]" />
+    <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+  </div>
+);
+
+const EmptyStateCard = ({ 
+  icon: Icon, 
+  title, 
+  subtitle, 
+  onClick,
+  delay = 0 
+}: { 
+  icon: React.ComponentType<{ className?: string; size?: number; color?: string; strokeWidth?: number; }>, 
+  title: string, 
+  subtitle: string,
+  onClick?: () => void,
+  delay?: number 
+}) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay, duration: 0.5 }}
+    onClick={onClick}
+    className="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/2 p-4 transition-all duration-300 hover:bg-white/4 hover:border-white/10 hover:shadow-[0_0_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-sm cursor-pointer select-none"
+  >
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white/5 text-muted transition-colors group-hover:text-accent group-hover:bg-accent/10">
+      <Icon size={28} strokeWidth={1.5} />
+    </div>
+    <div className="flex flex-col">
+      <span className="font-galgo text-4xl tracking-wider text-foreground/80 group-hover:text-foreground transition-colors">{title}</span>
+      <span className="font-offbit text-sm uppercase tracking-widest text-muted/50 group-hover:text-muted transition-colors">{subtitle}</span>
+    </div>
+    <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0">
+      <ChevronRight size={28} className="text-accent" />
+    </div>
+  </motion.div>
+);
+
+const TickerTape = () => (
+  <div className="absolute bottom-0 left-0 w-full overflow-hidden border-t border-white/5 bg-black/20 backdrop-blur-md py-2">
+    <div className="flex whitespace-nowrap">
+      <motion.div 
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 20, ease: "linear", repeat: Infinity }}
+        className="flex items-center gap-8 px-4"
+      >
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="flex items-center gap-8">
+            <span className="flex items-center gap-2 font-offbit text-lg text-muted/30 uppercase tracking-[0.2em]">
+              <div className="h-1 w-1 rounded-full bg-accent/50 -mt-1" />
+              System Standby
+            </span>
+            <span className="flex items-center gap-2 font-offbit text-lg text-muted/30 uppercase tracking-[0.2em]">
+              Waiting for Input
+            </span>
+            <span className="flex items-center gap-2 font-offbit text-lg text-muted/30 uppercase tracking-[0.2em]">
+              <div className="h-1 w-1 rounded-full bg-accent/50 -mt-1" />
+              Protocol: Null
+            </span>
+            <span className="flex items-center gap-2 font-offbit text-lg text-muted/30 uppercase tracking-[0.2em]">
+              v1.0.0
+            </span>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  </div>
+);
+
 function parseTimeString(timeStr: string): number {
   const parts = timeStr.split(':');
   if (parts.length === 2) {
@@ -179,6 +257,8 @@ export function PomodoroPanel() {
   const setActive = useTimerStore((s) => s.setActive);
   const startPauseById = useTimerStore((s) => s.startPauseById);
   const resetById = useTimerStore((s) => s.resetById);
+  const newTimer = useTimerStore((s) => s.newTimer);
+  const updateTimer = useTimerStore((s) => s.updateTimer);
   const enablePomodoro = useTimerStore((s) => s.enablePomodoro);
   const disablePomodoro = useTimerStore((s) => s.disablePomodoro);
   const updatePomodoroConfig = useTimerStore((s) => s.updatePomodoroConfig);
@@ -212,15 +292,12 @@ export function PomodoroPanel() {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (focusLock) {
-          // UNLOCK ONLY
           setFocusLock(false);
           return; 
         } else if (showSettings) {
-          // CLOSE SETTINGS ONLY
           setShowSettings(false);
           return;
         } else {
-          // GO BACK TO DASHBOARD
           setView("timers");
         }
       }
@@ -271,43 +348,151 @@ export function PomodoroPanel() {
 
   const currentStyles = getPhaseStyles(pomodoroConfig?.currentPhase);
 
-  // --- Render Empty State ---
+  const startQuickAccessProtocol = (protocol: "deepWork" | "flowState" | "shortSprint") => {
+    const id = newTimer("timer");
+    setActive(id);
+
+    if (protocol === "flowState") {
+      updateTimer(id, {
+        label: "Flow State",
+        direction: "down",
+        durationMs: 90 * 60 * 1000,
+        loop: false,
+      });
+      return;
+    }
+
+    const isDeepWork = protocol === "deepWork";
+    updateTimer(id, {
+      label: isDeepWork ? "Deep Work Protocol" : "Short Sprint",
+      direction: "down",
+      loop: false,
+    });
+
+    enablePomodoro(id, {
+      workDurationMs: (isDeepWork ? 50 : 25) * 60 * 1000,
+      shortBreakDurationMs: (isDeepWork ? 10 : 5) * 60 * 1000,
+      longBreakDurationMs: (isDeepWork ? 10 : 15) * 60 * 1000,
+      longBreakInterval: 4,
+      currentCycle: 1,
+      currentPhase: "work",
+    });
+  };
+
+  // --- Render Empty State (Awwwards Style) ---
   if (!pomodoroTimer) {
     return (
-      <div className="flex h-full flex-col bg-background relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--tw-gradient-stops))] from-accent/5 via-transparent to-transparent opacity-50" />
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      <div className="flex h-full flex-col bg-[#050505] relative overflow-hidden">
+        <GridBackground />
         
+        {/* Navigation Bar */}
         <header className="relative z-10 flex items-center justify-between p-8">
-           <button onClick={() => setView("timers")} className="group flex items-center gap-2 text-muted hover:text-foreground transition-colors">
-              <ArrowLeft size={18} />
-              <span className="font-offbit text-xs uppercase tracking-widest">Back</span>
+           <button onClick={() => setView("timers")} className="group flex items-center gap-3 text-muted hover:text-foreground transition-colors">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 group-hover:bg-white/10 group-hover:border-white/20 transition-all cursor-pointer
+              ">
+                <ArrowLeft size={20} />
+              </div>
+              <span className="font-offbit text-md uppercase tracking-[0.2em] cursor-pointer">Dashboard</span>
            </button>
+           <div className="hidden md:flex items-center gap-6">
+               <span className="font-offbit text-xs text-muted uppercase tracking-widest">Sys_Status: IDLE</span>
+               <span className="font-offbit text-xs text-muted uppercase tracking-widest">Net: Online</span>
+           </div>
         </header>
         
-        <div className="flex flex-1 items-center justify-center relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-6 text-center"
-          >
-            <h1 className="font-galgo text-6xl text-foreground/20">No Context</h1>
-            <ActionButton onClick={() => setView("timers")} variant="primary">
-              Select Timer
-            </ActionButton>
-          </motion.div>
+        {/* Main Split Layout */}
+        <div className="relative z-10 grid flex-1 grid-cols-1 md:grid-cols-2 gap-8 p-8 md:p-16">
+          
+          {/* Left Column: Typography & Status */}
+          <div className="flex flex-col justify-center gap-8">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-2 -mt-24"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                 <span className="h-px w-8 bg-accent/50" />
+                 <span className="font-offbit text-md text-accent uppercase tracking-widest">No Active Protocol</span>
+              </div>
+              <h1 className="font-galgo text-[15vw] md:text-9xl leading-[0.7] tracking-wide text-white/90">
+                SYSTEM<br/><span className="text-white/20">IDLE</span>
+              </h1>
+              <p className="max-w-md font-offbit text-lg text-muted/60 leading-relaxed pt-4">
+                No active timer context found. Initialize a protocol from the dashboard to begin a session. 
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <ElectricBorder
+                mode="rect"
+                color="var(--accent)"
+                speed={0.4}
+                thickness={1}
+                glow={1}
+                borderRadius={999}
+                className="w-fit"
+              >
+                 <button 
+                   onClick={() => setView("timers")} 
+                   className="group flex items-center gap-4 bg-accent/5 px-8 py-4 rounded-3xl hover:bg-accent/10 transition-colors cursor-pointer"
+                 >
+                    <Zap size={28} className="text-accent" />
+                    <span className="font-galgo text-4xl uppercase tracking-wider text-white">Initialize Session</span>
+                    <ChevronRight className="text-accent/50 transition-transform group-hover:translate-x-1" size={28} />
+                 </button>
+              </ElectricBorder>
+            </motion.div>
+          </div>
+
+          {/* Right Column: Visual Dashboard */}
+          <div className="hidden md:flex flex-col justify-center items-center md:items-start pl-12 pb-28">
+            <div className="relative w-full max-w-md space-y-4">
+               {/* Decorative "Data" Header */}
+               <div className="flex justify-between border-b border-white/5 pb-2 mb-6">
+                  <span className="font-offbit text-md text-muted/30 uppercase tracking-[0.2em]">Quick Access</span>
+               </div>
+               
+               {/* "Ghost" Cards (Visual Only) */}
+               <EmptyStateCard 
+                 delay={0.3}
+                 icon={BrainCircuit}
+                 title="Deep Work Protocol"
+                 subtitle="50m Focus • 10m Rest"
+                 onClick={() => startQuickAccessProtocol("deepWork")}
+               />
+               <EmptyStateCard 
+                 delay={0.4}
+                 icon={Activity}
+                 title="Flow State"
+                 subtitle="90m Uninterrupted"
+                 onClick={() => startQuickAccessProtocol("flowState")}
+               />
+               <EmptyStateCard 
+                 delay={0.5}
+                 icon={Coffee}
+                 title="Short Sprint"
+                 subtitle="25m Focus • 5m Rest"
+                 onClick={() => startQuickAccessProtocol("shortSprint")}
+               />
+            </div>
+          </div>
         </div>
+
+        <TickerTape />
       </div>
     );
   }
 
   // --- Render Main Panel ---
   return (
-    <div className="flex h-full flex-col bg-background text-foreground relative overflow-hidden">
+    <div className="flex h-full flex-col bg-[#050505] text-foreground relative overflow-hidden">
       
       {/* --- Ambient Background --- */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-accent/5 via-background to-background opacity-40 pointer-events-none" />
-      <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none" />
+      <GridBackground />
       
       {/* Decorative Icon */}
       <div className="absolute -right-18 -top-10 text-foreground/5 pointer-events-none select-none z-0">
@@ -325,20 +510,18 @@ export function PomodoroPanel() {
         </ElectricBorder>
       </div>
 
-      {/* --- SETTINGS MODAL (Awwwards Style) --- */}
+      {/* --- SETTINGS MODAL --- */}
       <AnimatePresence>
         {showSettings && (
           <>
-            {/* Backdrop with Blur */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowSettings(false)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md"
+              className="fixed inset-0 z-40 bg-black/80 backdrop-blur-md"
             />
             
-            {/* Modal Container */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: "-45%", x: "-50%", filter: "blur(10px)" }}
               animate={{ opacity: 1, scale: 1, y: "-50%", x: "-50%", filter: "blur(0px)" }}
@@ -346,17 +529,14 @@ export function PomodoroPanel() {
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               className="fixed left-1/2 top-1/2 z-50 w-full max-w-[600px] origin-center overflow-hidden rounded-[32px] border border-white/10 bg-[#0A0A0A] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
             >
-                {/* Decorative Noise on Modal */}
                 <div className="absolute inset-0 opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none z-0" />
 
                 <div className="relative z-10 flex flex-col h-full">
-                  
-                  {/* Header */}
                   <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/1">
                     <div className="flex flex-col">
                       <span className="font-galgo text-5xl tracking-wider text-white">SYSTEM CONFIG</span>
                       <span className="font-offbit text-xs uppercase tracking-[0.2em] text-accent/80">
-                         {pomodoroTimer.label} Protocol
+                          {pomodoroTimer.label} Protocol
                       </span>
                     </div>
                     <button 
@@ -370,7 +550,7 @@ export function PomodoroPanel() {
                   <div className="p-8 space-y-8">
                     {!pomodoroConfig ? (
                       <div className="py-12 flex flex-col items-center justify-center text-center space-y-6">
-                        <div className="h-16 w-16 rounded-full bg-accent/5 flex items-center justify-center text-accent mb-2">
+                        <div className="h-16 w-16 rounded-full bg-accent/5 flex items-center justify-center text-accent mb-2 border border-accent/20">
                              <Zap size={32} />
                         </div>
                         <div>
@@ -385,8 +565,6 @@ export function PomodoroPanel() {
                       </div>
                     ) : (
                       <div className="space-y-8">
-                        
-                         {/* Section: Timeline */}
                          <div className="space-y-4">
                             <h4 className="font-offbit text-sm uppercase tracking-widest text-muted/40 pl-1">Timeline & Cycles</h4>
                             <div className="grid grid-cols-2 gap-3">
@@ -419,7 +597,6 @@ export function PomodoroPanel() {
                             </div>
                          </div>
 
-                         {/* Section: Automation */}
                          <div className="space-y-4">
                              <h4 className="font-offbit text-sm uppercase tracking-widest text-muted/40 pl-1">Automation</h4>
                              <div className="grid grid-cols-2 gap-3">
@@ -428,7 +605,6 @@ export function PomodoroPanel() {
                              </div>
                          </div>
 
-                         {/* Footer / Danger */}
                          <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                             <button 
                                 onClick={() => { disablePomodoro(pomodoroTimer.id); setShowSettings(false); }} 
@@ -448,7 +624,6 @@ export function PomodoroPanel() {
                                 <span>Save Changes</span>
                             </motion.button>
                          </div>
-
                       </div>
                     )}
                   </div>
@@ -458,7 +633,7 @@ export function PomodoroPanel() {
         )}
       </AnimatePresence>
 
-      {/* --- FOCUS LOCK OVERLAY (Immersive) --- */}
+      {/* --- FOCUS LOCK OVERLAY --- */}
       <AnimatePresence>
         {focusLock && (
           <motion.div 
@@ -468,7 +643,6 @@ export function PomodoroPanel() {
             transition={{ duration: 0.5 }}
             className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black cursor-none"
           >
-             {/* Glowing Background Blob */}
              <div className={clsx(
                "absolute inset-0 opacity-20 transition-colors duration-1000",
                pomodoroConfig?.currentPhase === 'work' ? "bg-[radial-gradient(circle,rgba(204,255,0,0.3)_0%,transparent_70%)]" :
