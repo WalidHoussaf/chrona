@@ -15,14 +15,7 @@ interface DraggablePresetProps {
 
 export function DraggablePreset({ preset }: DraggablePresetProps) {
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: preset.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: preset.id });
 
   const applyPreset = useTimerStore((s) => s.applyPreset);
   const renamePreset = useTimerStore((s) => s.renamePreset);

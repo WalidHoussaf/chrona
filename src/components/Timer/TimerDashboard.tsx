@@ -109,10 +109,9 @@ export function TimerDashboard() {
       {/* Ambient Background */}
       <GridBackground />
 
-      {/* --- Header Section (Seamless Blend) --- */}
+      {/* --- Header Section --- */}
       <motion.div 
         variants={itemVariants}
-        // Updated: Removed border-b, removed bg-card, added shrink-0 to prevent collapse
         className="relative shrink-0 z-10 flex flex-col md:flex-row md:items-end justify-between gap-6 px-8 py-8 pt-10"
       >
         <div className="space-y-2">
@@ -206,7 +205,7 @@ export function TimerDashboard() {
         </ScrollArea>
       </div>
 
-      {/* --- CONFIRMATION MODAL (Awwwards Style) --- */}
+      {/* --- CONFIRMATION MODAL --- */}
       <AnimatePresence>
         {isDeleteModalOpen && (
           <>
@@ -227,7 +226,6 @@ export function TimerDashboard() {
               exit="exit"
               className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-[600px] origin-center overflow-hidden rounded-[32px] border border-white/10 bg-[#0A0A0A] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
             >
-                {/* Decorative Noise on Modal */}
                 <div className="absolute inset-0 opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none z-0" />
 
                 <div className="relative z-10 flex flex-col h-full">

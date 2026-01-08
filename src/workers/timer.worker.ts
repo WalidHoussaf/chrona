@@ -182,7 +182,7 @@ function snapshot(type: "snapshot" | "tick") {
   const runtimeById: Record<string, TimerRuntime> = {};
 
   for (const [id, t] of timers) {
-    const runtime = computeRuntime(t, now);
+    let runtime = computeRuntime(t, now);
 
     if (t.kind === "timer" && t.direction === "down") {
       if (t.loop) {
@@ -196,14 +196,14 @@ function snapshot(type: "snapshot" | "tick") {
           t.baseElapsedMs = Math.max(0, Math.round(t.durationMs));
           t.runningSinceUnixMs = null;
           emit({ type: "completed", id, loopsCompleted: 1 });
-          
-          // Handle Pomodoro phase transitions
+
           handlePomodoroCompletion(t);
+          runtime = computeRuntime(t, now);
         }
       }
     }
 
-    runtimeById[id] = computeRuntime(t, now);
+    runtimeById[id] = runtime;
   }
 
   emit({ type, runtimeById });
@@ -212,15 +212,48 @@ function snapshot(type: "snapshot" | "tick") {
 const tickIntervalMs = 20;
 let nextTarget = unixNowMs();
 
+let tickTimeout: ReturnType<typeof setTimeout> | null = null;
+let ticking = false;
+
+function hasRunningTimers() {
+  for (const t of timers.values()) {
+    if (t.runningSinceUnixMs != null) return true;
+  }
+  return false;
+}
+
+function stopTicking() {
+  ticking = false;
+  if (tickTimeout != null) {
+    clearTimeout(tickTimeout);
+    tickTimeout = null;
+  }
+}
+
+function startTicking() {
+  if (ticking) return;
+  ticking = true;
+  nextTarget = unixNowMs();
+  schedule();
+}
+
+function updateTicking() {
+  if (hasRunningTimers()) startTicking();
+  else stopTicking();
+}
+
 function schedule() {
+  if (!ticking) return;
   const now = unixNowMs();
   nextTarget += tickIntervalMs;
   const delay = Math.max(0, nextTarget - now);
-  setTimeout(loop, delay);
+  tickTimeout = setTimeout(loop, delay);
 }
 
 function loop() {
+  if (!ticking) return;
   snapshot("tick");
+  updateTicking();
   schedule();
 }
 
@@ -232,6 +265,7 @@ function upsert(timer: TimerConfig & TimerPersistedRuntime) {
     loopsCompleted: existing?.loopsCompleted ?? 0,
     completed: existing?.completed ?? false,
   });
+  updateTicking();
 }
 
 function startTimer(id: string) {
@@ -245,6 +279,7 @@ function startTimer(id: string) {
   if (t.runningSinceUnixMs == null) {
     t.runningSinceUnixMs = unixNowMs();
   }
+  updateTicking();
 }
 
 function pauseTimer(id: string) {
@@ -256,6 +291,7 @@ function pauseTimer(id: string) {
   t.baseElapsedMs =
     t.baseElapsedMs + Math.max(0, now - t.runningSinceUnixMs);
   t.runningSinceUnixMs = null;
+  updateTicking();
 }
 
 function resetTimer(id: string) {
@@ -265,6 +301,7 @@ function resetTimer(id: string) {
   t.runningSinceUnixMs = null;
   t.completed = false;
   t.loopsCompleted = 0;
+  updateTicking();
 }
 
 ctx.onmessage = (e: MessageEvent<WorkerCommand>) => {
@@ -275,6 +312,7 @@ ctx.onmessage = (e: MessageEvent<WorkerCommand>) => {
     for (const t of msg.timers) upsert(t);
     emit({ type: "ready" });
     snapshot("snapshot");
+    updateTicking();
     return;
   }
 
@@ -287,6 +325,7 @@ ctx.onmessage = (e: MessageEvent<WorkerCommand>) => {
   if (msg.type === "remove") {
     timers.delete(msg.id);
     snapshot("snapshot");
+    updateTicking();
     return;
   }
 
@@ -329,6 +368,7 @@ ctx.onmessage = (e: MessageEvent<WorkerCommand>) => {
   if (msg.type === "killAll") {
     timers.clear();
     snapshot("snapshot");
+    updateTicking();
     return;
   }
 
@@ -344,4 +384,4 @@ ctx.onmessage = (e: MessageEvent<WorkerCommand>) => {
 
 emit({ type: "ready" });
 snapshot("snapshot");
-schedule();
+updateTicking();

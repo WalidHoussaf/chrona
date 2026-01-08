@@ -91,35 +91,33 @@ export function Presets() {
         </div>
         
         <div title="Save Current State">
-  <ElectricBorder
-    mode="rect"
-    color={`var(--accent)`}
-    speed={0.4}
-    chaos={0.16}
-    svgDisplacement={6}
-    thickness={1}
-    fuzziness={0.4}
-    glow={1}
-    borderRadius={8}
-    showOutline={false}
-    // 1. REMOVED: px-3 py-3 from here
-    className="shrink-0 flex items-center justify-center rounded-lg border border-border bg-card text-muted hover:text-accent transition-all active:scale-95 cursor-pointer overflow-hidden"
-  >
-    <button
-      type="button"
-      onClick={() => {
-        const n = name.trim();
-        if (!n) return;
-        savePresetFromActive(n);
-        setName("");
-      }}
-      // 2. ADDED: p-3 and justify-center here
-      className="w-full h-full bg-transparent cursor-pointer flex items-center justify-center gap-2 p-3"
-    >
-      <Plus size={16} />
-    </button>
-  </ElectricBorder>
-</div>
+          <ElectricBorder
+            mode="rect"
+            color={`var(--accent)`}
+            speed={0.4}
+            chaos={0.16}
+            svgDisplacement={6}
+            thickness={1}
+            fuzziness={0.4}
+            glow={1}
+            borderRadius={8}
+            showOutline={false}
+            className="shrink-0 flex items-center justify-center rounded-lg border border-border bg-card text-muted hover:text-accent transition-all active:scale-95 cursor-pointer overflow-hidden"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                const n = name.trim();
+                if (!n) return;
+                savePresetFromActive(n);
+                setName("");
+              }}
+              className="w-full h-full bg-transparent cursor-pointer flex items-center justify-center gap-2 p-3"
+            >
+              <Plus size={16} />
+            </button>
+          </ElectricBorder>
+        </div>
       </div>
 
       {/* --- List Area --- */}

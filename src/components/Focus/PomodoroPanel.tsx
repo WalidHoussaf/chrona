@@ -2,11 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import clsx from "clsx";
-import { 
-  Settings, Lock, LockOpen, Play, Pause, RotateCcw, ArrowLeft, 
-  Power, Zap, X, Clock, Repeat, CheckCircle2, ChevronRight, 
-  Activity, BrainCircuit, Coffee 
-} from "lucide-react";
+import { Settings, Lock, LockOpen, Play, Pause, RotateCcw, ArrowLeft, Power, Zap, X, Clock, Repeat, CheckCircle2, ChevronRight, Activity, BrainCircuit, Coffee } from "lucide-react";
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, parseHmsToMs } from "@/lib/time";
 import type { PomodoroConfig } from "@/lib/timerProtocol";
@@ -155,8 +151,6 @@ const ModernToggle = ({ label, checked, onChange }: { label: string, checked: bo
       </div>
     </div>
 );
-
-// --- New Aesthetic Components ---
 
 const GridBackground = () => (
   <div className="absolute inset-0 pointer-events-none z-0">
@@ -392,7 +386,7 @@ export function PomodoroPanel() {
     });
   };
 
-  // --- Render Empty State (Awwwards Style) ---
+  // --- Render Empty State ---
   if (!pomodoroTimer) {
     return (
       <div className="flex h-full flex-col bg-[#050505] relative overflow-hidden">
@@ -464,12 +458,11 @@ export function PomodoroPanel() {
           {/* Right Column: Visual Dashboard */}
           <div className="hidden md:flex flex-col justify-center items-center md:items-start pl-12 pb-28">
             <div className="relative w-full max-w-md space-y-4">
-               {/* Decorative "Data" Header */}
                <div className="flex justify-between border-b border-white/5 pb-2 mb-6">
                   <span className="font-nohemi text-lg text-muted/70 uppercase tracking-wider">Quick Access</span>
                </div>
                
-               {/* "Ghost" Cards (Visual Only) */}
+               {/* "Ghost" Cards */}
                <EmptyStateCard 
                  delay={0.3}
                  icon={BrainCircuit}
@@ -821,15 +814,14 @@ export function PomodoroPanel() {
 
            {/* The Big Digits */}
            <div className="relative">
-                 {/* Glow effect behind numbers */}
                  <div className={clsx(
                      "absolute inset-0 bg-accent/10 blur-xl transition-opacity duration-300",
-                     pomodoroConfig && status === "running" ? "opacity-30" : "opacity-0"
+                     status === "running" ? "opacity-30" : "opacity-0"
                  )} />
                  
                  <span className={clsx(
                     "relative z-10 font-offbit text-[12vw] md:text-[9rem] leading-none font-bold tracking-tighter tabular-nums transition-colors duration-300 select-none",
-                    pomodoroConfig && status === "running" ? "text-accent drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]" : "text-muted"
+                    status === "running" ? "text-accent drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]" : "text-muted"
                  )}>
                 {formatDurationMs(display)}
               </span>
@@ -880,10 +872,8 @@ export function PomodoroPanel() {
                   </ElectricBorder>
                 </motion.div>
               )}
-              
               <div className="w-14" /> 
            </div>
-
         </div>
       </div>
     </div>

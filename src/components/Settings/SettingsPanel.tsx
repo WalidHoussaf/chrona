@@ -211,7 +211,6 @@ export function SettingsPanel() {
             
             {/* Stats Card (Local Storage) */}
             <Card className="md:col-span-4 h-full">
-              {/* Inner content wrapper ensures the space inside fills the Card's full height */}
               <div className="flex flex-col justify-between h-full">
                   <SectionHeader icon={Database} title="Local Storage" />
                   <div className="flex flex-col gap-8">

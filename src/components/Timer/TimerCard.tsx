@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import clsx from "clsx";
-import gsap from "gsap";
+import { motion, useAnimation } from "framer-motion";
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, splitMsToHms, parseHmsToMs } from "@/lib/time";
 import ElectricBorder from "@/components/UI/ElectricBorder";
@@ -18,7 +18,8 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
   const startPauseActive = useTimerStore((s) => s.startPauseActive);
   const resetActive = useTimerStore((s) => s.resetActive);
 
-  const ref = useRef<HTMLDivElement | null>(null);
+  // Framer Motion controls
+  const controls = useAnimation();
   const lastStatusRef = useRef<string | null>(null);
 
   const display = runtime?.displayMs ?? 0;
@@ -29,27 +30,31 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
     return splitMsToHms(timer.durationMs);
   }, [timer]);
 
-  // Animation for Completion
+  // Animation for Completion (Replicating GSAP fromTo behavior)
   useEffect(() => {
-    if (!ref.current) return;
     if (lastStatusRef.current === status) return;
     lastStatusRef.current = status;
 
     if (status === "completed") {
-      gsap.fromTo(
-        ref.current,
-        { scale: 1, boxShadow: "0 0 0px rgba(204, 255, 0, 0)" },
-        { 
-          scale: 1.02, 
-          boxShadow: "0 0 30px rgba(204, 255, 0, 0.3)",
-          duration: 0.2, 
-          ease: "power2.out", 
-          yoyo: true, 
-          repeat: 3 
+      controls.start({
+        // Array syntax [from, to] replicates gsap.fromTo
+        scale: [1, 1.02],
+        boxShadow: ["0 0 0px rgba(204, 255, 0, 0)", "0 0 30px rgba(204, 255, 0, 0.3)"],
+        transition: {
+          duration: 0.2,
+          ease: "easeOut", // Matches power2.out
+          repeat: 3,       // Matches GSAP repeat: 3
+          repeatType: "reverse", // Matches GSAP yoyo: true
         },
-      );
+      });
+    } else {
+      // Ensure we reset to 'idle' state visually if status changes
+      controls.set({ 
+        scale: 1, 
+        boxShadow: "0 0 0px rgba(204, 255, 0, 0)" 
+      });
     }
-  }, [status]);
+  }, [status, controls]);
 
   if (!timer) return null;
 
@@ -69,11 +74,11 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
       showOutline={false}
       className="h-full w-full"
     >
-      <div
-        ref={ref}
+      <motion.div
+        animate={controls}
         onMouseDown={() => setActive(timer.id)}
         className={clsx(
-          "group relative flex flex-col justify-between overflow-hidden rounded-xl p-6 transition-all duration-500 h-full w-full",
+          "group relative flex flex-col justify-between overflow-hidden rounded-xl p-6 transition-colors duration-500 h-full w-full",
           // Active State logic
           active 
             ? "bg-card shadow-[0_0_40px_-15px_rgba(204,255,0,0.15)]" 
@@ -165,7 +170,7 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
           */}
           <div className="group/deck relative flex items-stretch gap-1.5 p-1.5 rounded-2xl bg-black/20 border border-white/5 shadow-inner backdrop-blur-md overflow-hidden">
             
-            {/* RESET BUTTON (Reveal on hover or when paused) */}
+            {/* RESET BUTTON */}
             <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setActive(timer.id); resetActive(); }}
@@ -195,8 +200,7 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
                     <span>{running ? "Pause" : "Start"}</span>
                 </div>
 
-                {/* ANIMATION: Diagonal Shimmer (Tailwind v4) */}
-                {/* Only shows when NOT running to suggest 'ready to start' */}
+                {/* ANIMATION: Diagonal Shimmer */}
                 {!running && (
                     <div className="absolute inset-0 z-0 w-[300%] bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer" />
                 )}
@@ -218,7 +222,7 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </ElectricBorder>
   );
 }
@@ -258,19 +262,14 @@ function TimeField({
   disabled: boolean;
   max?: number;
 }) {
-  // 1. Create a Ref to access the actual DOM input element
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  // 2. We use a Ref to store the latest value so we don't have to 
-  // re-bind the event listener on every single number change.
+
   const valueRef = useRef(value);
-  
-  // Update the ref when value changes
+
   useEffect(() => {
     valueRef.current = value;
   }, [value]);
 
-  // 3. Helper functions for clicking arrows
   const handleIncrement = () => {
     const next = value + 1;
     onChange(max != null ? Math.min(max, next) : next);
@@ -281,7 +280,6 @@ function TimeField({
     onChange(Math.max(0, next));
   };
 
-  // 4. THE FIX: Attach a non-passive wheel listener
   useEffect(() => {
     const element = inputRef.current;
     if (!element) return;
@@ -289,36 +287,27 @@ function TimeField({
     const handleWheel = (e: WheelEvent) => {
       if (disabled) return;
       
-      // CRITICAL: This stops the main page from scrolling!
       e.preventDefault(); 
       
-      // Optional: Blur input so you don't see the text cursor
       element.blur(); 
 
-      // Logic:
-      // If user holds Shift, we do +5 (optional feature).
-      // If not, we do +1. 
-      // Since preventDefault works now, the user isn't forced to hold Shift.
       const isShiftPressed = e.shiftKey;
       const delta = isShiftPressed ? 5 : 1; 
       
-      // Determine direction (up or down)
       const dir = e.deltaY < 0 ? delta : -delta;
       
-      // Calculate next value using the Ref (current value)
       const next = valueRef.current + dir;
       const final = max != null ? Math.min(max, Math.max(0, next)) : Math.max(0, next);
       
       onChange(final);
     };
 
-    // { passive: false } allows us to call preventDefault()
     element.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
       element.removeEventListener("wheel", handleWheel);
     };
-  }, [disabled, max, onChange]); // Dependencies
+  }, [disabled, max, onChange]);
 
   return (
     <div className="group/field relative flex flex-col gap-1">
@@ -343,7 +332,7 @@ function TimeField({
         {/* Number Input */}
         <div className="relative w-full">
             <input
-              ref={inputRef} // Attached the Ref here
+              ref={inputRef} 
               type="number"
               inputMode="numeric"
               className="w-full bg-transparent text-center font-offbit text-3xl font-bold text-foreground outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none selection:bg-accent selection:text-background"
@@ -351,7 +340,6 @@ function TimeField({
               disabled={disabled}
               min={0}
               max={max}
-              // Removed the inline onWheel prop here because we are handling it in useEffect
               onChange={(e) => onChange(Number(e.target.value || 0))}
             />
             {/* Tooltip on Hover */}

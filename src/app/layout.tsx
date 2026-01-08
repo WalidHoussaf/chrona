@@ -55,6 +55,11 @@ const galgo = localFont({
 export const metadata: Metadata = {
   title: "Chrona Desktop",
   description: "Precision-focused, distraction-free desktop timer.",
+  icons: {
+    icon: "/logo1.png",
+    shortcut: "/logo1.png",
+    apple: "/logo1.png",
+  },
 };
 
 export default function RootLayout({

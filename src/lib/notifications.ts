@@ -94,7 +94,7 @@ class NotificationManager {
         // Flash window if supported
         this.flashWindow();
         
-        // Only show in-app notification if page is visible (user is actively using the app)
+        // Only show in-app notification if page is visible
         if (!document.hidden) {
           this.showInAppNotification(options);
         }
@@ -235,7 +235,7 @@ class NotificationManager {
       title: 'Timer Complete!',
       body: `${timerName} has finished.`,
       tag: 'timer-complete',
-      requireInteraction: false, // Allow auto-close for better UX
+      requireInteraction: false,
     });
     this.playCompletionSound();
   }

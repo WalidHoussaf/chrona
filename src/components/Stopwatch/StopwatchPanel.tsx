@@ -6,26 +6,61 @@ import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs } from "@/lib/time";
 import clsx from "clsx";
 import { Play, Pause, Flag, RotateCcw, Zap, History } from "lucide-react";
-import { motion, AnimatePresence, Easing } from "framer-motion";
+import { motion, AnimatePresence, Easing, useMotionValue, useAnimationFrame } from "framer-motion";
 import ElectricBorder from "@/components/UI/ElectricBorder";
 import ColorBends from "@/components/UI/ColorBlends";
 
 /**
+ * Helper Hook: Handles continuous rotation that can pause without resetting
+ */
+function usePausableRotation(running: boolean, durationMs: number, shouldReset: boolean) {
+  const rotation = useMotionValue(0);
+
+  useAnimationFrame((time, delta) => {
+    if (!running) return;
+    // Calculate how many degrees to move based on time passed since last frame (delta)
+    // 360 degrees / durationMs = degrees per millisecond
+    const step = (360 / durationMs) * delta; 
+    rotation.set(rotation.get() + step);
+  });
+
+  // Reset logic: explicitly set to 0 when the timer is cleared
+  useEffect(() => {
+    if (shouldReset) {
+      rotation.set(0);
+    }
+  }, [shouldReset, rotation]);
+
+  return rotation;
+}
+
+/**
  * The "Swiss Blueprint" Mechanism
  */
-function BackgroundMechanism({ running }: { running: boolean }) {
+function BackgroundMechanism({ running, displayTime }: { running: boolean; displayTime: number }) {
   const smoothEase = "linear" as Easing;
-
+  
+  // Background elements that always spin slowly (decorative)
   const speedSlow = { repeat: Infinity, ease: smoothEase, duration: 120 };
-  const speedMed = { repeat: Infinity, ease: smoothEase, duration: running ? 40 : 80 };
-  const speedFast = { repeat: Infinity, ease: smoothEase, duration: running ? 10 : 30 };
-  const speedSecondHand = { repeat: Infinity, ease: smoothEase, duration: 60 };
-  const speedMinuteHand = { repeat: Infinity, ease: smoothEase, duration: 300 };
+  const speedMed = { repeat: Infinity, ease: smoothEase, duration: 80 };
 
   const centerPivot = {
     transformOrigin: "300px 300px",
-    transformBox: "view-box" as const
+    transformBox: "view-box" as const,
   };
+
+  // --- NEW ROTATION LOGIC ---
+  // We detect a "Reset" if the display time hits 0 while not running
+  const isReset = displayTime === 0;
+
+  // 1. Fast Gradient Spinner (10 seconds per rotation)
+  const rotateSpinner = usePausableRotation(running, 10000, isReset);
+  
+  // 2. Second Hand (60 seconds per rotation)
+  const rotateSecondHand = usePausableRotation(running, 60000, isReset);
+
+  // 3. Minute Hand (300 seconds / 5 mins per rotation)
+  const rotateMinuteHand = usePausableRotation(running, 300000, isReset);
 
   return (
     <>
@@ -46,9 +81,11 @@ function BackgroundMechanism({ running }: { running: boolean }) {
             </linearGradient>
           </defs>
 
+          {/* Static decoration circles */}
           <circle cx="300" cy="300" r="290" strokeWidth="0.2" className="opacity-20" />
           <circle cx="300" cy="300" r="200" strokeWidth="0.2" className="opacity-10" />
 
+          {/* Background Ticks (Always spinning slowly) */}
           <motion.g initial={{ rotate: 0 }} animate={{ rotate: 360 }} transition={speedSlow} style={centerPivot}>
             {Array.from({ length: 60 }).map((_, i) => (
               <line
@@ -64,12 +101,8 @@ function BackgroundMechanism({ running }: { running: boolean }) {
             ))}
           </motion.g>
 
-          <motion.g
-            initial={{ rotate: 0 }}
-            animate={{ rotate: running ? 360 : 0 }}
-            transition={running ? speedFast : { duration: 0 }}
-            style={centerPivot}
-          >
+          {/* --- FAST SPINNER (Fixed) --- */}
+          <motion.g style={{ ...centerPivot, rotate: rotateSpinner }}>
             <circle
               cx="300"
               cy="300"
@@ -85,12 +118,14 @@ function BackgroundMechanism({ running }: { running: boolean }) {
             />
           </motion.g>
 
+          {/* Decorative Triangles (Always spinning) */}
           <motion.g initial={{ rotate: 360 }} animate={{ rotate: 0 }} transition={speedMed} style={centerPivot}>
             <circle cx="300" cy="300" r="140" strokeWidth="0.5" strokeDasharray="2 4" className="opacity-30" />
             <path d="M 300 155 L 295 165 L 305 165 Z" fill="currentColor" className="opacity-20" />
             <path d="M 300 445 L 295 435 L 305 435 Z" fill="currentColor" className="opacity-20" />
           </motion.g>
 
+          {/* Numbers (Always spinning slowly) */}
           <motion.g
             initial={{ rotate: 0 }}
             animate={{ rotate: 360 }}
@@ -98,20 +133,13 @@ function BackgroundMechanism({ running }: { running: boolean }) {
             style={centerPivot}
             className="font-offbit text-[10px] uppercase tracking-[0.3em] fill-current stroke-none opacity-40"
           >
-            <text x="300" y="130" textAnchor="middle">
-              00
-            </text>
-            <text x="300" y="130" textAnchor="middle" transform="rotate(90 300 300)">
-              15
-            </text>
-            <text x="300" y="130" textAnchor="middle" transform="rotate(180 300 300)">
-              30
-            </text>
-            <text x="300" y="130" textAnchor="middle" transform="rotate(270 300 300)">
-              45
-            </text>
+            <text x="300" y="130" textAnchor="middle">00</text>
+            <text x="300" y="130" textAnchor="middle" transform="rotate(90 300 300)">15</text>
+            <text x="300" y="130" textAnchor="middle" transform="rotate(180 300 300)">30</text>
+            <text x="300" y="130" textAnchor="middle" transform="rotate(270 300 300)">45</text>
           </motion.g>
 
+          {/* Center Square decoration */}
           <g className="opacity-30">
             <circle cx="300" cy="300" r="10" strokeWidth="1" />
             <motion.rect
@@ -129,12 +157,8 @@ function BackgroundMechanism({ running }: { running: boolean }) {
             <line x1="300" y1="100" x2="300" y2="500" strokeWidth="0.2" />
           </g>
 
-          <motion.g
-            initial={{ rotate: 0 }}
-            animate={{ rotate: running ? 360 : 0 }}
-            transition={running ? speedMinuteHand : { duration: 0 }}
-            style={centerPivot}
-          >
+          {/* --- MINUTE HAND (Fixed) --- */}
+          <motion.g style={{ ...centerPivot, rotate: rotateMinuteHand }}>
             <rect x="0" y="0" width="600" height="600" fill="none" stroke="none" />
             <line
               x1="300"
@@ -151,12 +175,8 @@ function BackgroundMechanism({ running }: { running: boolean }) {
             <line x1="300" y1="300" x2="300" y2="320" strokeWidth="2.5" className="opacity-30" />
           </motion.g>
 
-          <motion.g
-            initial={{ rotate: 0 }}
-            animate={{ rotate: running ? 360 : 0 }}
-            transition={running ? speedSecondHand : { duration: 0 }}
-            style={centerPivot}
-          >
+          {/* --- SECOND HAND (Fixed) --- */}
+          <motion.g style={{ ...centerPivot, rotate: rotateSecondHand }}>
             <rect x="0" y="0" width="600" height="600" fill="none" stroke="none" />
             <line
               x1="300"
@@ -183,6 +203,7 @@ function BackgroundMechanism({ running }: { running: boolean }) {
   );
 }
 
+// ... GridBackground component stays the same ...
 const GridBackground = () => (
   <div className="absolute inset-0 pointer-events-none z-0">
     <ColorBends
@@ -236,7 +257,10 @@ export function StopwatchPanel() {
   return (
     <div className="flex h-full flex-col bg-background relative overflow-hidden">
       <GridBackground />
-      <BackgroundMechanism running={running} />
+      {/* FIX: Pass 'display' (time) to the background mechanism. 
+         We need this so the hands know when to reset (when display === 0).
+      */}
+      <BackgroundMechanism running={running} displayTime={display} />
 
       <motion.header
         initial={{ y: -20, opacity: 0 }}
