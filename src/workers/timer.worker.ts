@@ -9,13 +9,14 @@ import type {
 
 function getNextPomodoroPhase(config: PomodoroConfig): { phase: "work" | "shortBreak" | "longBreak"; cycle: number; durationMs: number } {
   const { currentPhase, currentCycle, longBreakInterval, workDurationMs, shortBreakDurationMs, longBreakDurationMs } = config;
+  const interval = Math.max(1, Math.floor(longBreakInterval));
   
   if (currentPhase === "work") {
     // After work, determine break type
-    if (currentCycle % longBreakInterval === 0) {
+    if (currentCycle >= interval) {
       return {
         phase: "longBreak",
-        cycle: currentCycle + 1,
+        cycle: currentCycle,
         durationMs: longBreakDurationMs,
       };
     } else {
@@ -25,14 +26,23 @@ function getNextPomodoroPhase(config: PomodoroConfig): { phase: "work" | "shortB
         durationMs: shortBreakDurationMs,
       };
     }
-  } else {
-    // After break, go back to work
+  }
+
+  if (currentPhase === "shortBreak") {
+    // After a short break, advance to the next work session
     return {
       phase: "work",
-      cycle: currentPhase === "longBreak" ? currentCycle : currentCycle,
+      cycle: currentCycle + 1,
       durationMs: workDurationMs,
     };
   }
+
+  // After a long break, start a fresh cycle set
+  return {
+    phase: "work",
+    cycle: 1,
+    durationMs: workDurationMs,
+  };
 }
 
 function handlePomodoroCompletion(t: RuntimeState) {

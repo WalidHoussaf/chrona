@@ -129,7 +129,10 @@ export const useTimerStore = create<TimerState>()(
             const id = event.id;
             const timer = get().timers.find((t) => t.id === id);
             if (timer) {
-              notificationManager.notifyTimerComplete(timer.label);
+              // Avoid duplicate notifications for Pomodoro timers (phase-change notifications cover completion)
+              if (!timer.pomodoroConfig?.enabled) {
+                notificationManager.notifyTimerComplete(timer.label);
+              }
             }
           }
 
@@ -137,7 +140,12 @@ export const useTimerStore = create<TimerState>()(
             const id = event.id;
             const timer = get().timers.find((t) => t.id === id);
             if (timer) {
-              notificationManager.notifyPomodoroPhaseChange(event.phase, timer.label);
+              if (event.phase === "longBreak" && timer.pomodoroConfig) {
+                // Coalesce: when the cycle completes, show a single combined notification
+                notificationManager.notifyPomodoroCycleComplete(timer.label, timer.pomodoroConfig.longBreakInterval);
+              } else {
+                notificationManager.notifyPomodoroPhaseChange(event.phase, timer.label);
+              }
             }
             set((s) => ({
               timers: s.timers.map((t) => {

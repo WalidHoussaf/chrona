@@ -129,7 +129,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
             />
 
             <div className="flex flex-col overflow-hidden">
-              <span className="truncate font-offbit text-md text-foreground transition-colors group-hover:text-white tracking-tighter">
+              <span className="truncate font-nohemi text-md text-foreground transition-colors group-hover:text-white tracking-tight">
                 {preset.name}
               </span>
             </div>
@@ -179,7 +179,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                 <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/1">
                   <div className="flex flex-col">
                     <span className="font-galgo text-5xl tracking-wider text-white">RENAME PRESET</span>
-                    <span className="font-offbit text-xs uppercase tracking-[0.2em] text-accent/80">{preset.name}</span>
+                    <span className="font-nohemi text-md uppercase tracking-[0.2em] text-accent/80">{preset.name}</span>
                   </div>
                   <button
                     onClick={() => setIsRenameModalOpen(false)}
@@ -192,10 +192,10 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                 <div className="p-8 space-y-8">
                   <div className="py-4 flex flex-col items-center justify-center text-center space-y-6">
                     <div className="h-16 w-16 rounded-full bg-accent/5 flex items-center justify-center text-accent mb-2 border border-accent/30">
-                      <PenLine size={28} />
+                      <PenLine size={22} />
                     </div>
                     <div className="w-full">
-                      <h3 className="font-galgo tracking-wide text-5xl mb-4">Enter New Name</h3>
+                      <h3 className="font-nohemi tracking-tighter text-3xl mb-6">Enter New Name</h3>
                       <input
                         value={nextName}
                         onChange={(e) => setNextName(e.target.value)}
@@ -209,7 +209,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                             confirmRename();
                           }
                         }}
-                        className="w-full rounded-[18px] border border-white/10 bg-white/5 px-5 py-4 font-offbit text-2xl tracking-wider text-white outline-none focus:border-accent"
+                        className="w-full rounded-[18px] border border-white/10 bg-white/5 px-5 py-3 font-nohemi text-xl tracking-tighter text-white outline-none focus:border-accent"
                         placeholder="Preset name"
                         autoFocus
                       />
@@ -219,7 +219,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                   <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                     <button
                       onClick={() => setIsRenameModalOpen(false)}
-                      className="group flex items-center gap-2 font-galgo font-extralight text-2xl uppercase tracking-widest text-muted/50 hover:text-foreground transition-colors cursor-pointer"
+                      className="group flex items-center gap-2 font-nohemi text-lg tracking-tighter text-muted/50 hover:text-foreground transition-colors cursor-pointer"
                     >
                       <X size={20} className="group-hover:scale-110 transition-transform mb-1" />
                       <span>Cancel Operation</span>
@@ -229,9 +229,9 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                       onClick={confirmRename}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center gap-2 font-galgo font-extralight bg-accent text-black px-6 py-2 rounded-full text-2xl uppercase tracking-wider hover:bg-accent/90 transition-colors cursor-pointer"
+                      className="flex items-center gap-2 font-nohemi bg-accent text-black px-6 py-2 rounded-full text-lg tracking-tighter hover:bg-accent/90 transition-colors cursor-pointer"
                     >
-                      <PenLine size={20} className="mb-0.5" />
+                      <PenLine size={16} className="mb-0.5" />
                       <span>Rename</span>
                     </motion.button>
                   </div>
@@ -266,7 +266,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                 <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/1">
                   <div className="flex flex-col">
                     <span className="font-galgo text-5xl tracking-wider text-white">SYSTEM PURGE</span>
-                    <span className="font-offbit text-xs uppercase tracking-[0.2em] text-red-400/80">Preset Marked</span>
+                    <span className="font-nohemi text-sm uppercase tracking-[0.2em] text-red-400/80">Preset Marked</span>
                   </div>
                   <button
                     onClick={() => setIsDeleteModalOpen(false)}
@@ -282,9 +282,9 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                       <AlertTriangle size={32} />
                     </div>
                     <div>
-                      <h3 className="font-galgo tracking-wide text-5xl mb-2">Confirm Deletion</h3>
-                      <p className="font-offbit text-md text-muted/60 max-w-md mx-auto leading-relaxed">
-                        You are about to permanently delete <span className="text-foreground font-bold">&quot;{preset.name}&quot;</span>.
+                      <h3 className="font-nohemi tracking-tighter text-3xl mb-2">Confirm Deletion</h3>
+                      <p className="font-offbit text-lg text-muted/60 max-w-md mx-auto leading-relaxed">
+                        You are about to permanently delete <span className="text-foreground font-nohemi">&quot;{preset.name}&quot;</span>.
                         This action cannot be undone.
                       </p>
                     </div>
@@ -293,7 +293,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                   <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                     <button
                       onClick={() => setIsDeleteModalOpen(false)}
-                      className="group flex items-center gap-2 font-galgo font-extralight text-2xl uppercase tracking-widest text-muted/50 hover:text-foreground transition-colors cursor-pointer"
+                      className="group flex items-center gap-2 font-nohemi text-lg tracking-tighter text-muted/50 hover:text-foreground transition-colors cursor-pointer"
                     >
                       <X size={20} className="group-hover:scale-110 transition-transform mb-1" />
                       <span>Cancel Operation</span>
@@ -303,9 +303,9 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                       onClick={confirmDelete}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center gap-2 font-galgo font-extralight bg-red-500 text-white px-6 py-2 rounded-full text-2xl uppercase tracking-wider hover:bg-red-600 transition-colors cursor-pointer"
+                      className="flex items-center gap-2 font-nohemi bg-red-500 text-white px-6 py-2 rounded-full text-xl tracking-tighter hover:bg-red-600 transition-colors cursor-pointer"
                     >
-                      <Trash2 size={20} className="mb-0.5" />
+                      <Trash2 size={20} className="mb-1" />
                       <span>Delete</span>
                     </motion.button>
                   </div>

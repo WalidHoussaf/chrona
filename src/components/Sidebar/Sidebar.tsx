@@ -46,7 +46,7 @@ export function Sidebar() {
           onClick={() => setView("timers")}
           icon={LayoutGrid}
         >
-          Timers Dashboard
+          Timers Board
         </NavButton>
 
         <NavButton 
@@ -75,7 +75,7 @@ export function Sidebar() {
       </nav>
 
       {/* --- PRESETS CONTAINER --- */}
-      <div className="flex-1 overflow-y-auto px-4 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 mt-4">
         <div className="space-y-1">
           <Presets />
         </div>
@@ -125,7 +125,7 @@ function NavButton({
 
       {/* Text label */}
       <span className={clsx(
-        "font-galgo font-extralight text-4xl tracking-wider transition-colors duration-300",
+        "font-nohemi text-2xl tracking-tighter transition-colors duration-300",
       )}>
         {children}
       </span>

@@ -7,9 +7,10 @@ import { DragDropProvider } from "@/components/UI/DragDropContext";
 import { useTimerStore } from "@/store/timerStore";
 import { DraggableTimerCard } from "@/components/Timer/DraggableTimerCard";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { Plus, Trash2, LayoutList, AlertTriangle, X, Hourglass } from "lucide-react";
+import { Plus, Trash2, AlertTriangle, X, Crown, Focus } from "lucide-react";
 import clsx from "clsx";
 import ElectricBorder from "@/components/UI/ElectricBorder";
+import ColorBends from "@/components/UI/ColorBlends";
 
 // --- Animation Variants ---
 const containerVariants = {
@@ -43,6 +44,27 @@ const modalVariants: Variants = {
   },
   exit: { opacity: 0, scale: 0.95, filter: "blur(10px)", transition: { duration: 0.15 } }
 };
+
+// --- Styled Sub-Components ---
+const GridBackground = () => (
+  <div className="absolute inset-0 pointer-events-none z-0">
+    <ColorBends
+      className="absolute inset-0"
+      colors={["#020202", "#070707", "#101010", "#151515", "#CCFF00"]}
+      transparent
+      rotation={35}
+      speed={0.15}
+      autoRotate={0.3}
+      scale={0.6}
+      frequency={1}
+      warpStrength={1}
+      mouseInfluence={1}
+      parallax={0.5}
+      noise={0}
+    />
+    <div className="absolute inset-0 bg-black/60" />
+  </div>
+);
 
 // --- Reusable UI Elements ---
 const Key = ({ children }: { children: React.ReactNode }) => (
@@ -82,10 +104,10 @@ export function TimerDashboard() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex h-full flex-col bg-background text-foreground overflow-hidden relative"
+      className="flex h-full flex-col bg-[#050505] text-foreground overflow-hidden relative"
     >
-      {/* Background Ambience */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-accent/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+      {/* Ambient Background */}
+      <GridBackground />
 
       {/* --- Header Section (Seamless Blend) --- */}
       <motion.div 
@@ -95,14 +117,14 @@ export function TimerDashboard() {
       >
         <div className="space-y-2">
           <div className="flex items-center gap-3 text-accent mb-1">
-            <Hourglass size={18} className="mb-1" />
-            <span className="font-offbit text-md uppercase tracking-[0.2em] font-light">Focus Mode</span>
+            <Focus size={18} className="mb-1" />
+            <span className="font-nohemi text-sm uppercase tracking-[0.2em]">Focus Mode</span>
           </div>
-          <h1 className="font-galgo text-6xl tracking-wider text-foreground leading-[0.85]">
+          <h1 className="font-nohemi text-4xl tracking-tighter text-foreground leading-10">
             My Timers
           </h1>
           <p className="font-offbit text-md text-muted max-w-sm leading-relaxed opacity-80">
-            {sorted.length} {sorted.length === 1 ? 'active timer' : 'active timers'}.
+            {sorted.length} {sorted.length === 1 ? 'active timer' : 'active timers'}. Transform seconds into achievements.
           </p>
         </div>
 
@@ -120,15 +142,15 @@ export function TimerDashboard() {
               glow={1}
               borderRadius={999}
               showOutline={false}
-              className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-accent/30 bg-accent/5 px-6 py-3 transition-all duration-300 cursor-pointer hover:bg-accent/10 hover:border-accent hover:shadow-[0_0_20px_-5px_rgba(204,255,0,0.2)] active:scale-[0.98]"
+              className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-accent/30 bg-accent/5 transition-all duration-300 cursor-pointer hover:bg-accent/10 hover:border-accent hover:shadow-[0_0_20px_-5px_rgba(204,255,0,0.2)] active:scale-[0.98]"
             >
               <button
                 type="button"
                 onClick={() => newTimer("timer")}
-                className="relative flex items-center gap-3 w-full h-full bg-transparent cursor-pointer"
+                className="relative flex items-center gap-3 w-full h-full bg-transparent cursor-pointer px-6 py-3"
               >
                 <Plus size={18} className="text-accent transition-transform group-hover:rotate-90 mb-0.5" strokeWidth={2.5} />
-                <span className="font-offbit text-xs font-bold uppercase tracking-wider text-accent">
+                <span className="font-nohemi text-xs uppercase tracking-widest text-accent">
                   New Timer
                 </span>
               </button>
@@ -145,7 +167,7 @@ export function TimerDashboard() {
               )}
             >
                <Trash2 className="mb-0.5" size={16} />
-               <span className="font-offbit text-xs font-bold uppercase tracking-wider">
+               <span className="font-nohemi text-xs uppercase tracking-widest">
                  Clear All
                </span>
             </button>
@@ -214,7 +236,7 @@ export function TimerDashboard() {
                   <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/1">
                     <div className="flex flex-col">
                       <span className="font-galgo text-5xl tracking-wider text-white">SYSTEM PURGE</span>
-                      <span className="font-offbit text-xs uppercase tracking-[0.2em] text-red-400/80">
+                      <span className="font-nohemi text-xs uppercase tracking-wider text-red-400/80">
                          {sorted.length} {sorted.length === 1 ? 'Timer' : 'Timers'} Marked
                       </span>
                     </div>
@@ -232,7 +254,7 @@ export function TimerDashboard() {
                            <AlertTriangle size={32} />
                       </div>
                       <div>
-                         <h3 className="font-galgo tracking-wide text-5xl mb-2">Confirm Deletion</h3>
+                         <h3 className="font-nohemi tracking-tight text-4xl mb-2">Confirm Deletion</h3>
                          <p className="font-offbit text-md text-muted/60 max-w-md mx-auto leading-relaxed">
                            You are about to permanently delete <span className="text-foreground font-bold">{sorted.length} active {sorted.length === 1 ? 'timer' : 'timers'}</span>. 
                            This action cannot be undone and all data will be lost.
@@ -244,7 +266,7 @@ export function TimerDashboard() {
                      <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                         <button 
                             onClick={() => setIsDeleteModalOpen(false)} 
-                            className="group flex items-center gap-2 font-galgo font-extralight text-2xl uppercase tracking-widest text-muted/50 hover:text-foreground transition-colors cursor-pointer"
+                            className="group flex items-center gap-2 font-nohemi text-lg tracking-tighter text-muted/50 hover:text-foreground transition-colors cursor-pointer"
                         >
                             <X size={20} className="group-hover:scale-110 transition-transform mb-1" />
                             <span>Cancel Operation</span>
@@ -254,7 +276,7 @@ export function TimerDashboard() {
                             onClick={handleConfirmDelete}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center gap-2 font-galgo font-extralight bg-red-500 text-white px-6 py-2 rounded-full text-2xl uppercase tracking-wider hover:bg-red-600 transition-colors cursor-pointer"
+                            className="flex items-center gap-2 font-nohemi bg-red-500 text-white px-6 py-2 rounded-full text-lg tracking-tighter hover:bg-red-600 transition-colors cursor-pointer"
                         >
                             <Trash2 size={20} className="mb-0.5" />
                             <span>Delete All</span>
@@ -284,11 +306,11 @@ function EmptyState() {
       )}
     >
       <div className="p-4 rounded-full bg-card border border-border text-muted mb-2 shadow-sm">
-        <LayoutList size={32} strokeWidth={1} />
+        <Crown size={32} strokeWidth={1} />
       </div>
       
       <div className="space-y-2">
-        <h3 className="font-galgo text-5xl md:text-7xl text-foreground/80 tracking-wider opacity-90">
+        <h3 className="font-nohemi text-2xl md:text-5xl text-foreground/80 tracking-tighter opacity-90">
           No Active Timers
         </h3>
         <p className="font-offbit text-muted text-sm uppercase tracking-widest max-w-xs mx-auto opacity-70">

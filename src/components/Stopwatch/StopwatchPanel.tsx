@@ -8,6 +8,7 @@ import clsx from "clsx";
 import { Play, Pause, Flag, RotateCcw, Zap, History } from "lucide-react";
 import { motion, AnimatePresence, Easing } from "framer-motion";
 import ElectricBorder from "@/components/UI/ElectricBorder";
+import ColorBends from "@/components/UI/ColorBlends";
 
 /**
  * The "Swiss Blueprint" Mechanism
@@ -182,6 +183,26 @@ function BackgroundMechanism({ running }: { running: boolean }) {
   );
 }
 
+const GridBackground = () => (
+  <div className="absolute inset-0 pointer-events-none z-0">
+    <ColorBends
+      className="absolute inset-0"
+      colors={["#070707", "#151515", "#CCFF00"]}
+      transparent
+      rotation={230}
+      speed={0}
+      autoRotate={0.85}
+      scale={2.9}
+      frequency={1}
+      warpStrength={1.1}
+      mouseInfluence={1}
+      parallax={0.5}
+      noise={0}
+    />
+    <div className="absolute inset-0 bg-black/60" />
+  </div>
+);
+
 export function StopwatchPanel() {
   const stopwatch = useTimerStore((s) => s.timers.find((t) => t.kind === "stopwatch"));
   const runtime = useTimerStore((s) => (stopwatch ? s.runtimeById[stopwatch.id] : undefined));
@@ -214,6 +235,7 @@ export function StopwatchPanel() {
 
   return (
     <div className="flex h-full flex-col bg-background relative overflow-hidden">
+      <GridBackground />
       <BackgroundMechanism running={running} />
 
       <motion.header
@@ -229,12 +251,12 @@ export function StopwatchPanel() {
                 running ? "bg-accent shadow-[0_0_10px_#CCFF00] animate-pulse" : "bg-muted/30"
               )}
             />
-            <span className="font-offbit text-md uppercase tracking-[0.2em] font-light">
+            <span className="font-nohemi text-sm uppercase tracking-[0.2em]">
               {running ? "Chronometer Active" : "Standby Mode"}
             </span>
           </div>
 
-          <h1 className="font-galgo text-6xl tracking-wider text-foreground leading-[0.85]">Stopwatch</h1>
+          <h1 className="font-nohemi text-4xl tracking-tighter text-foreground leading-10">Stopwatch</h1>
           <p className="font-offbit text-md text-muted max-w-sm leading-relaxed opacity-80">
             Precision timing with lap recording.
           </p>
@@ -346,16 +368,16 @@ export function StopwatchPanel() {
             <div className="flex items-center justify-between px-8 py-4 border-b border-border/30 bg-muted/5">
               <div className="flex items-center gap-2 text-muted">
                 <History size={22} />
-                <span className="font-galgo text-3xl tracking-wider pt-1">Session Data Log</span>
+                <span className="font-nohemi text-lg pt-1">Session Data Log</span>
               </div>
-              <span className="font-offbit text-sm text-muted/60 uppercase tracking-widest border border-border/50 px-2 py-0.5 rounded">
+              <span className="font-nohemi text-sm text-muted/60 uppercase tracking-widest border border-border/50 px-2 py-0.5 rounded">
                 {laps.length} Entries
               </span>
             </div>
 
             <ScrollArea className="flex-1" ref={scrollViewportRef}>
               <div className="flex flex-col p-2 space-y-1">
-                <div className="grid grid-cols-3 px-6 py-2 text-xs uppercase font-bold text-muted/40 font-offbit tracking-widest">
+                <div className="grid grid-cols-3 px-6 py-2 text-md uppercase text-muted/70 font-nohemi">
                   <span>Index</span>
                   <span className="text-center">Split Status</span>
                   <span className="text-right">Recorded Time</span>
@@ -371,20 +393,20 @@ export function StopwatchPanel() {
                       className="group grid grid-cols-3 items-center px-6 py-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 cursor-default"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="font-offbit text-md text-muted/40 group-hover:text-accent transition-colors">
+                        <span className="font-offbit text-lg text-muted/70 group-hover:text-accent transition-colors">
                           #{String(realIndex).padStart(2, "0")}
                         </span>
                       </div>
 
                       <div className="flex justify-center">
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Zap size={14} className="text-accent mb-1" />
-                          <span className="text-sm uppercase text-accent font-offbit">Recorded</span>
+                        <div className="flex items-center gap-2 transition-opacity">
+                          <Zap size={16} className="text-accent mb-1" />
+                          <span className="text-md uppercase text-accent font-offbit">Recorded</span>
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <span className="font-offbit text-2xl tabular-nums text-foreground/70 group-hover:text-foreground tracking-tight">
+                        <span className="font-offbit text-2xl tabular-nums text-foreground/70 group-hover:text-foreground tracking-wide">
                           {formatDurationMs(lap.elapsedMs)}
                         </span>
                       </div>

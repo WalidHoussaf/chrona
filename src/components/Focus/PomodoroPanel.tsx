@@ -12,6 +12,7 @@ import { formatDurationMs, parseHmsToMs } from "@/lib/time";
 import type { PomodoroConfig } from "@/lib/timerProtocol";
 import { motion, AnimatePresence } from "framer-motion";
 import ElectricBorder from "@/components/UI/ElectricBorder";
+import ColorBends from "@/components/UI/ColorBlends";
 
 // --- Styled Sub-Components ---
 
@@ -114,7 +115,7 @@ function ElectricHeaderButton({
       <button
         type="button"
         onClick={onClick}
-        className="relative flex items-center gap-3 w-full h-full bg-transparent cursor-pointer font-offbit text-xs font-bold uppercase tracking-wider text-accent px-6 py-3"
+        className="relative flex items-center gap-3 w-full h-full bg-transparent cursor-pointer font-nohemi text-xs uppercase tracking-wider text-accent px-6 py-3"
       >
         {icon && <span className="transition-transform group-hover:scale-110">{icon}</span>}
         <span className="relative z-10">{children}</span>
@@ -159,9 +160,21 @@ const ModernToggle = ({ label, checked, onChange }: { label: string, checked: bo
 
 const GridBackground = () => (
   <div className="absolute inset-0 pointer-events-none z-0">
-    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-    <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-30%,rgba(204,255,0,0.06),transparent)]" />
-    <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+    <ColorBends
+      className="absolute inset-0"
+      colors={["#020202", "#070707", "#101010", "#151515", "#CCFF00"]}
+      transparent
+      rotation={35}
+      speed={0.15}
+      autoRotate={0.3}
+      scale={0.6}
+      frequency={1}
+      warpStrength={1}
+      mouseInfluence={1}
+      parallax={0.5}
+      noise={0}
+    />
+    <div className="absolute inset-0 bg-black/60" />
   </div>
 );
 
@@ -185,11 +198,11 @@ const EmptyStateCard = ({
     onClick={onClick}
     className="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/2 p-4 transition-all duration-300 hover:bg-white/4 hover:border-white/10 hover:shadow-[0_0_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-sm cursor-pointer select-none"
   >
-    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white/5 text-muted transition-colors group-hover:text-accent group-hover:bg-accent/10">
-      <Icon size={28} strokeWidth={1.5} />
+    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-white/5 text-muted transition-colors group-hover:text-accent group-hover:bg-accent/10">
+      <Icon size={24} strokeWidth={1.5} />
     </div>
     <div className="flex flex-col">
-      <span className="font-galgo text-4xl tracking-wider text-foreground/80 group-hover:text-foreground transition-colors">{title}</span>
+      <span className="font-nohemi text-2xl tracking-tighter text-muted group-hover:text-accent transition-colors">{title}</span>
       <span className="font-offbit text-sm uppercase tracking-widest text-muted/50 group-hover:text-muted transition-colors">{subtitle}</span>
     </div>
     <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0">
@@ -208,18 +221,18 @@ const TickerTape = () => (
       >
         {[...Array(4)].map((_, i) => (
           <div key={i} className="flex items-center gap-8">
-            <span className="flex items-center gap-2 font-offbit text-lg text-muted/30 uppercase tracking-[0.2em]">
+            <span className="flex items-center gap-2 font-offbit text-sm text-muted/50 uppercase tracking-[0.2em]">
               <div className="h-1 w-1 rounded-full bg-accent/50 -mt-1" />
               System Standby
             </span>
-            <span className="flex items-center gap-2 font-offbit text-lg text-muted/30 uppercase tracking-[0.2em]">
+            <span className="flex items-center gap-2 font-offbit text-sm text-muted/50 uppercase tracking-[0.2em]">
               Waiting for Input
             </span>
-            <span className="flex items-center gap-2 font-offbit text-lg text-muted/30 uppercase tracking-[0.2em]">
+            <span className="flex items-center gap-2 font-offbit text-sm text-muted/50 uppercase tracking-[0.2em]">
               <div className="h-1 w-1 rounded-full bg-accent/50 -mt-1" />
               Protocol: Null
             </span>
-            <span className="flex items-center gap-2 font-offbit text-lg text-muted/30 uppercase tracking-[0.2em]">
+            <span className="flex items-center gap-2 font-offbit text-sm text-muted/50 uppercase tracking-[0.2em]">
               v1.0.0
             </span>
           </div>
@@ -387,16 +400,16 @@ export function PomodoroPanel() {
         
         {/* Navigation Bar */}
         <header className="relative z-10 flex items-center justify-between p-8">
-           <button onClick={() => setView("timers")} className="group flex items-center gap-3 text-muted hover:text-foreground transition-colors">
+           <button onClick={() => setView("timers")} className="group flex items-center gap-3 text-accent hover:text-accent/80 transition-colors">
               <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 group-hover:bg-white/10 group-hover:border-white/20 transition-all cursor-pointer
               ">
-                <ArrowLeft size={20} />
+                <ArrowLeft size={18} />
               </div>
-              <span className="font-offbit text-md uppercase tracking-[0.2em] cursor-pointer">Dashboard</span>
+              <span className="font-nohemi text-accent hover:text-accent/80 text-md uppercase tracking-[0.2em] cursor-pointer">Dashboard</span>
            </button>
            <div className="hidden md:flex items-center gap-6">
-               <span className="font-offbit text-xs text-muted uppercase tracking-widest">Sys_Status: IDLE</span>
-               <span className="font-offbit text-xs text-muted uppercase tracking-widest">Net: Online</span>
+               <span className="font-nohemi text-sm uppercase text-muted tracking-tight">Sys_Status: IDLE</span>
+               <span className="font-nohemi text-sm uppercase text-muted tracking-tight">Net: Online</span>
            </div>
         </header>
         
@@ -412,9 +425,9 @@ export function PomodoroPanel() {
             >
               <div className="flex items-center gap-3 mb-2">
                  <span className="h-px w-8 bg-accent/50" />
-                 <span className="font-offbit text-md text-accent uppercase tracking-widest">No Active Protocol</span>
+                 <span className="font-nohemi text-lg text-accent uppercase">No Active Protocol</span>
               </div>
-              <h1 className="font-galgo text-[15vw] md:text-9xl leading-[0.7] tracking-wide text-white/90">
+              <h1 className="font-galgo text-[15vw] font-light md:text-9xl leading-[0.7] tracking-wide text-white/90">
                 SYSTEM<br/><span className="text-white/20">IDLE</span>
               </h1>
               <p className="max-w-md font-offbit text-lg text-muted/60 leading-relaxed pt-4">
@@ -438,11 +451,11 @@ export function PomodoroPanel() {
               >
                  <button 
                    onClick={() => setView("timers")} 
-                   className="group flex items-center gap-4 bg-accent/5 px-8 py-4 rounded-3xl hover:bg-accent/10 transition-colors cursor-pointer"
+                   className="group flex items-center gap-4 bg-accent/5 px-6 py-4 rounded-4xl hover:bg-accent/10 transition-colors cursor-pointer"
                  >
-                    <Zap size={28} className="text-accent" />
-                    <span className="font-galgo text-4xl uppercase tracking-wider text-white">Initialize Session</span>
-                    <ChevronRight className="text-accent/50 transition-transform group-hover:translate-x-1" size={28} />
+                    <Zap size={24} className="text-accent" />
+                    <span className="font-nohemi text-xl tracking-tighter text-white">Initialize Session</span>
+                    <ChevronRight className="text-accent transition-transform group-hover:translate-x-1" size={24} />
                  </button>
               </ElectricBorder>
             </motion.div>
@@ -453,7 +466,7 @@ export function PomodoroPanel() {
             <div className="relative w-full max-w-md space-y-4">
                {/* Decorative "Data" Header */}
                <div className="flex justify-between border-b border-white/5 pb-2 mb-6">
-                  <span className="font-offbit text-md text-muted/30 uppercase tracking-[0.2em]">Quick Access</span>
+                  <span className="font-nohemi text-lg text-muted/70 uppercase tracking-wider">Quick Access</span>
                </div>
                
                {/* "Ghost" Cards (Visual Only) */}
@@ -535,7 +548,7 @@ export function PomodoroPanel() {
                   <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/1">
                     <div className="flex flex-col">
                       <span className="font-galgo text-5xl tracking-wider text-white">SYSTEM CONFIG</span>
-                      <span className="font-offbit text-xs uppercase tracking-[0.2em] text-accent/80">
+                      <span className="font-nohemi text-xs uppercase tracking-[0.2em] text-accent/80">
                           {pomodoroTimer.label} Protocol
                       </span>
                     </div>
@@ -554,13 +567,13 @@ export function PomodoroPanel() {
                              <Zap size={32} />
                         </div>
                         <div>
-                           <h3 className="font-galgo tracking-wide text-5xl mb-2">Initialize Protocol</h3>
+                           <h3 className="font-nohemi tracking-tight text-4xl mb-2">Initialize Protocol</h3>
                            <p className="font-offbit text-md text-muted/60 max-w-xs mx-auto leading-relaxed">
                              Enable standard 25/5 intervals with phase tracking and cycle management.
                            </p>
                         </div>
                         <ActionButton onClick={handleEnablePomodoro} variant="primary" fullWidth>
-                          <span className="text-sm">Start Pomodoro</span>
+                          <span className="text-sm font-nohemi font-light">Start Pomodoro</span>
                         </ActionButton>
                       </div>
                     ) : (
@@ -608,7 +621,7 @@ export function PomodoroPanel() {
                          <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                             <button 
                                 onClick={() => { disablePomodoro(pomodoroTimer.id); setShowSettings(false); }} 
-                                className="group flex items-center gap-2 font-galgo font-extralight text-2xl uppercase tracking-[0.2em] text-red-500/50 hover:text-red-400 transition-colors cursor-pointer"
+                                className="group flex items-center gap-2 font-nohemi text-lg tracking-tighter text-red-500/50 hover:text-red-400 transition-colors cursor-pointer"
                             >
                                 <Power size={20} className="group-hover:scale-110 transition-transform mb-1" />
                                 <span>Terminate Pomodoro</span>
@@ -618,7 +631,7 @@ export function PomodoroPanel() {
                                 onClick={() => setShowSettings(false)}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="flex items-center gap-2 font-galgo font-extralight bg-white text-black px-6 py-2 rounded-full text-2xl uppercase tracking-wider hover:bg-white/90 transition-colors cursor-pointer"
+                                className="flex items-center gap-2 font-nohemi bg-white text-black px-6 py-2 rounded-full text-lg tracking-tighter hover:bg-white/90 transition-colors cursor-pointer"
                             >
                                 <CheckCircle2 size={20} className="mb-0.5" />
                                 <span>Save Changes</span>
@@ -657,7 +670,7 @@ export function PomodoroPanel() {
                   transition={{ delay: 0.2 }}
                   className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-2 backdrop-blur-md"
                 >
-                   <div className={clsx("h-2 w-2 rounded-full animate-pulse", currentStyles.color === "text-accent" ? "bg-accent" : currentStyles.color === "text-cyan-400" ? "bg-cyan-400" : "bg-purple-400")} />
+                   <div className={clsx("h-2 w-2 rounded-full animate-pulse -mt-1", currentStyles.color === "text-accent" ? "bg-accent" : currentStyles.color === "text-cyan-400" ? "bg-cyan-400" : "bg-purple-400")} />
                    <span className="font-offbit text-sm uppercase tracking-[0.3em] text-white/80">
                      {currentStyles.label}
                    </span>
@@ -693,14 +706,14 @@ export function PomodoroPanel() {
         <div className="space-y-2">
           <div className="flex items-center gap-3 text-accent mb-1">
             <div className={clsx(
-               "h-2 w-2 rounded-full transition-all duration-500 mt-[-3px]",
+               "h-2 w-2 rounded-full transition-all duration-500 -mt-[3px]",
                status === "running" ? "bg-accent shadow-[0_0_10px_#CCFF00] animate-pulse" : "bg-muted/30"
             )} />
-            <span className="font-offbit text-md uppercase tracking-[0.2em] font-light">
+            <span className="font-nohemi text-sm uppercase tracking-[0.2em]">
                {status === "running" ? "Session Active" : "Standby Mode"}
             </span>
           </div>
-          <h1 className="font-galgo text-6xl tracking-wider text-foreground leading-[0.85]">
+          <h1 className="font-nohemi text-4xl tracking-tighter text-foreground leading-10">
             {pomodoroTimer.label}
           </h1>
           <p className="font-offbit text-md text-muted max-w-sm leading-relaxed opacity-80">

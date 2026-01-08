@@ -6,18 +6,7 @@ import gsap from "gsap";
 import { useTimerStore } from "@/store/timerStore";
 import { formatDurationMs, splitMsToHms, parseHmsToMs } from "@/lib/time";
 import ElectricBorder from "@/components/UI/ElectricBorder";
-import { 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Trash2,  
-  ArrowUp, 
-  ArrowDown, 
-  ChevronsUp, 
-  ChevronsDown, 
-  Zap, 
-  Infinity as InfinityIcon 
-} from "lucide-react";
+import { Play, Pause, RotateCcw, Trash2, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown, Zap, Infinity as InfinityIcon } from "lucide-react";
 
 export function TimerCard({ id, active, dragHandle }: { id: string; active: boolean; dragHandle?: React.ReactNode }) {
   const timer = useTimerStore((s) => s.timers.find((t) => t.id === id));
@@ -106,12 +95,12 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
                      "h-2 w-2 rounded-full transition-colors duration-300 mb-1",
                      status === "running" ? "bg-accent shadow-[0_0_8px_rgba(204,255,0,0.8)] animate-pulse" : "bg-muted/30"
                )} />
-               <span className="font-offbit text-sm uppercase tracking-wide text-muted">
+               <span className="font-nohemi text-sm uppercase tracking-wide text-muted">
                  {status === "idle" ? "Ready" : status}
                </span>
             </div>
             <input
-              className="w-full bg-transparent font-galgo text-6xl tracking-wider text-foreground outline-none placeholder:text-muted/30 transition-colors focus:text-accent"
+              className="w-full bg-transparent font-nohemi text-4xl tracking-tighter text-foreground outline-none placeholder:text-muted/30 transition-colors focus:text-accent"
               value={timer.label}
               onChange={(e) => updateTimer(timer.id, { label: e.target.value })}
               placeholder="Untitled Timer"
@@ -151,83 +140,82 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
         </div>
 
         {/* --- INPUTS & CONTROLS --- */}
-        <div className="relative z-10 flex flex-col gap-6">
+        <div className="relative z-10 flex flex-col gap-5 mt-auto">
           
-          {/* Time Inputs (Only visible/editable when not running for better UX, or disabled styling) */}
-          {timer.kind === "timer" && (
-            <div className={clsx(
-              "grid grid-cols-3 gap-4 transition-opacity duration-300",
-              running ? "opacity-30 pointer-events-none grayscale" : "opacity-100"
-            )}>
-              <TimeField
-                label="HRS"
-                value={hms.h}
-                disabled={running}
-                onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(v, hms.m, hms.s) })}
-              />
-              <TimeField
-                label="MIN"
-                value={hms.m}
-                disabled={running}
-                onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, v, hms.s) })}
-                max={59}
-              />
-              <TimeField
-                label="SEC"
-                value={hms.s}
-                disabled={running}
-                onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, hms.m, v) })}
-                max={59}
-              />
-            </div>
-          )}
+          {/* 1. Time Inputs 
+              (We wrap them in a container that blurs/fades when running) 
+          */}
+          <div className={clsx(
+            "grid grid-cols-3 gap-3 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            running 
+              ? "opacity-20 blur-sm scale-95 pointer-events-none grayscale" 
+              : "opacity-100 scale-100"
+          )}>
+            {timer.kind === "timer" && (
+                <>
+                <TimeField label="HRS" value={hms.h} disabled={running} onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(v, hms.m, hms.s) })} />
+                <TimeField label="MIN" value={hms.m} disabled={running} onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, v, hms.s) })} max={59} />
+                <TimeField label="SEC" value={hms.s} disabled={running} onChange={(v) => updateTimer(timer.id, { durationMs: parseHmsToMs(hms.h, hms.m, v) })} max={59} />
+                </>
+            )}
+          </div>
 
-          {/* Action Bar */}
-          <div className="flex items-center justify-center gap-3 pt-2">
-             {/* Secondary Actions */}
-             <div className="flex gap-2 justify-center">
-               <SecondaryAction 
-                 onClick={(e) => {
-                   e.stopPropagation();
-                   setActive(timer.id);
-                   resetActive();
-                 }}
-                 icon={RotateCcw}
-                 title="Reset Timer"
-               />
-             </div>
+          {/* 2. The Magnetic Command Deck 
+              (A unified container for all actions)
+          */}
+          <div className="group/deck relative flex items-stretch gap-1.5 p-1.5 rounded-2xl bg-black/20 border border-white/5 shadow-inner backdrop-blur-md overflow-hidden">
+            
+            {/* RESET BUTTON (Reveal on hover or when paused) */}
+            <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setActive(timer.id); resetActive(); }}
+                className="relative group/btn flex items-center justify-center w-12 rounded-xl text-muted/50 hover:text-white hover:bg-white/10 transition-all duration-300 active:scale-90 overflow-hidden cursor-pointer"
+                title="Reset"
+            >
+                <RotateCcw size={18} className="transition-transform duration-500 group-hover/btn:-rotate-180" />
+            </button>
 
-             {/* Primary Play/Pause */}
-             <button
-               type="button"
-               onClick={(e) => {
-                 e.stopPropagation();
-                 setActive(timer.id);
-                 startPauseActive();
-               }}
-               className={clsx(
-                 "flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 font-offbit cursor-pointer",
-                 running 
-                   ? "bg-card border border-accent text-accent hover:bg-accent hover:text-background" 
-                   : "bg-accent text-background hover:brightness-110 shadow-[0_0_20px_-5px_rgba(204,255,0,0.4)]"
-               )}
-             >
-               {running ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
-               {running ? "Pause" : "Start"}
-             </button>
+            {/* HERO START/PAUSE BUTTON */}
+            <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setActive(timer.id); startPauseActive(); }}
+                className={clsx(
+                    "relative flex-1 h-14 overflow-hidden rounded-xl transition-all duration-500 ease-out group-hover/deck:shadow-lg cursor-pointer",
+                    // Active State (Neon/Solid) vs Idle State (Glass/Outline)
+                    running 
+                        ? "bg-accent text-black" 
+                        : "bg-white/5 text-foreground hover:bg-white/10 border border-white/5 hover:border-white/20"
+                )}
+            >
+                {/* Text & Icon Content */}
+                <div className="relative z-10 flex items-center justify-center gap-3 w-full h-full font-nohemi text-md tracking-widest uppercase">
+                    <span className="transition-transform duration-300 active:scale-75 -mt-0.5">
+                        {running ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                    </span>
+                    <span>{running ? "Pause" : "Start"}</span>
+                </div>
 
-             {/* Secondary Actions */}
-             <div className="flex gap-2 justify-center">
-               <SecondaryAction 
-                 onClick={(e) => {
-                   e.stopPropagation();
-                   removeTimer(timer.id);
-                 }}
-                 icon={Trash2}
-                 title="Delete Timer"
-                 isDestructive
-               />
-             </div>
+                {/* ANIMATION: Diagonal Shimmer (Tailwind v4) */}
+                {/* Only shows when NOT running to suggest 'ready to start' */}
+                {!running && (
+                    <div className="absolute inset-0 z-0 w-[300%] bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer" />
+                )}
+
+                {/* ANIMATION: Subtle Pulse Overlay when Running */}
+                {running && (
+                    <div className="absolute inset-0 bg-white/20 animate-pulse mix-blend-overlay" />
+                )}
+            </button>
+
+            {/* DELETE BUTTON */}
+            <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); removeTimer(timer.id); }}
+                className="relative group/btn flex items-center justify-center w-12 rounded-xl text-muted/50 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 active:scale-90 cursor-pointer"
+                title="Delete"
+            >
+                <Trash2 size={18} className="transition-transform duration-300 group-hover/btn:rotate-12" />
+            </button>
           </div>
         </div>
       </div>
@@ -243,7 +231,7 @@ function ConfigToggle({ active, onClick, icon: Icon, label }: { active: boolean,
       onClick={onClick}
       title={label}
       className={clsx(
-        "flex items-center gap-1 px-2 py-1 rounded-md border transition-all duration-200 cursor-pointer text-lg font-offbit",
+        "flex items-center gap-1 px-2 py-1 rounded-md border transition-all duration-200 text-sm font-nohemi cursor-pointer",
         active 
           ? "bg-accent text-background border-accent" 
           : "bg-transparent text-muted border-transparent hover:bg-white/5 hover:text-foreground"
@@ -253,24 +241,6 @@ function ConfigToggle({ active, onClick, icon: Icon, label }: { active: boolean,
         <Icon size={24} strokeWidth={1} />
       </span>
       <span>{label}</span>
-    </button>
-  );
-}
-
-function SecondaryAction({ onClick, icon: Icon, title, isDestructive }: { onClick: (e: React.MouseEvent<HTMLButtonElement>) => void, icon: React.ComponentType<{ size?: number }>, title: string, isDestructive?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={clsx(
-        "p-3.5 rounded-xl border transition-all duration-200 active:scale-95 cursor-pointer",
-        isDestructive
-          ? "border-border bg-transparent text-muted hover:border-red-500 hover:text-red-500 hover:bg-red-500/10"
-          : "border-border bg-transparent text-muted hover:border-foreground hover:text-foreground hover:bg-white/5"
-      )}
-    >
-      <Icon size={18} />
     </button>
   );
 }
@@ -353,7 +323,7 @@ function TimeField({
   return (
     <div className="group/field relative flex flex-col gap-1">
       {/* Label */}
-      <span className="font-offbit text-xs font-bold text-muted/50 text-center uppercase tracking-widest group-hover/field:text-accent transition-colors">
+      <span className="font-offbit text-sm text-muted/50 text-center uppercase tracking-widest group-hover/field:text-accent transition-colors">
         {label}
       </span>
 
@@ -376,7 +346,7 @@ function TimeField({
               ref={inputRef} // Attached the Ref here
               type="number"
               inputMode="numeric"
-              className="w-full bg-transparent text-center font-offbit text-2xl font-medium text-foreground outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none selection:bg-accent selection:text-background"
+              className="w-full bg-transparent text-center font-offbit text-3xl font-bold text-foreground outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none selection:bg-accent selection:text-background"
               value={value.toString().padStart(2, '0')}
               disabled={disabled}
               min={0}
@@ -387,7 +357,7 @@ function TimeField({
             {/* Tooltip on Hover */}
             <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover/field:opacity-100 z-50 min-w-max">
                <div className="flex items-center tracking-wider font-galgo gap-2 rounded bg-card border border-border px-2 py-1 text-2xl text-muted shadow-xl">
-                 <span className="font-offbit tracking-normal text-xs text-foreground">SCROLL</span> to adjust
+                 <span className="font-offbit tracking-normal text-sm text-foreground">SCROLL</span> to adjust
                </div>
             </div>
         </div>
@@ -405,5 +375,3 @@ function TimeField({
     </div>
   );
 }
-
-// ... (rest of the code remains the same)

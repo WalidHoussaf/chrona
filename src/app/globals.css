@@ -16,6 +16,14 @@
   --color-card: var(--card);
   --color-accent: var(--accent);
   --color-border: var(--border);
+
+  /* Define the shimmer keyframes */
+  --animate-shimmer: shimmer 4s linear infinite;
+  
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
 }
 
 /* Set default styles */

@@ -24,19 +24,27 @@ class NotificationManager {
     // Initialize audio context on first user interaction
     if (typeof window !== 'undefined') {
       this.initAudioContext();
+      // Add event listener to resume audio context on user interaction
+      document.addEventListener('click', this.handleResumeAudioContext);
+      document.addEventListener('keydown', this.handleResumeAudioContext);
     }
   }
 
   private initAudioContext() {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      
-      // Handle autoplay restrictions - resume if suspended
-      if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume().catch(console.warn);
-      }
     }
   }
+
+  private handleResumeAudioContext = () => {
+    this.resumeAudioContext();
+  };
+
+  private resumeAudioContext() {
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(console.warn);
+    }
+  };
 
   async requestPermission(): Promise<boolean> {
     if (typeof window === 'undefined' || !('Notification' in window)) {
@@ -101,9 +109,16 @@ class NotificationManager {
   }
 
   private showInAppNotification(options: NotificationOptions): void {
-    const id = Date.now().toString();
+    // Use a stable id when tag is provided, so we can dedupe/replace noisy notifications
+    // Add timestamp to ensure React key uniqueness while maintaining deduplication
+    const id = options.tag ? `tag:${options.tag}:${Date.now()}` : Date.now().toString();
     const notification = { id, title: options.title, body: options.body, timestamp: Date.now() };
     
+    // If a notification with the same tag already exists, remove the old one before adding new
+    if (options.tag) {
+      const tagPrefix = `tag:${options.tag}:`;
+      this.inAppNotifications = this.inAppNotifications.filter((n) => !n.id.startsWith(tagPrefix));
+    }
     this.inAppNotifications.unshift(notification);
     
     // Keep only last 10 notifications
@@ -140,9 +155,18 @@ class NotificationManager {
 
     // Resume if suspended (handles autoplay restrictions)
     if (this.audioContext.state === 'suspended') {
-      this.audioContext.resume().catch(console.warn);
-      return; // Skip this sound, context will resume for next sound
+      this.audioContext.resume().then(() => {
+        // After resuming, play the sound
+        this.playSoundInternal(options);
+      }).catch(console.warn);
+    } else {
+      // Play immediately if not suspended
+      this.playSoundInternal(options);
     }
+  }
+
+  private playSoundInternal(options: SoundOptions = {}): void {
+    if (!this.audioContext) return;
 
     const {
       frequency = 800,
@@ -230,6 +254,16 @@ class NotificationManager {
     });
     this.playPhaseChangeSound();
   }
+
+  notifyPomodoroCycleComplete(timerName: string, cycleTotal: number): void {
+    this.showNotification({
+      title: 'Pomodoro Cycle Complete!',
+      body: `${timerName}: ${cycleTotal}/${cycleTotal}. Great job — enjoy your long break.`,
+      tag: 'pomodoro-cycle-complete',
+      requireInteraction: false,
+    });
+    this.playCompletionSound();
+  }
 }
 
 // Singleton instance
@@ -246,6 +280,8 @@ export function useNotifications() {
     notifyTimerComplete: (timerName: string) => notificationManager.notifyTimerComplete(timerName),
     notifyPomodoroPhaseChange: (phase: string, timerName: string) => 
       notificationManager.notifyPomodoroPhaseChange(phase, timerName),
+    notifyPomodoroCycleComplete: (timerName: string, cycleTotal: number) =>
+      notificationManager.notifyPomodoroCycleComplete(timerName, cycleTotal),
     getInAppNotifications: () => notificationManager.getInAppNotifications(),
   };
 }

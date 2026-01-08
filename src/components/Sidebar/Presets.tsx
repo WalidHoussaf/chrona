@@ -54,11 +54,11 @@ export function Presets() {
   };
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex flex-col gap-4 w-[99%] max-w-[450px]">
       
       {/* --- Header Row --- */}
       <div className="flex items-end justify-between border-b border-border pb-2">
-        <h2 className="font-galgo text-4xl tracking-wider text-foreground">
+        <h2 className="font-nohemi text-2xl tracking-tighter text-foreground">
           Presets
         </h2>
         <button
@@ -66,7 +66,7 @@ export function Presets() {
           onClick={onExport}
           className="group flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-card cursor-pointer"
         >
-          <span className="font-offbit text-[12px] uppercase tracking-wider text-muted group-hover:text-foreground cursor-pointer">
+          <span className="font-nohemi text-xs uppercase tracking-wider text-muted group-hover:text-foreground cursor-pointer">
             Export
           </span>
           <Download size={12} className="text-muted group-hover:text-accent" />
@@ -77,7 +77,7 @@ export function Presets() {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <input
-            className="w-full rounded-lg border border-border bg-card px-3 py-2 pr-8 font-offbit text-md text-foreground placeholder:text-muted/50 focus:outline-none focus:border-accent hover:border-accent transition-colors"
+            className="w-full rounded-lg border border-border bg-card px-2 py-2 pr-8 font-nohemi text-md tracking-tight text-foreground placeholder:text-muted/50 focus:outline-none focus:border-accent hover:border-accent transition-colors"
             placeholder="Name active timer..."
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -91,33 +91,35 @@ export function Presets() {
         </div>
         
         <div title="Save Current State">
-          <ElectricBorder
-            mode="rect"
-            color={`var(--accent)`}
-            speed={0.4}
-            chaos={0.16}
-            svgDisplacement={6}
-            thickness={1}
-            fuzziness={0.4}
-            glow={1}
-            borderRadius={8}
-            showOutline={false}
-            className="shrink-0 flex items-center justify-center rounded-lg border border-border bg-card px-3 py-3 text-muted hover:text-accent transition-all active:scale-95 cursor-pointer"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                const n = name.trim();
-                if (!n) return;
-                savePresetFromActive(n);
-                setName("");
-              }}
-              className="w-full h-full bg-transparent cursor-pointer flex items-center gap-2"
-            >
-              <Plus size={16} />
-            </button>
-          </ElectricBorder>
-        </div>
+  <ElectricBorder
+    mode="rect"
+    color={`var(--accent)`}
+    speed={0.4}
+    chaos={0.16}
+    svgDisplacement={6}
+    thickness={1}
+    fuzziness={0.4}
+    glow={1}
+    borderRadius={8}
+    showOutline={false}
+    // 1. REMOVED: px-3 py-3 from here
+    className="shrink-0 flex items-center justify-center rounded-lg border border-border bg-card text-muted hover:text-accent transition-all active:scale-95 cursor-pointer overflow-hidden"
+  >
+    <button
+      type="button"
+      onClick={() => {
+        const n = name.trim();
+        if (!n) return;
+        savePresetFromActive(n);
+        setName("");
+      }}
+      // 2. ADDED: p-3 and justify-center here
+      className="w-full h-full bg-transparent cursor-pointer flex items-center justify-center gap-2 p-3"
+    >
+      <Plus size={16} />
+    </button>
+  </ElectricBorder>
+</div>
       </div>
 
       {/* --- List Area --- */}
@@ -145,7 +147,7 @@ export function Presets() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex w-full items-center justify-between group cursor-pointer"
         >
-          <span className="font-galgo text-4xl tracking-wider text-muted group-hover:text-foreground transition-colors">
+          <span className="font-nohemi text-2xl tracking-tighter text-muted group-hover:text-foreground transition-colors">
             Advanced Operations
           </span>
           <ChevronRight 
@@ -169,7 +171,7 @@ export function Presets() {
             <div className="flex items-center gap-2 justify-end">
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1 font-offbit text-[12px] text-foreground hover:border-accent hover:text-accent transition-all cursor-pointer"
+                className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1 font-nohemi tracking-tighter text-xs text-foreground hover:border-accent hover:text-accent transition-all cursor-pointer"
                 onClick={() => {
                   importPresetsJson(importText);
                   setImportText("");
