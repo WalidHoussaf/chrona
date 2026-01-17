@@ -1,25 +1,22 @@
-# Chrona Desktop
+# Chrona Timer
 
-![Chrona Desktop](public/logo.png)
+![Chrona Timer](public/logo.png)
 
 Precision-first, distraction-free desktop timer for power users. Built for focus sessions, rapid multi-timer workflows, and ultra-accurate timing.
 
 **Portfolio Showcase** — Chrona highlights my product design, UI engineering, and systems thinking across precision timing, animation, and keyboard-first UX.
 
-**Live Demo:** https://your-vercel-domain.vercel.app
+**Live Demo:** https://chrona-timer.vercel.app
 
-## 📸 Screens
-
-> Add screenshots to `public/screenshots/` and update the paths below.
+## Screenshots
 
 ![Chrona — Timers Dashboard](public/screenshots/timers-dashboard.png)
-![Chrona — Timers Dashboard](public/screenshots/timers-dashboard1.png)
-![Chrona — Timers Dashboard](public/screenshots/stopwatch-page.png)
+![Chrona — Timers Stopwatch](public/screenshots/stopwatch-page.png)
 ![Chrona — Focus Mode](public/screenshots/focus-mode.png)
 ![Chrona — Focus Mode](public/screenshots/focus-mode1.png)
 ![Chrona — Settings](public/screenshots/settings.png)
 
-## ✨ Highlights
+## Highlights
 
 - High-precision timer engine with drift correction and Web Worker architecture.
 - Multi-timer dashboard with parallel execution and color-coded status indicators.
@@ -28,7 +25,7 @@ Precision-first, distraction-free desktop timer for power users. Built for focus
 - Presets system with import/export and quick launch.
 - Keyboard-first workflows with comprehensive shortcuts.
 
-## 🧰 Tech Stack
+## Tech Stack
 
 - Next.js (App Router)
 - TypeScript
@@ -38,7 +35,7 @@ Precision-first, distraction-free desktop timer for power users. Built for focus
 - Radix UI
 - Lucide React
 
-## 🚀 Getting Started
+## Getting Started
 
 Install dependencies:
 
@@ -54,7 +51,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the app.
 
-## 📦 Scripts
+## Scripts
 
 ```bash
 npm run dev
@@ -63,7 +60,7 @@ npm run start
 npm run lint
 ```
 
-## ☁️ Deployment (Portfolio)
+## Deployment (Portfolio)
 
 Chrona is deployed online to showcase the full experience in a shareable, production-ready environment. This lets anyone explore the UI, animations, and workflow without local setup.
 
@@ -79,6 +76,6 @@ NEXT_PUBLIC_ANALYTICS_ID=
 NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY=
 ```
 
-## 🧭 Feature Roadmap
+## Feature Roadmap
 
 For full feature details and planned work, see [FEATURE_DOCUMENTATION.md](FEATURE_DOCUMENTATION.md).

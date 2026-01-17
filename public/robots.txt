@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://chrona-timer.vercel.app/sitemap.xml

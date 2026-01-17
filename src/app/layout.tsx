@@ -52,7 +52,7 @@ const galgo = localFont({
   preload: false,
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://chrona-timer.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -60,18 +60,24 @@ export const metadata: Metadata = {
     default: "Chrona Desktop",
     template: "%s | Chrona Desktop",
   },
-  description: "Precision-focused, distraction-free desktop timer for power users.",
+  description: "Precision-focused, distraction-free desktop timer for power users. Boost productivity with multi-timer workflows, keyboard shortcuts, and focus sessions.",
   keywords: [
     "timer",
     "pomodoro",
     "focus",
     "productivity",
     "stopwatch",
+    "desktop timer",
+    "productivity app",
+    "time management",
+    "focus timer",
+    "work timer",
     "nextjs",
     "typescript",
   ],
   authors: [{ name: "Chrona" }],
   creator: "Walid Houssaf",
+  category: "productivity",
   openGraph: {
     title: "Chrona Desktop",
     description:
