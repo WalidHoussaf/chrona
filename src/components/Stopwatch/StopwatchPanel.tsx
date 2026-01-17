@@ -18,13 +18,10 @@ function usePausableRotation(running: boolean, durationMs: number, shouldReset: 
 
   useAnimationFrame((time, delta) => {
     if (!running) return;
-    // Calculate how many degrees to move based on time passed since last frame (delta)
-    // 360 degrees / durationMs = degrees per millisecond
     const step = (360 / durationMs) * delta; 
     rotation.set(rotation.get() + step);
   });
 
-  // Reset logic: explicitly set to 0 when the timer is cleared
   useEffect(() => {
     if (shouldReset) {
       rotation.set(0);
@@ -40,7 +37,6 @@ function usePausableRotation(running: boolean, durationMs: number, shouldReset: 
 function BackgroundMechanism({ running, displayTime }: { running: boolean; displayTime: number }) {
   const smoothEase = "linear" as Easing;
   
-  // Background elements that always spin slowly (decorative)
   const speedSlow = { repeat: Infinity, ease: smoothEase, duration: 120 };
   const speedMed = { repeat: Infinity, ease: smoothEase, duration: 80 };
 
@@ -49,8 +45,6 @@ function BackgroundMechanism({ running, displayTime }: { running: boolean; displ
     transformBox: "view-box" as const,
   };
 
-  // --- NEW ROTATION LOGIC ---
-  // We detect a "Reset" if the display time hits 0 while not running
   const isReset = displayTime === 0;
 
   // 1. Fast Gradient Spinner (10 seconds per rotation)
@@ -85,7 +79,7 @@ function BackgroundMechanism({ running, displayTime }: { running: boolean; displ
           <circle cx="300" cy="300" r="290" strokeWidth="0.2" className="opacity-20" />
           <circle cx="300" cy="300" r="200" strokeWidth="0.2" className="opacity-10" />
 
-          {/* Background Ticks (Always spinning slowly) */}
+          {/* Background Ticks */}
           <motion.g initial={{ rotate: 0 }} animate={{ rotate: 360 }} transition={speedSlow} style={centerPivot}>
             {Array.from({ length: 60 }).map((_, i) => (
               <line
@@ -101,7 +95,7 @@ function BackgroundMechanism({ running, displayTime }: { running: boolean; displ
             ))}
           </motion.g>
 
-          {/* --- FAST SPINNER (Fixed) --- */}
+          {/* --- FAST SPINNER --- */}
           <motion.g style={{ ...centerPivot, rotate: rotateSpinner }}>
             <circle
               cx="300"
@@ -118,14 +112,14 @@ function BackgroundMechanism({ running, displayTime }: { running: boolean; displ
             />
           </motion.g>
 
-          {/* Decorative Triangles (Always spinning) */}
+          {/* Decorative Triangles */}
           <motion.g initial={{ rotate: 360 }} animate={{ rotate: 0 }} transition={speedMed} style={centerPivot}>
             <circle cx="300" cy="300" r="140" strokeWidth="0.5" strokeDasharray="2 4" className="opacity-30" />
             <path d="M 300 155 L 295 165 L 305 165 Z" fill="currentColor" className="opacity-20" />
             <path d="M 300 445 L 295 435 L 305 435 Z" fill="currentColor" className="opacity-20" />
           </motion.g>
 
-          {/* Numbers (Always spinning slowly) */}
+          {/* Numbers */}
           <motion.g
             initial={{ rotate: 0 }}
             animate={{ rotate: 360 }}
@@ -157,7 +151,7 @@ function BackgroundMechanism({ running, displayTime }: { running: boolean; displ
             <line x1="300" y1="100" x2="300" y2="500" strokeWidth="0.2" />
           </g>
 
-          {/* --- MINUTE HAND (Fixed) --- */}
+          {/* --- MINUTE HAND --- */}
           <motion.g style={{ ...centerPivot, rotate: rotateMinuteHand }}>
             <rect x="0" y="0" width="600" height="600" fill="none" stroke="none" />
             <line
@@ -175,7 +169,7 @@ function BackgroundMechanism({ running, displayTime }: { running: boolean; displ
             <line x1="300" y1="300" x2="300" y2="320" strokeWidth="2.5" className="opacity-30" />
           </motion.g>
 
-          {/* --- SECOND HAND (Fixed) --- */}
+          {/* --- SECOND HAND --- */}
           <motion.g style={{ ...centerPivot, rotate: rotateSecondHand }}>
             <rect x="0" y="0" width="600" height="600" fill="none" stroke="none" />
             <line
@@ -203,7 +197,6 @@ function BackgroundMechanism({ running, displayTime }: { running: boolean; displ
   );
 }
 
-// ... GridBackground component stays the same ...
 const GridBackground = () => (
   <div className="absolute inset-0 pointer-events-none z-0">
     <ColorBends
@@ -257,9 +250,6 @@ export function StopwatchPanel() {
   return (
     <div className="flex h-full flex-col bg-background relative overflow-hidden">
       <GridBackground />
-      {/* FIX: Pass 'display' (time) to the background mechanism. 
-         We need this so the hands know when to reset (when display === 0).
-      */}
       <BackgroundMechanism running={running} displayTime={display} />
 
       <motion.header
@@ -287,7 +277,12 @@ export function StopwatchPanel() {
         </div>
       </motion.header>
 
-      <main className="flex-1 flex flex-col items-center justify-center w-full px-8 z-10 relative">
+      <main 
+        className={clsx(
+          "flex-1 flex flex-col items-center justify-center w-full px-8 z-10 relative transition-[padding-bottom] duration-500 ease-in-out",
+          hasLaps ? "pb-[34vh] md:pb-0" : "pb-0"
+        )}
+      >
         <div className="relative flex flex-col items-center">
           <div className="relative">
             <div
@@ -299,7 +294,7 @@ export function StopwatchPanel() {
 
             <span
               className={clsx(
-                "relative z-10 font-offbit text-[12vw] md:text-[9rem] leading-none font-bold tracking-tighter tabular-nums transition-colors duration-300 select-none",
+                "relative z-10 font-offbit text-[18vw] md:text-[9rem] leading-none font-bold tracking-tighter tabular-nums transition-colors duration-300 select-none",
                 running ? "text-accent drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]" : "text-muted"
               )}
             >
@@ -309,7 +304,7 @@ export function StopwatchPanel() {
 
           <motion.div
             initial={false}
-            animate={{ y: hasLaps ? -24 : 0 }}
+            animate={{ y: hasLaps ? -12 : 0 }}
             transition={{ type: "spring", stiffness: 250, damping: 22 }}
             className="flex items-center gap-8 mt-16"
           >
@@ -384,24 +379,35 @@ export function StopwatchPanel() {
       <AnimatePresence>
         {hasLaps && (
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="h-64 shrink-0 border-t border-border/40 bg-card/40 backdrop-blur-md z-20 flex flex-col"
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ type: "spring", bounce: 0, duration: 0.5 }}
+            className={clsx(
+                "z-20 flex flex-col border-t border-border/40 backdrop-blur-md",
+                // Mobile: Adjusted height to 32vh (~32% of screen) to clear buttons
+                "h-[32vh] bg-background/95 absolute bottom-0 w-full shadow-[0_-5px_30px_-5px_rgba(0,0,0,1)]",
+                // Desktop: Original fixed height
+                "md:h-64 md:relative md:bg-card/40 md:shrink-0 md:shadow-none"
+            )}
           >
-            <div className="flex items-center justify-between px-8 py-4 border-b border-border/30 bg-muted/5">
+            <div className="flex items-center justify-between px-6 py-4 md:px-8 md:py-4 border-b border-border/30 bg-muted/5 shrink-0">
               <div className="flex items-center gap-2 text-muted">
-                <History size={22} />
-                <span className="font-nohemi text-lg pt-1">Session Data Log</span>
+                <History size={22} className="hidden md:block" />
+                <span className="font-nohemi text-sm md:text-lg md:pt-1 uppercase tracking-wider md:tracking-normal">
+                    <span className="md:hidden">Telemetry Log</span>
+                    <span className="hidden md:inline">Session Data Log</span>
+                </span>
               </div>
-              <span className="font-nohemi text-sm text-muted/60 uppercase tracking-widest border border-border/50 px-2 py-0.5 rounded">
-                {laps.length} Entries
+              <span className="font-nohemi text-[10px] md:text-sm text-muted/60 uppercase tracking-widest border border-border/50 px-2 py-0.5 rounded">
+                {laps.length} <span className="hidden md:inline">Entries</span>
               </span>
             </div>
 
             <ScrollArea className="flex-1" ref={scrollViewportRef}>
               <div className="flex flex-col p-2 space-y-1">
-                <div className="grid grid-cols-3 px-6 py-2 text-md uppercase text-muted/70 font-nohemi">
+                {/* Desktop Headers (Hidden on Mobile) */}
+                <div className="hidden md:grid grid-cols-3 px-6 py-2 text-md uppercase text-muted/70 font-nohemi">
                   <span>Index</span>
                   <span className="text-center">Split Status</span>
                   <span className="text-right">Recorded Time</span>
@@ -414,23 +420,32 @@ export function StopwatchPanel() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       key={lap.id}
-                      className="group grid grid-cols-3 items-center px-6 py-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 cursor-default"
+                      className={clsx(
+                          "group items-center px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 cursor-default",
+                          // Mobile: Flex (Space Between)
+                          "flex justify-between",
+                          // Desktop: Grid (3 Columns)
+                          "md:grid md:grid-cols-3"
+                      )}
                     >
+                      {/* Index */}
                       <div className="flex items-center gap-3">
-                        <span className="font-offbit text-lg text-muted/70 group-hover:text-accent transition-colors">
+                        <span className="font-offbit text-sm md:text-lg text-muted/70 group-hover:text-accent transition-colors">
                           #{String(realIndex).padStart(2, "0")}
                         </span>
                       </div>
 
-                      <div className="flex justify-center">
+                      {/* Status (Hidden on Mobile) */}
+                      <div className="hidden md:flex justify-center">
                         <div className="flex items-center gap-2 transition-opacity">
                           <Zap size={16} className="text-accent mb-1" />
                           <span className="text-md uppercase text-accent font-offbit">Recorded</span>
                         </div>
                       </div>
 
+                      {/* Time */}
                       <div className="text-right">
-                        <span className="font-offbit text-2xl tabular-nums text-foreground/70 group-hover:text-foreground tracking-wide">
+                        <span className="font-offbit text-xl md:text-2xl tabular-nums text-foreground/90 group-hover:text-foreground tracking-wide">
                           {formatDurationMs(lap.elapsedMs)}
                         </span>
                       </div>

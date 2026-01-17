@@ -1,16 +1,6 @@
-import React, { useEffect, useRef, useCallback, CSSProperties, ReactNode, useSyncExternalStore } from 'react';
+import React, { useEffect, useRef, useCallback, CSSProperties, ReactNode } from 'react';
 
 let electricBorderActiveCount = 0;
-const electricBorderCountListeners = new Set<() => void>();
-
-function emitElectricBorderCount() {
-  for (const l of electricBorderCountListeners) l();
-}
-
-function subscribeElectricBorderCount(listener: () => void) {
-  electricBorderCountListeners.add(listener);
-  return () => electricBorderCountListeners.delete(listener);
-}
 
 function getElectricBorderCountSnapshot() {
   return electricBorderActiveCount;
@@ -69,11 +59,8 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
   className,
   style
 }) => {
-  const activeCount = useSyncExternalStore(
-    subscribeElectricBorderCount,
-    getElectricBorderCountSnapshot,
-    getElectricBorderCountSnapshot
-  );
+  const hasPositionClass = /\b(static|fixed|absolute|relative|sticky)\b/.test(className ?? '');
+  const containerPositionClass = hasPositionClass ? '' : 'relative';
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,11 +75,9 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
 
   useEffect(() => {
     electricBorderActiveCount += 1;
-    emitElectricBorderCount();
 
     return () => {
       electricBorderActiveCount = Math.max(0, electricBorderActiveCount - 1);
-      emitElectricBorderCount();
     };
   }, []);
 
@@ -236,12 +221,13 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     if (!ctx) return;
 
     const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+    const activeCountSnapshot = getElectricBorderCountSnapshot();
 
     const effectiveQuality: 'low' | 'medium' | 'high' = (() => {
       if (quality !== 'auto') return quality;
       if (prefersReducedMotion) return 'low';
-      if (activeCount >= 18) return 'low';
-      if (activeCount >= 8) return 'medium';
+      if (activeCountSnapshot >= 18) return 'low';
+      if (activeCountSnapshot >= 8) return 'medium';
       return 'high';
     })();
 
@@ -249,7 +235,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       maxFps ??
       (prefersReducedMotion
         ? 15
-        : activeCount >= 18
+        : activeCountSnapshot >= 18
           ? 20
           : effectiveQuality === 'high'
             ? 60
@@ -261,7 +247,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     const effectiveDprCap = dprCap ?? (effectiveQuality === 'high' ? 2 : 1.5);
     const effectiveRenderScale = Math.max(
       0.5,
-      Math.min(1, renderScale ?? (activeCount >= 18 ? 0.7 : effectiveQuality === 'low' ? 0.75 : 1))
+      Math.min(1, renderScale ?? (activeCountSnapshot >= 18 ? 0.7 : effectiveQuality === 'low' ? 0.75 : 1))
     );
 
     const octaves = effectiveQuality === 'high' ? 7 : effectiveQuality === 'low' ? 3 : 5;
@@ -275,7 +261,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
 
     const effectiveThickness = thickness ?? strokeWidth;
 
-    const MAX_POINTS = activeCount >= 18 ? 420 : 700;
+    const MAX_POINTS = activeCountSnapshot >= 18 ? 420 : 700;
 
     let svgPaths: SVGPathElement[] = [];
     let svgPathLengths: number[] = [];
@@ -656,7 +642,6 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     dprCap,
     renderScale,
     pauseWhenOffscreen,
-    activeCount,
     octavedNoise,
     getRoundedRectPoint
   ]
@@ -665,7 +650,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-visible isolate ${className ?? ''}`}
+      className={`${containerPositionClass} overflow-visible isolate ${className ?? ''}`.trim()}
       style={{ '--electric-border-color': color, borderRadius, contain: 'layout style', ...style } as CSSProperties}
     >
       <div

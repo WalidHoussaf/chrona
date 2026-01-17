@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Keyboard } from "lucide-react";
 import ElectricBorder from "@/components/UI/ElectricBorder";
 
@@ -24,89 +24,102 @@ const Key = ({ children }: { children: React.ReactNode }) => (
 
 export function KeyboardShortcuts() {
   const [isHovered, setIsHovered] = useState(false);
+  const [canShow, setCanShow] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia(
+      "(min-width: 1024px) and (hover: hover) and (pointer: fine)"
+    );
+
+    const update = () => setCanShow(mq.matches);
+    update();
+
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  if (!canShow) return null;
 
   return (
-    <div className="fixed right-4 bottom-4 z-50">
-      <div 
-        className="relative"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+    <div
+      className="fixed right-4 bottom-4 z-50"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <button 
+        className="relative z-20 flex h-8 w-8 items-center justify-center rounded-full bg-card/10 text-muted/60 hover:bg-card/20 hover:text-muted/80 transition-colors cursor-pointer"
+        aria-label="Show keyboard shortcuts"
       >
-        <button 
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-card/10 text-muted/60 hover:bg-card/20 hover:text-muted/80 transition-colors cursor-pointer"
-          aria-label="Show keyboard shortcuts"
+        <Keyboard size={20} />
+      </button>
+      
+      {isHovered && (
+        <ElectricBorder
+          mode="rect"
+          color={`var(--accent)`}
+          speed={0.4}
+          chaos={0.16}
+          svgDisplacement={6}
+          thickness={1}
+          fuzziness={0.4}
+          glow={1}
+          borderRadius={12}
+          showOutline={false}
+          className="fixed right-4 bottom-16 z-10 w-120 rounded-lg bg-card/95 p-4 text-foreground shadow-xl backdrop-blur-sm border border-border"
         >
-          <Keyboard size={20} />
-        </button>
-        
-        {isHovered && (
-          <ElectricBorder
-            mode="rect"
-            color={`var(--accent)`}
-            speed={0.4}
-            chaos={0.16}
-            svgDisplacement={6}
-            thickness={1}
-            fuzziness={0.4}
-            glow={1}
-            borderRadius={12}
-            showOutline={false}
-            className="absolute right-0 bottom-10 w-120 rounded-lg bg-card/95 p-4 text-foreground shadow-xl backdrop-blur-sm border border-border"
-          >
-            {/* Header text */}
-            <h3 className="mb-3 font-galgo tracking-widest text-4xl text-foreground">Keyboard Shortcuts</h3>
+          {/* Header text */}
+          <h3 className="mb-3 font-galgo tracking-widest text-4xl text-foreground">Keyboard Shortcuts</h3>
 
-            <div className="grid grid-cols-3 gap-4">
-              
-              <div>
-                <Key>1 - 4</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Switch View</div>
-              </div>
-              
-              <div>
-                <Key>Space</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Start/Pause</div>
-              </div>
-
-              <div>
-                <Key>N</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">New Timer</div>
-              </div>
-              
-              <div>
-                <Key>R</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Reset</div>
-              </div>
-
-              <div>
-                <Key>Tab</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Switch Timer</div>
-              </div>
-              
-              <div>
-                <Key>Ctrl+Shift+S</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Save Preset</div>
-              </div>
-              
-              <div>
-                <Key>Ctrl+Shift+X</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Kill All</div>
-              </div>
-
-              <div>
-                <Key>Ctrl+Enter</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Fullscreen</div>
-              </div>
-
-              <div>
-                <Key>Esc</Key>
-                <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Exit Focus</div>
-              </div>
-
+          <div className="grid grid-cols-3 gap-4">
+            
+            <div>
+              <Key>1 - 4</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Switch View</div>
             </div>
-          </ElectricBorder>
-        )}
-      </div>
+            
+            <div>
+              <Key>Space</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Start/Pause</div>
+            </div>
+
+            <div>
+              <Key>N</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">New Timer</div>
+            </div>
+            
+            <div>
+              <Key>R</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Reset</div>
+            </div>
+
+            <div>
+              <Key>Tab</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Switch Timer</div>
+            </div>
+            
+            <div>
+              <Key>Ctrl+Shift+S</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Save Preset</div>
+            </div>
+            
+            <div>
+              <Key>Ctrl+Shift+X</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Kill All</div>
+            </div>
+
+            <div>
+              <Key>Ctrl+Enter</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Fullscreen</div>
+            </div>
+
+            <div>
+              <Key>Esc</Key>
+              <div className="font-galgo font-extralight tracking-wider text-3xl text-foreground/80">Exit Focus</div>
+            </div>
+
+          </div>
+        </ElectricBorder>
+      )}
     </div>
   );
 }

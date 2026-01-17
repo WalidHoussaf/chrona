@@ -73,7 +73,7 @@ const Key = ({ children }: { children: React.ReactNode }) => (
 );
 
 const SectionHeader = ({ icon: Icon, title }: { icon: React.ComponentType<{ size?: number; className?: string }>, title: string }) => (
-  <div className="flex items-center gap-3 mb-6">
+  <div className="flex items-center gap-3 mb-4 sm:mb-6">
     <ElectricBorder
       mode="rect"
       color={`var(--accent)`}
@@ -91,7 +91,7 @@ const SectionHeader = ({ icon: Icon, title }: { icon: React.ComponentType<{ size
         <Icon size={18} />
       </div>
     </ElectricBorder>
-    <span className="font-galgo text-3xl uppercase tracking-widest text-muted">{title}</span>
+    <span className="font-galgo text-xl sm:text-2xl md:text-3xl uppercase tracking-widest text-muted">{title}</span>
   </div>
 );
 
@@ -119,7 +119,7 @@ const Card = ({ children, className = "", onClick }: { children: React.ReactNode
     >
       <div
         className={clsx(
-          "h-full w-full overflow-hidden rounded-xl bg-card/50 p-8 backdrop-blur-sm transition-all duration-500",
+          "h-full w-full overflow-hidden rounded-xl bg-card/50 p-5 sm:p-6 md:p-8 backdrop-blur-sm transition-all duration-500",
           "hover:bg-card hover:shadow-[0_0_30px_-10px_rgba(204,255,0,0.1)]"
         )}
       >
@@ -154,18 +154,18 @@ export function SettingsPanel() {
   return (
     <div className="relative h-full w-full overflow-hidden bg-background text-foreground">
       <GridBackground />
-      <div className="relative z-10 h-full w-full overflow-y-auto">
+      <div className="relative z-10 h-full w-full overflow-y-auto scrollbar-hide md:scrollbar-visible">
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="relative z-10 mx-auto w-full max-w-7xl p-6 md:p-12 pb-32"
+          className="relative z-10 mx-auto w-full max-w-7xl p-5 sm:p-6 md:p-12 pb-10"
         >
           {/* Header Section */}
-          <motion.div variants={itemVariants} className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <motion.div variants={itemVariants} className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-8">
             <div>
               <h1 className="font-nohemi text-2xl md:text-4xl tracking-tighter text-foreground">Settings</h1>
-              <p className="mt-2 font-offbit text-sm uppercase tracking-widest text-accent max-w-md">
+              <p className="mt-2 font-offbit text-xs sm:text-sm uppercase tracking-widest text-accent max-w-md">
                 System Configuration • v1.0.0
               </p>
             </div>
@@ -173,7 +173,7 @@ export function SettingsPanel() {
             {/* Data Export Button */}
             <button
               onClick={onCopyPresets}
-              className="group relative flex items-center gap-4 overflow-hidden rounded-full bg-accent px-8 py-4 text-background transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-accent px-5 py-3 text-background transition-all hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer sm:w-auto sm:gap-4 sm:px-8 sm:py-4"
             >
               <div className="relative h-5 w-5 text-background">
                 <AnimatePresence mode="wait">
@@ -200,36 +200,36 @@ export function SettingsPanel() {
                   )}
                 </AnimatePresence>
               </div>
-              <span className="font-offbit text-xs font-bold uppercase tracking-wider text-background">
+              <span className="font-offbit text-xs sm:text-base uppercase tracking-wider text-background">
                 {copied ? "JSON Copied" : "Export Data"}
               </span>
             </button>
           </motion.div>
 
           {/* Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
             
             {/* Stats Card (Local Storage) */}
             <Card className="md:col-span-4 h-full">
               <div className="flex flex-col justify-between h-full">
                   <SectionHeader icon={Database} title="Local Storage" />
-                  <div className="flex flex-col gap-8">
+                  <div className="flex flex-col gap-6 sm:gap-8">
                       <div className="flex items-baseline justify-between">
-                          <span className="text-foreground font-galgo font-light text-[28px] uppercase tracking-widest group-hover:text-accent transition-colors">Active Timers</span>
-                          <span className="font-offbit text-4xl text-foreground">{timersCount}</span>
+                          <span className="text-foreground font-galgo font-light text-lg sm:text-xl md:text-[28px] uppercase tracking-widest group-hover:text-accent transition-colors">Active Timers</span>
+                          <span className="font-offbit text-3xl sm:text-4xl text-foreground">{timersCount}</span>
                       </div>
                       <div className="flex items-baseline justify-between">
-                          <span className="text-foreground font-galgo font-light text-[28px] uppercase tracking-widest group-hover:text-accent transition-colors">Saved Presets</span>
-                          <span className="font-offbit text-4xl text-foreground">{presetsCount}</span>
+                          <span className="text-foreground font-galgo font-light text-lg sm:text-xl md:text-[28px] uppercase tracking-widest group-hover:text-accent transition-colors">Saved Presets</span>
+                          <span className="font-offbit text-3xl sm:text-4xl text-foreground">{presetsCount}</span>
                       </div>
                   </div>
               </div>
             </Card>
 
             {/* Efficiency Tips Card */}
-            <Card className="md:col-span-8 h-full">
+            <Card className="md:col-span-8 h-full hidden md:flex">
                <SectionHeader icon={Zap} title="Efficiency Tips" />
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 h-full">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 h-full">
                  <div className="flex gap-4 items-start group">
                    <ElectricBorder
                      mode="rect"
@@ -249,13 +249,13 @@ export function SettingsPanel() {
                      </div>
                    </ElectricBorder>
                    <div>
-                     <h4 className="font-galgo font-light text-4xl text-foreground mb-2 group-hover:text-accent transition-colors tracking-wider cursor-pointer">Precision Scrubbing</h4>
-                     <div className="text-md font-offbit text-muted leading-relaxed">
-                       Hover over any time field and scroll. Hold <Key>Shift</Key> while scrolling to increment by 5 units.
-                     </div>
-                   </div>
-                 </div>
-                 <div className="flex gap-4 items-start group">
+                     <h4 className="font-galgo font-light text-2xl sm:text-3xl md:text-4xl text-foreground mb-2 group-hover:text-accent transition-colors tracking-wider cursor-pointer">Precision Scrubbing</h4>
+                    <div className="text-sm sm:text-base font-offbit text-muted leading-relaxed">
+                      Hover over any time field and scroll. Hold <Key>Shift</Key> while scrolling to increment by 5 units.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start group">
                    <ElectricBorder
                      mode="rect"
                      color={`var(--accent)`}
@@ -274,22 +274,22 @@ export function SettingsPanel() {
                      </div>
                    </ElectricBorder>
                    <div>
-                     <h4 className="font-galgo font-light text-4xl text-foreground mb-2 group-hover:text-accent transition-colors tracking-wider cursor-pointer">Drag & Organize</h4>
-                     <div className="text-md font-offbit text-muted leading-relaxed">
-                       Every timer and preset is draggable. Grab the handle to reorganize your workspace instantly.
-                     </div>
-                   </div>
-                 </div>
-               </div>
+                     <h4 className="font-galgo font-light text-2xl sm:text-3xl md:text-4xl text-foreground mb-2 group-hover:text-accent transition-colors tracking-wider cursor-pointer">Drag & Organize</h4>
+                    <div className="text-sm sm:text-base font-offbit text-muted leading-relaxed">
+                      Every timer and preset is draggable. Grab the handle to reorganize your workspace instantly.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </Card>
 
             {/* Shortcuts Section */}
-            <Card className="md:col-span-12">
+            <Card className="md:col-span-12 hidden md:flex">
               <SectionHeader icon={Command} title="Keyboard Command Interface" />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mt-6 md:mt-8">
                 
                 {/* Navigation Group */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <div className="flex gap-4 items-center group">
                     <ElectricBorder
                       mode="rect"
@@ -308,24 +308,24 @@ export function SettingsPanel() {
                          <GamepadDirectional size={16} />
                       </div>
                     </ElectricBorder>
-                    <h3 className="font-galgo text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">Navigation</h3>
+                    <h3 className="font-galgo text-2xl sm:text-3xl md:text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">Navigation</h3>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Timer Dashboard</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Timer Dashboard</span> 
                       <Key>1</Key>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Stopwatch</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Stopwatch</span> 
                       <Key>2</Key>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Focus Mode</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Focus Mode</span> 
                       <Key>3</Key>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Settings</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Settings</span> 
                       <Key>4</Key>
                     </div>
                   </div>
@@ -351,24 +351,24 @@ export function SettingsPanel() {
                          <Keyboard size={16} />
                       </div>
                     </ElectricBorder>
-                    <h3 className="font-galgo text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">Controls</h3>
+                    <h3 className="font-galgo text-2xl sm:text-3xl md:text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">Controls</h3>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Toggle Play/Pause</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Toggle Play/Pause</span> 
                       <Key>Space</Key>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Create Timer</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Create Timer</span> 
                       <Key>N</Key>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Reset Active</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Reset Active</span> 
                       <Key>R</Key>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Cycle Timers</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Cycle Timers</span> 
                       <Key>Tab</Key>
                     </div>
                   </div>
@@ -394,24 +394,24 @@ export function SettingsPanel() {
                          <Cpu size={16} />
                       </div>
                     </ElectricBorder>
-                    <h3 className="font-galgo text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">System</h3>
+                    <h3 className="font-galgo text-2xl sm:text-3xl md:text-4xl tracking-wider text-foreground group-hover:text-accent transition-colors cursor-pointer">System</h3>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Save Preset</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Save Preset</span> 
                       <div className="flex gap-1"><Key>Ctrl</Key> <Key>Shift</Key> <Key>S</Key></div>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Kill All</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Kill All</span> 
                       <div className="flex gap-1"><Key>Ctrl</Key> <Key>Shift</Key> <Key>X</Key></div>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Fullscreen</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Fullscreen</span> 
                       <div className="flex gap-1"><Key>Ctrl</Key> <Key>Enter</Key></div>
                     </div>
-                    <div className="flex justify-between items-center group">
-                      <span className="text-muted font-offbit text-lg group-hover:text-foreground transition-colors">Exit Focus</span> 
+                    <div className="flex justify-between items-center gap-4 group">
+                      <span className="text-muted font-offbit text-sm sm:text-base md:text-lg group-hover:text-foreground transition-colors">Exit Focus</span> 
                       <Key>Esc</Key>
                     </div>
                   </div>
@@ -424,7 +424,7 @@ export function SettingsPanel() {
                {/* Input Card */}
                <Card className="flex flex-col gap-4">
                  <SectionHeader icon={Pointer} title="Input Method" />
-                 <p className="text-md font-offbit text-muted leading-relaxed opacity-80">
+                 <p className="text-sm sm:text-base font-offbit text-muted leading-relaxed opacity-80">
                    Input fields are completely typeless. Use scroll interactions or keyboard shortcuts for fluid control without leaving the keyboard.
                  </p>
                </Card>
@@ -432,7 +432,7 @@ export function SettingsPanel() {
                {/* UI Card */}
                <Card className="flex flex-col gap-4">
                  <SectionHeader icon={Monitor} title="Visual Feedback" />
-                 <p className="text-md font-offbit text-muted leading-relaxed opacity-80">
+                 <p className="text-sm sm:text-base font-offbit text-muted leading-relaxed opacity-80">
                    The interface uses subtle layout shifts and <span className="text-accent">neon</span> indicators to signal timer states.
                  </p>
                </Card>
@@ -465,9 +465,10 @@ export function SettingsPanel() {
                      </ElectricBorder>
                    </div>
                  </div>
-                 <p className="text-md font-offbit text-muted leading-relaxed opacity-80">
-                   Audio cues play on completion and phase changes. Notifications persist if the window is not focused.
-                 </p>
+                 <p className="text-sm sm:text-base font-offbit text-muted leading-relaxed opacity-80">
+                  Audio cues play on completion and phase changes. Notifications persist if the window is not focused.
+                </p>
+
                  <ElectricBorder
                    mode="rect"
                    color={`var(--accent)`}

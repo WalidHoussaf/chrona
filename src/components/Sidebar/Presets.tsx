@@ -58,15 +58,15 @@ export function Presets() {
       
       {/* --- Header Row --- */}
       <div className="flex items-end justify-between border-b border-border pb-2">
-        <h2 className="font-nohemi text-2xl tracking-tighter text-foreground">
+        <h2 className="font-nohemi text-xl lg:text-2xl tracking-tighter text-foreground">
           Presets
         </h2>
         <button
           type="button"
           onClick={onExport}
-          className="group flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-card cursor-pointer"
+          className="group flex items-center rounded-md transition-colors hover:bg-card cursor-pointer gap-1 px-1.5 py-0.5 lg:gap-1.5 lg:px-2 lg:py-1"
         >
-          <span className="font-nohemi text-xs uppercase tracking-wider text-muted group-hover:text-foreground cursor-pointer">
+          <span className="font-nohemi uppercase tracking-wider cursor-pointer text-[10px] text-muted lg:text-xs group-hover:text-foreground">
             Export
           </span>
           <Download size={12} className="text-muted group-hover:text-accent" />
@@ -145,13 +145,13 @@ export function Presets() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex w-full items-center justify-between group cursor-pointer"
         >
-          <span className="font-nohemi text-2xl tracking-tighter text-muted group-hover:text-foreground transition-colors">
+          <span className="font-nohemi text-xl lg:text-2xl tracking-tighter text-foreground hover:text-accent transition-colors">
             Advanced Operations
           </span>
           <ChevronRight 
             size={14} 
             className={clsx(
-              "text-muted transition-transform duration-300",
+              "text-muted transition-transform duration-300 group-hover:text-accent",
               isExpanded ? "rotate-90" : "rotate-0"
             )} 
           />
@@ -175,14 +175,13 @@ export function Presets() {
                   setImportText("");
                 }}
               >
-                <Upload size={12} />
+                <Upload size={12} className="-mt-0.5" />
                 IMPORT JSON
               </button>
-              
               {exportText && (
                 <button
                   type="button"
-                  className="rounded-md px-3 py-1.5 font-offbit text-xs text-muted hover:text-foreground transition-colors cursor-pointer"
+                  className="rounded-md px-3 py-1.5 font-nohemi uppercase tracking-tight text-xs text-muted hover:text-foreground transition-colors cursor-pointer"
                   onClick={() => setExportText(null)}
                 >
                   Clear Output

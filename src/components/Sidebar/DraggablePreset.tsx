@@ -6,15 +6,25 @@ import { CSS } from "@dnd-kit/utilities";
 import clsx from "clsx";
 import { useTimerStore } from "@/store/timerStore";
 import type { Preset } from "@/store/timerStore";
-import { AlertTriangle, GripVertical, PenLine, Trash2, X, Zap } from "lucide-react";
-import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { AlertTriangle, GripVertical, PenLine, Trash2, X, Zap, ChevronDown } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface DraggablePresetProps {
   preset: Preset;
 }
 
-export function DraggablePreset({ preset }: DraggablePresetProps) {
+function useDesktopMediaQuery() {
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isDesktop;
+}
 
+export function DraggablePreset({ preset }: DraggablePresetProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: preset.id });
 
   const applyPreset = useTimerStore((s) => s.applyPreset);
@@ -24,20 +34,19 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [nextName, setNextName] = useState(preset.name);
+  const isDesktop = useDesktopMediaQuery();
 
-  const modalVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.9, filter: "blur(10px)" },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      filter: "blur(0px)",
-      transition: {
-        type: "spring",
-        damping: 25,
-        stiffness: 300
-      }
+  const modalVariants = {
+    desktop: {
+      initial: { opacity: 0, scale: 0.95, y: "-50%", x: "-50%", filter: "blur(10px)" },
+      animate: { opacity: 1, scale: 1, y: "-50%", x: "-50%", filter: "blur(0px)" },
+      exit: { opacity: 0, scale: 0.95, y: "-45%", x: "-50%", filter: "blur(10px)" },
     },
-    exit: { opacity: 0, scale: 0.95, filter: "blur(10px)", transition: { duration: 0.15 } }
+    mobile: {
+      initial: { opacity: 0, y: "100%", x: 0 },
+      animate: { opacity: 1, y: "0%", x: 0 },
+      exit: { opacity: 0, y: "100%", x: 0 },
+    },
   };
 
   const openRename = () => {
@@ -156,20 +165,29 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsRenameModalOpen(false)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:bg-black/80 md:backdrop-blur-md"
             />
 
             <motion.div
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
+              variants={isDesktop ? modalVariants.desktop : modalVariants.mobile}
+              initial="initial"
+              animate="animate"
               exit="exit"
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-[600px] origin-center overflow-hidden rounded-[32px] border border-white/10 bg-[#0A0A0A] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+              className={clsx(
+                "fixed z-50 origin-center overflow-hidden border-white/10 bg-[#0A0A0A]",
+                "bottom-0 left-0 w-full rounded-t-[32px] border-t pb-safe shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.8)]",
+                "md:top-1/2 md:left-1/2 md:bottom-auto md:w-full md:max-w-[600px] md:rounded-[32px] md:border md:pb-0 md:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
+              )}
             >
               <div className="absolute inset-0 opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none z-0" />
 
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/1">
+              <div className="absolute top-0 left-0 w-full flex justify-center pt-3 md:hidden z-20 pointer-events-none">
+                <div className="h-1.5 w-12 rounded-full bg-white/20" />
+              </div>
+
+              <div className="relative z-10 flex flex-col h-full max-h-[85vh] md:max-h-none">
+                <div className="flex items-center justify-between px-6 pt-8 pb-4 md:px-8 md:py-6 border-b border-white/5 bg-white/1">
                   <div className="flex flex-col">
                     <span className="font-galgo text-5xl tracking-wider text-white">RENAME PRESET</span>
                     <span className="font-nohemi text-md uppercase tracking-[0.2em] text-accent/80">{preset.name}</span>
@@ -178,11 +196,11 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                     onClick={() => setIsRenameModalOpen(false)}
                     className="rounded-full p-2 text-muted cursor-pointer hover:bg-white/10 hover:text-white transition-colors"
                   >
-                    <X size={20} strokeWidth={1.5} />
+                    {isDesktop ? <X size={20} strokeWidth={1.5} /> : <ChevronDown size={24} strokeWidth={1.5} />}
                   </button>
                 </div>
 
-                <div className="p-8 space-y-8">
+                <div className="p-6 md:p-8 space-y-8 overflow-y-auto overscroll-contain">
                   <div className="py-4 flex flex-col items-center justify-center text-center space-y-6">
                     <div className="h-16 w-16 rounded-full bg-accent/5 flex items-center justify-center text-accent mb-2 border border-accent/30">
                       <PenLine size={22} />
@@ -209,10 +227,14 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                  <div className={clsx(
+                    "pt-4 border-t border-white/5 flex gap-4",
+                    "flex-col-reverse",
+                    "md:flex-row md:items-center md:justify-between"
+                  )}>
                     <button
                       onClick={() => setIsRenameModalOpen(false)}
-                      className="group flex items-center gap-2 font-nohemi text-lg tracking-tighter text-muted/50 hover:text-foreground transition-colors cursor-pointer"
+                      className="group flex items-center justify-center gap-2 font-nohemi text-lg tracking-tighter text-muted/50 hover:text-foreground transition-colors cursor-pointer py-3 md:py-0"
                     >
                       <X size={20} className="group-hover:scale-110 transition-transform mb-1" />
                       <span>Cancel Operation</span>
@@ -222,7 +244,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                       onClick={confirmRename}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center gap-2 font-nohemi bg-accent text-black px-6 py-2 rounded-full text-lg tracking-tighter hover:bg-accent/90 transition-colors cursor-pointer"
+                      className="w-full md:w-auto flex items-center justify-center gap-2 font-nohemi bg-accent text-black px-6 py-4 md:py-2 rounded-xl md:rounded-full text-lg tracking-tighter hover:bg-accent/90 transition-colors cursor-pointer"
                     >
                       <PenLine size={16} className="mb-0.5" />
                       <span>Rename</span>
@@ -243,20 +265,29 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDeleteModalOpen(false)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:bg-black/80 md:backdrop-blur-md"
             />
 
             <motion.div
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
+              variants={isDesktop ? modalVariants.desktop : modalVariants.mobile}
+              initial="initial"
+              animate="animate"
               exit="exit"
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-[600px] origin-center overflow-hidden rounded-[32px] border border-white/10 bg-[#0A0A0A] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+              className={clsx(
+                "fixed z-50 origin-center overflow-hidden border-white/10 bg-[#0A0A0A]",
+                "bottom-0 left-0 w-full rounded-t-[32px] border-t pb-safe shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.8)]",
+                "md:top-1/2 md:left-1/2 md:bottom-auto md:w-full md:max-w-[600px] md:rounded-[32px] md:border md:pb-0 md:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
+              )}
             >
               <div className="absolute inset-0 opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none z-0" />
 
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/1">
+              <div className="absolute top-0 left-0 w-full flex justify-center pt-3 md:hidden z-20 pointer-events-none">
+                <div className="h-1.5 w-12 rounded-full bg-white/20" />
+              </div>
+
+              <div className="relative z-10 flex flex-col h-full max-h-[85vh] md:max-h-none">
+                <div className="flex items-center justify-between px-6 pt-8 pb-4 md:px-8 md:py-6 border-b border-white/5 bg-white/1">
                   <div className="flex flex-col">
                     <span className="font-galgo text-5xl tracking-wider text-white">SYSTEM PURGE</span>
                     <span className="font-nohemi text-sm uppercase tracking-[0.2em] text-red-400/80">Preset Marked</span>
@@ -265,11 +296,11 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                     onClick={() => setIsDeleteModalOpen(false)}
                     className="rounded-full p-2 text-muted cursor-pointer hover:bg-white/10 hover:text-white transition-colors"
                   >
-                    <X size={20} strokeWidth={1.5} />
+                    {isDesktop ? <X size={20} strokeWidth={1.5} /> : <ChevronDown size={24} strokeWidth={1.5} />}
                   </button>
                 </div>
 
-                <div className="p-8 space-y-8">
+                <div className="p-6 md:p-8 space-y-8 overflow-y-auto overscroll-contain">
                   <div className="py-4 flex flex-col items-center justify-center text-center space-y-6">
                     <div className="h-16 w-16 rounded-full bg-red-500/5 flex items-center justify-center text-red-400 mb-2 border border-red-500/30">
                       <AlertTriangle size={32} />
@@ -283,10 +314,14 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                  <div className={clsx(
+                    "pt-4 border-t border-white/5 flex gap-4",
+                    "flex-col-reverse",
+                    "md:flex-row md:items-center md:justify-between"
+                  )}>
                     <button
                       onClick={() => setIsDeleteModalOpen(false)}
-                      className="group flex items-center gap-2 font-nohemi text-lg tracking-tighter text-muted/50 hover:text-foreground transition-colors cursor-pointer"
+                      className="group flex items-center justify-center gap-2 font-nohemi text-lg tracking-tighter text-muted/50 hover:text-foreground transition-colors cursor-pointer py-3 md:py-0"
                     >
                       <X size={20} className="group-hover:scale-110 transition-transform mb-1" />
                       <span>Cancel Operation</span>
@@ -296,7 +331,7 @@ export function DraggablePreset({ preset }: DraggablePresetProps) {
                       onClick={confirmDelete}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center gap-2 font-nohemi bg-red-500 text-white px-6 py-2 rounded-full text-xl tracking-tighter hover:bg-red-600 transition-colors cursor-pointer"
+                      className="w-full md:w-auto flex items-center justify-center gap-2 font-nohemi bg-red-500 text-white px-6 py-4 md:py-2 rounded-xl md:rounded-full text-xl tracking-tighter hover:bg-red-600 transition-colors cursor-pointer"
                     >
                       <Trash2 size={20} className="mb-1" />
                       <span>Delete</span>

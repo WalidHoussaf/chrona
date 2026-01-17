@@ -25,36 +25,34 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
   const display = runtime?.displayMs ?? 0;
   const status = runtime?.status ?? "idle";
 
-  const hms = useMemo(() => {
-    if (!timer) return { h: 0, m: 0, s: 0 };
-    return splitMsToHms(timer.durationMs);
-  }, [timer]);
-
-  // Animation for Completion (Replicating GSAP fromTo behavior)
+  // Animation for Completion
   useEffect(() => {
     if (lastStatusRef.current === status) return;
     lastStatusRef.current = status;
 
     if (status === "completed") {
       controls.start({
-        // Array syntax [from, to] replicates gsap.fromTo
         scale: [1, 1.02],
         boxShadow: ["0 0 0px rgba(204, 255, 0, 0)", "0 0 30px rgba(204, 255, 0, 0.3)"],
         transition: {
           duration: 0.2,
-          ease: "easeOut", // Matches power2.out
-          repeat: 3,       // Matches GSAP repeat: 3
-          repeatType: "reverse", // Matches GSAP yoyo: true
+          ease: "easeOut",
+          repeat: 3,
+          repeatType: "reverse",
         },
       });
     } else {
-      // Ensure we reset to 'idle' state visually if status changes
       controls.set({ 
         scale: 1, 
         boxShadow: "0 0 0px rgba(204, 255, 0, 0)" 
       });
     }
   }, [status, controls]);
+
+  const hms = useMemo(() => {
+    if (!timer) return { h: 0, m: 0, s: 0 };
+    return splitMsToHms(timer.durationMs);
+  }, [timer]);
 
   if (!timer) return null;
 
@@ -72,13 +70,17 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
       glow={1}
       borderRadius={12}
       showOutline={false}
-      className="h-full w-full"
+      // CHANGED: h-auto everywhere so the card hugs content when it shrinks
+      className="h-auto w-full"
     >
       <motion.div
         animate={controls}
         onMouseDown={() => setActive(timer.id)}
+        onTouchStart={() => setActive(timer.id)}
         className={clsx(
-          "group relative flex flex-col justify-between overflow-hidden rounded-xl p-6 transition-colors duration-500 h-full w-full",
+          "group relative flex flex-col justify-between overflow-hidden rounded-xl p-3 lg:p-6 transition-colors duration-500 w-full",
+          // CHANGED: h-auto everywhere
+          "h-auto",
           // Active State logic
           active 
             ? "bg-card shadow-[0_0_40px_-15px_rgba(204,255,0,0.15)]" 
@@ -94,50 +96,51 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
 
         {/* --- HEADER SECTION --- */}
         <div className="relative z-10 flex items-start justify-between">
-          <div className="flex-1 flex flex-col items-start">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="flex-1 flex flex-col items-start min-w-0 pr-20 lg:pr-0">
+            
+            <div className="flex items-center gap-2 mb-0.5 lg:mb-1">
                <div className={clsx(
                      "h-2 w-2 rounded-full transition-colors duration-300 mb-1",
                      status === "running" ? "bg-accent shadow-[0_0_8px_rgba(204,255,0,0.8)] animate-pulse" : "bg-muted/30"
                )} />
-               <span className="font-nohemi text-sm uppercase tracking-wide text-muted">
+               <span className="font-nohemi text-xs lg:text-sm uppercase tracking-wide text-muted">
                  {status === "idle" ? "Ready" : status}
                </span>
             </div>
+
             <input
-              className="w-full bg-transparent font-nohemi text-4xl tracking-tighter text-foreground outline-none placeholder:text-muted/30 transition-colors focus:text-accent"
+              className="w-full bg-transparent font-nohemi text-2xl lg:text-4xl tracking-tighter text-foreground outline-none placeholder:text-muted/30 transition-colors focus:text-accent"
               value={timer.label}
               onChange={(e) => updateTimer(timer.id, { label: e.target.value })}
               placeholder="Untitled Timer"
             />
           </div>
 
-          {/* Top Right Config Toggles */}
-          <div className="absolute top-0 right-0 flex gap-1 -mt-1">
-            {timer.kind === "timer" && (
-              <>
-                <ConfigToggle 
-                  active={timer.loop} 
-                  onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
-                  icon={InfinityIcon}
-                  label="Loop"
-                />
-                <ConfigToggle 
-                  active={timer.direction === "up"} 
-                  onClick={() => updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })}
-                  icon={timer.direction === "up" ? ChevronsUp : ChevronsDown}
-                  label={timer.direction === "up" ? "Count Up" : "Count Down"}
-                />
-              </>
-            )}
-            {dragHandle}
+          <div className="absolute top-0 right-0 flex items-center gap-1 -mt-1">
+              {timer.kind === "timer" && (
+                <>
+                  <ConfigToggle 
+                    active={timer.loop} 
+                    onClick={() => updateTimer(timer.id, { loop: !timer.loop })}
+                    icon={InfinityIcon}
+                    label="Loop"
+                  />
+                  <ConfigToggle 
+                    active={timer.direction === "up"} 
+                    onClick={() => updateTimer(timer.id, { direction: timer.direction === "down" ? "up" : "down" })}
+                    icon={timer.direction === "up" ? ChevronsUp : ChevronsDown}
+                    label={timer.direction === "up" ? "Count Up" : "Count Down"}
+                  />
+                </>
+              )}
+              {dragHandle}
           </div>
         </div>
 
         {/* --- MAIN DISPLAY --- */}
-        <div className="relative z-10 my-8 flex justify-center">
+        <div className="relative z-10 my-2 lg:my-8 flex justify-center">
           <div className={clsx(
-            "font-offbit text-9xl font-bold tracking-tighter tabular-nums transition-colors duration-300 select-none text-center",
+            "font-offbit text-6xl lg:text-9xl font-bold tracking-tighter tabular-nums transition-colors duration-300 select-none text-center",
             running ? "text-accent drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]" : "text-foreground"
           )}>
             {formatDurationMs(display)}
@@ -145,16 +148,15 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
         </div>
 
         {/* --- INPUTS & CONTROLS --- */}
-        <div className="relative z-10 flex flex-col gap-5 mt-auto">
+        <div className="relative z-10 flex flex-col gap-2 lg:gap-5 mt-auto">
           
-          {/* 1. Time Inputs 
-              (We wrap them in a container that blurs/fades when running) 
-          */}
+          {/* 1. Time Inputs (Collapsible Everywhere) */}
           <div className={clsx(
-            "grid grid-cols-3 gap-3 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            "grid grid-cols-3 gap-1 lg:gap-3 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            // UNIFIED LOGIC: If running, collapse. If not, expand. No lg: override.
             running 
-              ? "opacity-20 blur-sm scale-95 pointer-events-none grayscale" 
-              : "opacity-100 scale-100"
+              ? "max-h-0 opacity-0 overflow-hidden -my-1"
+              : "max-h-32 opacity-100 lg:max-h-none lg:scale-100"
           )}>
             {timer.kind === "timer" && (
                 <>
@@ -165,19 +167,17 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
             )}
           </div>
 
-          {/* 2. The Magnetic Command Deck 
-              (A unified container for all actions)
-          */}
-          <div className="group/deck relative flex items-stretch gap-1.5 p-1.5 rounded-2xl bg-black/20 border border-white/5 shadow-inner backdrop-blur-md overflow-hidden">
+          {/* 2. The Magnetic Command Deck */}
+          <div className="group/deck relative flex items-stretch gap-1 p-1 lg:p-1.5 rounded-xl lg:rounded-2xl bg-black/20 border border-white/5 shadow-inner backdrop-blur-md overflow-hidden">
             
             {/* RESET BUTTON */}
             <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setActive(timer.id); resetActive(); }}
-                className="relative group/btn flex items-center justify-center w-12 rounded-xl text-muted/50 hover:text-white hover:bg-white/10 transition-all duration-300 active:scale-90 overflow-hidden cursor-pointer"
+                className="relative group/btn flex items-center justify-center w-10 lg:w-12 rounded-lg lg:rounded-xl text-muted/50 hover:text-white hover:bg-white/10 transition-all duration-300 active:scale-90 overflow-hidden cursor-pointer"
                 title="Reset"
             >
-                <RotateCcw size={18} className="transition-transform duration-500 group-hover/btn:-rotate-180" />
+                <RotateCcw size={16} className="transition-transform duration-500 group-hover/btn:-rotate-180" />
             </button>
 
             {/* HERO START/PAUSE BUTTON */}
@@ -185,27 +185,21 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setActive(timer.id); startPauseActive(); }}
                 className={clsx(
-                    "relative flex-1 h-14 overflow-hidden rounded-xl transition-all duration-500 ease-out group-hover/deck:shadow-lg cursor-pointer",
-                    // Active State (Neon/Solid) vs Idle State (Glass/Outline)
+                    "relative flex-1 h-10 lg:h-14 overflow-hidden rounded-lg lg:rounded-xl transition-all duration-500 ease-out group-hover/deck:shadow-lg cursor-pointer",
                     running 
                         ? "bg-accent text-black" 
                         : "bg-white/5 text-foreground hover:bg-white/10 border border-white/5 hover:border-white/20"
                 )}
             >
-                {/* Text & Icon Content */}
-                <div className="relative z-10 flex items-center justify-center gap-3 w-full h-full font-nohemi text-md tracking-widest uppercase">
+                <div className="relative z-10 flex items-center justify-center gap-2 lg:gap-3 w-full h-full font-nohemi text-sm lg:text-md tracking-widest uppercase">
                     <span className="transition-transform duration-300 active:scale-75 -mt-0.5">
-                        {running ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                        {running ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
                     </span>
                     <span>{running ? "Pause" : "Start"}</span>
                 </div>
-
-                {/* ANIMATION: Diagonal Shimmer */}
                 {!running && (
                     <div className="absolute inset-0 z-0 w-[300%] bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer" />
                 )}
-
-                {/* ANIMATION: Subtle Pulse Overlay when Running */}
                 {running && (
                     <div className="absolute inset-0 bg-white/20 animate-pulse mix-blend-overlay" />
                 )}
@@ -215,10 +209,10 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
             <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); removeTimer(timer.id); }}
-                className="relative group/btn flex items-center justify-center w-12 rounded-xl text-muted/50 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 active:scale-90 cursor-pointer"
+                className="relative group/btn flex items-center justify-center w-10 lg:w-12 rounded-lg lg:rounded-xl text-muted/50 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 active:scale-90 cursor-pointer"
                 title="Delete"
             >
-                <Trash2 size={18} className="transition-transform duration-300 group-hover/btn:rotate-12" />
+                <Trash2 size={16} className="transition-transform duration-300 group-hover/btn:rotate-12" />
             </button>
           </div>
         </div>
@@ -229,22 +223,23 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
 
 // --- Sub-components ---
 
-function ConfigToggle({ active, onClick, icon: Icon, label }: { active: boolean, onClick: () => void, icon: React.ComponentType<{ size?: number; strokeWidth?: number }>, label: string }) {
+function ConfigToggle({ active, onClick, icon: Icon, label }: { active: boolean, onClick: () => void, icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>, label: string }) {
   return (
     <button 
       onClick={onClick}
       title={label}
       className={clsx(
-        "flex items-center gap-1 px-2 py-1 rounded-md border transition-all duration-200 text-sm font-nohemi cursor-pointer",
+        "flex items-center justify-center gap-1 border transition-all duration-200 font-nohemi cursor-pointer",
+        "p-1.5 rounded-lg lg:px-2 lg:py-1 lg:rounded-md", 
         active 
           ? "bg-accent text-background border-accent" 
           : "bg-transparent text-muted border-transparent hover:bg-white/5 hover:text-foreground"
       )}
     >
-      <span className="-mt-0.5 inline-block">
-        <Icon size={24} strokeWidth={1} />
+      <span className="inline-block">
+        <Icon strokeWidth={1} className="w-4 h-4 lg:w-6 lg:h-6" />
       </span>
-      <span>{label}</span>
+      <span className="hidden lg:inline text-sm">{label}</span>
     </button>
   );
 }
@@ -263,7 +258,6 @@ function TimeField({
   max?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-
   const valueRef = useRef(value);
 
   useEffect(() => {
@@ -286,78 +280,67 @@ function TimeField({
 
     const handleWheel = (e: WheelEvent) => {
       if (disabled) return;
-      
       e.preventDefault(); 
-      
       element.blur(); 
-
       const isShiftPressed = e.shiftKey;
       const delta = isShiftPressed ? 5 : 1; 
-      
       const dir = e.deltaY < 0 ? delta : -delta;
-      
       const next = valueRef.current + dir;
       const final = max != null ? Math.min(max, Math.max(0, next)) : Math.max(0, next);
-      
       onChange(final);
     };
 
     element.addEventListener("wheel", handleWheel, { passive: false });
-
     return () => {
       element.removeEventListener("wheel", handleWheel);
     };
   }, [disabled, max, onChange]);
 
   return (
-    <div className="group/field relative flex flex-col gap-1">
-      {/* Label */}
-      <span className="font-offbit text-sm text-muted/50 text-center uppercase tracking-widest group-hover/field:text-accent transition-colors">
+    <div className="group/field relative flex flex-col gap-0.5 lg:gap-1">
+      <span className="font-offbit text-xs lg:text-sm text-muted/50 text-center uppercase tracking-widest group-hover/field:text-accent transition-colors">
         {label}
       </span>
 
-      {/* Input Container */}
-      <div className="relative flex flex-col items-center justify-center rounded-xl border border-border bg-black/20 p-1 group-hover/field:border-white/20 transition-colors">
-        
-        {/* Hover Controls - Top */}
+      <div className="relative flex flex-col items-center justify-center rounded-lg lg:rounded-xl border border-border bg-black/20 p-0.5 lg:p-1 group-hover/field:border-white/20 transition-colors">
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); handleIncrement(); }}
           disabled={disabled}
-          className="w-full flex items-center justify-center h-4 text-muted hover:text-accent opacity-0 group-hover/field:opacity-100 transition-all disabled:hidden cursor-pointer"
+          className={clsx(
+            "w-full flex items-center justify-center text-muted hover:text-accent transition-all disabled:hidden cursor-pointer",
+            "h-6 opacity-100",
+            "lg:h-4 lg:opacity-0 lg:group-hover/field:opacity-100",
+          )}
         >
-          <ArrowUp size={12} />
+          <ArrowUp size={10} className="lg:w-3 lg:h-3" />
         </button>
 
-        {/* Number Input */}
         <div className="relative w-full">
             <input
               ref={inputRef} 
               type="number"
               inputMode="numeric"
-              className="w-full bg-transparent text-center font-offbit text-3xl font-bold text-foreground outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none selection:bg-accent selection:text-background"
+              className="w-full bg-transparent text-center font-offbit text-xl lg:text-3xl font-bold text-foreground outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none selection:bg-accent selection:text-background"
               value={value.toString().padStart(2, '0')}
               disabled={disabled}
               min={0}
               max={max}
               onChange={(e) => onChange(Number(e.target.value || 0))}
             />
-            {/* Tooltip on Hover */}
-            <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover/field:opacity-100 z-50 min-w-max">
-               <div className="flex items-center tracking-wider font-galgo gap-2 rounded bg-card border border-border px-2 py-1 text-2xl text-muted shadow-xl">
-                 <span className="font-offbit tracking-normal text-sm text-foreground">SCROLL</span> to adjust
-               </div>
-            </div>
         </div>
 
-        {/* Hover Controls - Bottom */}
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); handleDecrement(); }}
           disabled={disabled}
-          className="w-full flex items-center justify-center h-4 text-muted hover:text-accent opacity-0 group-hover/field:opacity-100 transition-all disabled:hidden cursor-pointer"
+          className={clsx(
+            "w-full flex items-center justify-center text-muted hover:text-accent transition-all disabled:hidden cursor-pointer",
+             "h-6 opacity-100",
+             "lg:h-4 lg:opacity-0 lg:group-hover/field:opacity-100",
+          )}
         >
-          <ArrowDown size={12} />
+          <ArrowDown size={10} className="lg:w-3 lg:h-3" />
         </button>
       </div>
     </div>

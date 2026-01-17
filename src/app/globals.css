@@ -42,6 +42,24 @@ body {
   color: var(--foreground); 
 }
 
+/* Scrollbar hiding utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Scrollbar visible utility (for desktop) */
+.scrollbar-visible {
+  -ms-overflow-style: auto;  /* Internet Explorer 10+ */
+  scrollbar-width: auto;  /* Firefox */
+}
+.scrollbar-visible::-webkit-scrollbar {
+  display: auto;  /* Safari and Chrome */
+}
+
 /* Marker-style text selection */
 ::selection {
   background: rgba(204, 255, 0, 0.3);
