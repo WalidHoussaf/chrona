@@ -129,7 +129,7 @@ export function AppShell() {
               onClick={() => setNavOpen(true)}
               className="pointer-events-auto absolute -top-3 -right-3 z-50 lg:hidden w-16 h-16 flex items-center justify-center rounded-bl-full rounded-tl-full rounded-br-full bg-white/5 backdrop-blur-xl border-b border-l border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.03)] transition-all duration-300 ease-out hover:bg-white/10 hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
             >
-              {/* Icon alignment for this specific shape */}
+              {/* Icon */}
               <Menu 
                 size={22} 
                 strokeWidth={1.5} 

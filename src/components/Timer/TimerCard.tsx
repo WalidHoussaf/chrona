@@ -70,7 +70,6 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
       glow={1}
       borderRadius={12}
       showOutline={false}
-      // CHANGED: h-auto everywhere so the card hugs content when it shrinks
       className="h-auto w-full"
     >
       <motion.div
@@ -79,13 +78,10 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
         onTouchStart={() => setActive(timer.id)}
         className={clsx(
           "group relative flex flex-col justify-between overflow-hidden rounded-xl p-3 lg:p-6 transition-colors duration-500 w-full",
-          // CHANGED: h-auto everywhere
           "h-auto",
-          // Active State logic
           active 
             ? "bg-card shadow-[0_0_40px_-15px_rgba(204,255,0,0.15)]" 
             : "bg-card/40 hover:shadow-xl",
-          // Completion State
           status === "completed" && "bg-accent/10"
         )}
       >
@@ -150,10 +146,9 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
         {/* --- INPUTS & CONTROLS --- */}
         <div className="relative z-10 flex flex-col gap-2 lg:gap-5 mt-auto">
           
-          {/* 1. Time Inputs (Collapsible Everywhere) */}
+          {/* 1. Time Inputs */}
           <div className={clsx(
             "grid grid-cols-3 gap-1 lg:gap-3 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-            // UNIFIED LOGIC: If running, collapse. If not, expand. No lg: override.
             running 
               ? "max-h-0 opacity-0 overflow-hidden -my-1"
               : "max-h-32 opacity-100 lg:max-h-none lg:scale-100"

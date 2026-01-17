@@ -20,7 +20,7 @@ export function Sidebar({ setNavOpen }: SidebarProps = {}) {
       {/* --- CREATIVE SEPARATOR --- */}
       <div className="absolute right-0 top-0 h-full w-px bg-linear-to-b from-transparent via-accent/50 to-transparent opacity-20 transition-opacity duration-700 group-hover:opacity-100" />
       
-      {/* --- X BUTTON (Corner Style) --- */}
+      {/* --- X BUTTON --- */}
       <button
         type="button"
         onClick={() => setNavOpen?.(false)}
@@ -149,7 +149,7 @@ function NavButton({
         {children}
       </span>
       
-      {/* Active Dot (Right side) */}
+      {/* Active Dot */}
       {active && (
         <span className="ml-auto block h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(204,255,0,0.8)]" />
       )}

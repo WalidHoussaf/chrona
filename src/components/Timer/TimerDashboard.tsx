@@ -98,7 +98,7 @@ export function TimerDashboard() {
 
   // --- Animation Variants ---
   // Mobile: Slides up from bottom
-  // Desktop: Scales in from center (Original behavior)
+  // Desktop: Scales in from center
   const modalVariants = {
     desktop: {
       initial: { opacity: 0, scale: 0.95, y: "-50%", x: "-50%", filter: "blur(10px)" },
@@ -159,10 +159,10 @@ export function TimerDashboard() {
               <button
                 type="button"
                 onClick={() => newTimer("timer")}
-                className="relative flex items-center gap-3 w-full h-full bg-transparent cursor-pointer px-4 py-2 md:px-6 md:py-3"
+                className="relative flex items-center gap-3 w-full h-full bg-transparent cursor-pointer px-5 py-3 md:px-6 md:py-3"
               >
-                <Plus size={16} className="text-accent transition-transform group-hover:rotate-90 mb-0.5 md:size-[18px]" strokeWidth={2.5} />
-                <span className="font-nohemi text-[10px] uppercase tracking-widest text-accent md:text-xs">
+                <Plus size={17} className="text-accent transition-transform group-hover:rotate-90 mb-0.5 md:size-[18px]" strokeWidth={2.5} />
+                <span className="font-nohemi text-xs uppercase tracking-widest text-accent md:text-xs">
                   New Timer
                 </span>
               </button>
@@ -173,13 +173,13 @@ export function TimerDashboard() {
               onClick={() => setIsDeleteModalOpen(true)}
               disabled={sorted.length === 0}
               className={clsx(
-                "group relative flex items-center gap-2 rounded-full bg-transparent px-3 py-2 md:px-6 md:py-3 transition-all duration-300 cursor-pointer",
+                "group relative flex items-center gap-2 rounded-full bg-transparent px-5 py-3 md:px-6 md:py-3 transition-all duration-300 cursor-pointer",
                 "hover:text-red-400 text-muted",
                 "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-muted"
               )}
             >
-               <Trash2 className="mb-0.5" size={14} />
-               <span className="font-nohemi text-[10px] uppercase tracking-widest md:text-xs">
+               <Trash2 className="mb-0.5" size={15} />
+               <span className="font-nohemi text-xs uppercase tracking-widest md:text-xs">
                  Clear All
                </span>
             </button>
@@ -233,7 +233,6 @@ export function TimerDashboard() {
             
             {/* Modal Container */}
             <motion.div 
-              // Switch variants based on screen size
               variants={isDesktop ? modalVariants.desktop : modalVariants.mobile}
               initial="initial"
               animate="animate"

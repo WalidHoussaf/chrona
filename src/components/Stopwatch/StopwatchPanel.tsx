@@ -385,9 +385,7 @@ export function StopwatchPanel() {
             transition={{ type: "spring", bounce: 0, duration: 0.5 }}
             className={clsx(
                 "z-20 flex flex-col border-t border-border/40 backdrop-blur-md",
-                // Mobile: Adjusted height to 32vh (~32% of screen) to clear buttons
                 "h-[32vh] bg-background/95 absolute bottom-0 w-full shadow-[0_-5px_30px_-5px_rgba(0,0,0,1)]",
-                // Desktop: Original fixed height
                 "md:h-64 md:relative md:bg-card/40 md:shrink-0 md:shadow-none"
             )}
           >

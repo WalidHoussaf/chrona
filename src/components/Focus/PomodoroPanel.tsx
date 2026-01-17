@@ -319,7 +319,6 @@ export function PomodoroPanel() {
   }, [focusLock]);
 
   // --- Helpers ---
-
   const handleEnablePomodoro = () => {
     if (!pomodoroTimer) return;
     enablePomodoro(pomodoroTimer.id, config);

@@ -92,7 +92,7 @@ function clampIndex(n: number, min: number, max: number) {
 }
 
 export const useTimerStore = create<TimerState>()(
-  persist(
+  persist<TimerState, [], [], Partial<TimerState>>(
     (set, get) => {
       const engine = getTimerEngine();
       let subscribed = false;
@@ -196,11 +196,11 @@ export const useTimerStore = create<TimerState>()(
       };
 
       return {
-        view: "timers",
-        timers: [],
-        presets: [],
+        view: "timers" as View,
+        timers: [] as TimerItem[],
+        presets: [] as Preset[],
         activeId: null,
-        runtimeById: {},
+        runtimeById: {} as Record<TimerId, TimerRuntime>,
         engineReady: false,
         hasHydrated: false,
 
