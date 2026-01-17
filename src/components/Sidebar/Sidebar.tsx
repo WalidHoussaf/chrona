@@ -99,6 +99,13 @@ export function Sidebar({ setNavOpen }: SidebarProps = {}) {
           <Presets />
         </div>
       </div>
+
+      <div className="px-4 pb-4 pt-2 text-[10px] text-zinc-500">
+        <p className="font-nohemi text-center tracking-[0.25em] text-zinc-400">
+          Created by Walid Houssaf
+        </p>
+        <p className="mt-1 font-offbit text-center tracking-[0.2em]">&copy; 2026 All Rights Reserved</p>
+      </div>
     </aside>
   );
 }

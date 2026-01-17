@@ -52,9 +52,50 @@ const galgo = localFont({
   preload: false,
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "Chrona Desktop",
-  description: "Precision-focused, distraction-free desktop timer.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Chrona Desktop",
+    template: "%s | Chrona Desktop",
+  },
+  description: "Precision-focused, distraction-free desktop timer for power users.",
+  keywords: [
+    "timer",
+    "pomodoro",
+    "focus",
+    "productivity",
+    "stopwatch",
+    "nextjs",
+    "typescript",
+  ],
+  authors: [{ name: "Chrona" }],
+  creator: "Walid Houssaf",
+  openGraph: {
+    title: "Chrona Desktop",
+    description:
+      "Precision-focused, distraction-free desktop timer for power users.",
+    url: siteUrl,
+    siteName: "Chrona Desktop",
+    images: [
+      {
+        url: "/screenshots/timers-dashboard.png",
+        width: 1600,
+        height: 900,
+        alt: "Chrona Desktop interface",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Chrona Desktop",
+    description:
+      "Precision-focused, distraction-free desktop timer for power users.",
+    images: ["/screenshots/timers-dashboard.png"],
+  },
   icons: {
     icon: "/logo1.png",
     shortcut: "/logo1.png",

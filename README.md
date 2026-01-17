@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chrona Desktop
 
-## Getting Started
+![Chrona Desktop](public/logo1.png)
 
-First, run the development server:
+Precision-first, distraction-free desktop timer for power users. Built for focus sessions, rapid multi-timer workflows, and ultra-accurate timing.
+
+**Portfolio Showcase** — Chrona highlights my product design, UI engineering, and systems thinking across precision timing, animation, and keyboard-first UX.
+
+**Live Demo:** https://your-vercel-domain.vercel.app
+
+## 📸 Screens
+
+> Add screenshots to `public/screenshots/` and update the paths below.
+
+![Chrona — Timers Dashboard](public/screenshots/timers-dashboard.png)
+![Chrona — Timers Dashboard](public/screenshots/timers-dashboard1.png)
+![Chrona — Timers Dashboard](public/screenshots/stopwatch-page.png)
+![Chrona — Focus Mode](public/screenshots/focus-mode.png)
+![Chrona — Focus Mode](public/screenshots/focus-mode1.png)
+![Chrona — Settings](public/screenshots/settings.png)
+
+## ✨ Highlights
+
+- High-precision timer engine with drift correction and Web Worker architecture.
+- Multi-timer dashboard with parallel execution and color-coded status indicators.
+- Pomodoro focus system with auto-start rules and cycle tracking.
+- Focus lock mode with full-screen immersive experience.
+- Presets system with import/export and quick launch.
+- Keyboard-first workflows with comprehensive shortcuts.
+
+## 🧰 Tech Stack
+
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- Zustand
+- GSAP
+- Radix UI
+- Lucide React
+
+## 🚀 Getting Started
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📦 Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-## Learn More
+## ☁️ Deployment (Portfolio)
 
-To learn more about Next.js, take a look at the following resources:
+Chrona is deployed online to showcase the full experience in a shareable, production-ready environment. This lets anyone explore the UI, animations, and workflow without local setup.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If you add third-party services, document them here. Example format:
 
-## Deploy on Vercel
+```bash
+# Analytics (example)
+NEXT_PUBLIC_ANALYTICS_ID=
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Notifications (example)
+NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY=
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧭 Feature Roadmap
+
+For full feature details and planned work, see [FEATURE_DOCUMENTATION.md](FEATURE_DOCUMENTATION.md).
