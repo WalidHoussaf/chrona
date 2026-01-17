@@ -1,6 +1,6 @@
 # Chrona Desktop
 
-![Chrona Desktop](public/logo1.png)
+![Chrona Desktop](public/logo.png)
 
 Precision-first, distraction-free desktop timer for power users. Built for focus sessions, rapid multi-timer workflows, and ultra-accurate timing.
 
