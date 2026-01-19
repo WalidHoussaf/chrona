@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
 import { DragEndEvent } from "@dnd-kit/core";
 import { ScrollArea } from "@/components/UI/ScrollArea";
 import { DragDropProvider } from "@/components/UI/DragDropContext";
@@ -11,18 +12,10 @@ import { Plus, Trash2, AlertTriangle, X, Crown, Focus, ChevronDown } from "lucid
 import clsx from "clsx";
 import ElectricBorder from "@/components/UI/ElectricBorder";
 import ColorBends from "@/components/UI/ColorBlends";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 // --- Hooks ---
-function useDesktopMediaQuery() {
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-  return isDesktop;
-}
+const useDesktopMediaQuery = () => useMediaQuery("(min-width: 768px)");
 
 // --- Animation Variants ---
 const containerVariants = {

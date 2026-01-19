@@ -13,7 +13,7 @@ const offbit = localFont({
     },
   ],
   display: "swap",
-  preload: false,
+  preload: true,
 });
 
 const nohemi = localFont({
@@ -26,7 +26,7 @@ const nohemi = localFont({
     },
   ],
   display: "swap",
-  preload: false,
+  preload: true,
 });
 
 const galgo = localFont({
@@ -49,7 +49,7 @@ const galgo = localFont({
     },
   ],
   display: "swap",
-  preload: false,
+  preload: true,
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://chrona-timer.vercel.app";

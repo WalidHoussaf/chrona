@@ -44,7 +44,8 @@ export function Sidebar({ setNavOpen }: SidebarProps = {}) {
                 width={48} 
                 height={48}
                 quality={100}
-                unoptimized
+                priority
+                sizes="(max-width: 1024px) 40px, 48px"
                 className="h-10 w-auto lg:h-12"
               />
             </div>

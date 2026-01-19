@@ -579,13 +579,18 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       animationRef.current = requestAnimationFrame(drawElectricBorder);
     };
 
+    let resizeRaf: number | null = null;
     const resizeObserver = new ResizeObserver(() => {
-      const newSize = updateSize();
-      width = newSize.width;
-      height = newSize.height;
-      pixelScale = newSize.pixelScale;
-      refreshSvgData();
-      rebuildGeometry();
+      if (resizeRaf !== null) return;
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = null;
+        const newSize = updateSize();
+        width = newSize.width;
+        height = newSize.height;
+        pixelScale = newSize.pixelScale;
+        refreshSvgData();
+        rebuildGeometry();
+      });
     });
     resizeObserver.observe(container);
 
@@ -617,16 +622,14 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     animationRef.current = requestAnimationFrame(drawElectricBorder);
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-      isRunningRef.current = false;
+      if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+      if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
       resizeObserver.disconnect();
       if (intersectionObserver) intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
+      isRunningRef.current = false;
     };
-  },
-  [
+  }, [
     color,
     speed,
     chaos,
@@ -644,8 +647,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     pauseWhenOffscreen,
     octavedNoise,
     getRoundedRectPoint
-  ]
-);
+  ]);
 
   return (
     <div

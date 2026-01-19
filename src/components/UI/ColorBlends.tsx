@@ -131,6 +131,9 @@ export default function ColorBends({
   const rafRef = useRef<number | null>(null);
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const visibilityObserverRef = useRef<IntersectionObserver | null>(null);
+  const isVisibleRef = useRef(true);
+  const sizeRef = useRef({ width: 1, height: 1 });
   const rotationRef = useRef<number>(rotation);
   const autoRotateRef = useRef<number>(autoRotate);
   const pointerTargetRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
@@ -190,6 +193,7 @@ export default function ColorBends({
     const handleResize = () => {
       const w = container.clientWidth || 1;
       const h = container.clientHeight || 1;
+      sizeRef.current = { width: w, height: h };
       renderer.setSize(w, h, false);
       (material.uniforms.uCanvas.value as THREE.Vector2).set(w, h);
     };
@@ -220,15 +224,35 @@ export default function ColorBends({
       const amt = Math.min(1, dt * pointerSmoothRef.current);
       cur.lerp(tgt, amt);
       (material.uniforms.uPointer.value as THREE.Vector2).copy(cur);
-      renderer.render(scene, camera);
+      if (isVisibleRef.current && document.visibilityState === 'visible') {
+        renderer.render(scene, camera);
+      }
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
+
+    const onVisibilityChange = () => {
+      isVisibleRef.current = document.visibilityState === 'visible';
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    if (typeof IntersectionObserver !== 'undefined') {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          isVisibleRef.current = !!entries[0]?.isIntersecting;
+        },
+        { root: null, threshold: 0 }
+      );
+      observer.observe(container);
+      visibilityObserverRef.current = observer;
+    }
 
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
       else (window as Window).removeEventListener('resize', handleResize);
+      if (visibilityObserverRef.current) visibilityObserverRef.current.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       geometry.dispose();
       material.dispose();
       renderer.dispose();
@@ -289,18 +313,21 @@ export default function ColorBends({
   useEffect(() => {
     const material = materialRef.current;
     const container = containerRef.current;
+    const renderer = rendererRef.current;
     if (!material || !container) return;
 
-    const handlePointerMove = (e: PointerEvent) => {
-      const rect = container.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / (rect.width || 1)) * 2 - 1;
-      const y = -(((e.clientY - rect.top) / (rect.height || 1)) * 2 - 1);
+    const target = renderer?.domElement ?? container;
+    const handlePointerMove = (event: Event) => {
+      const e = event as PointerEvent;
+      const { width, height } = sizeRef.current;
+      const x = ((e.offsetX ?? 0) / (width || 1)) * 2 - 1;
+      const y = -(((e.offsetY ?? 0) / (height || 1)) * 2 - 1);
       pointerTargetRef.current.set(x, y);
     };
 
-    container.addEventListener('pointermove', handlePointerMove);
+    target.addEventListener('pointermove', handlePointerMove, { passive: true });
     return () => {
-      container.removeEventListener('pointermove', handlePointerMove);
+      target.removeEventListener('pointermove', handlePointerMove);
     };
   }, []);
 

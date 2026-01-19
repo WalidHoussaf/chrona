@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
+
 import clsx from "clsx";
 import { Settings, Lock, LockOpen, Play, Pause, RotateCcw, ArrowLeft, Power, Zap, X, Clock, Repeat, CheckCircle2, ChevronRight, ChevronDown, Activity, BrainCircuit, Coffee } from "lucide-react";
 import { useTimerStore } from "@/store/timerStore";
@@ -9,18 +10,10 @@ import type { PomodoroConfig } from "@/lib/timerProtocol";
 import { motion, AnimatePresence } from "framer-motion";
 import ElectricBorder from "@/components/UI/ElectricBorder";
 import ColorBends from "@/components/UI/ColorBlends";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 // --- Hooks ---
-function useDesktopMediaQuery() {
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-  return isDesktop;
-}
+const useDesktopMediaQuery = () => useMediaQuery("(min-width: 768px)");
 
 // --- Styled Sub-Components ---
 

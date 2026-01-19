@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import clsx from "clsx";
@@ -8,21 +9,13 @@ import { useTimerStore } from "@/store/timerStore";
 import type { Preset } from "@/store/timerStore";
 import { AlertTriangle, GripVertical, PenLine, Trash2, X, Zap, ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 interface DraggablePresetProps {
   preset: Preset;
 }
 
-function useDesktopMediaQuery() {
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-  return isDesktop;
-}
+const useDesktopMediaQuery = () => useMediaQuery("(min-width: 768px)");
 
 export function DraggablePreset({ preset }: DraggablePresetProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: preset.id });

@@ -20,6 +20,8 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
 
   // Framer Motion controls
   const controls = useAnimation();
+  const glowControls = useAnimation();
+
   const lastStatusRef = useRef<string | null>(null);
 
   const display = runtime?.displayMs ?? 0;
@@ -33,7 +35,16 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
     if (status === "completed") {
       controls.start({
         scale: [1, 1.02],
-        boxShadow: ["0 0 0px rgba(204, 255, 0, 0)", "0 0 30px rgba(204, 255, 0, 0.3)"],
+        transition: {
+          duration: 0.2,
+          ease: "easeOut",
+          repeat: 3,
+          repeatType: "reverse",
+        },
+      });
+      glowControls.start({
+        opacity: [0, 1],
+        scale: [1, 1.02],
         transition: {
           duration: 0.2,
           ease: "easeOut",
@@ -42,12 +53,10 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
         },
       });
     } else {
-      controls.set({ 
-        scale: 1, 
-        boxShadow: "0 0 0px rgba(204, 255, 0, 0)" 
-      });
+      controls.set({ scale: 1 });
+      glowControls.set({ opacity: 0, scale: 1 });
     }
-  }, [status, controls]);
+  }, [status, controls, glowControls]);
 
   const hms = useMemo(() => {
     if (!timer) return { h: 0, m: 0, s: 0 };
@@ -85,6 +94,17 @@ export function TimerCard({ id, active, dragHandle }: { id: string; active: bool
           status === "completed" && "bg-accent/10"
         )}
       >
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0, scale: 1 }}
+          animate={glowControls}
+          className="absolute inset-0 rounded-xl pointer-events-none"
+          style={{
+            boxShadow: "0 0 30px rgba(204, 255, 0, 0.3)",
+            willChange: "opacity, transform",
+          }}
+        />
+
         {/* Background Decor */}
         <div className="absolute top-0 right-0 -m-8 opacity-5 pointer-events-none">
           <Zap size={250} strokeWidth={1} className="rotate-12" />
